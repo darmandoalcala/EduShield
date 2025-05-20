@@ -1,0 +1,29 @@
+{
+  "name": "edushield",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "lint": "expo lint"
+  },
+  "dependencies": {
+    "@react-navigation/native": "^7.1.9",
+    "@react-navigation/native-stack": "^7.3.13",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.4.0",
+    "expo": "~53.0.9",
+    "expo-status-bar": "~2.2.3",
+    "prettier": "^3.5.3",
+    "react": "19.0.0",
+    "react-native": "0.79.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0",
+    "eslint": "^9.0.0",
+    "eslint-config-expo": "~9.2.0"
+  },
+  "private": true
+}
