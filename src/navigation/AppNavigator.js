@@ -8,6 +8,8 @@ import { useTheme } from '../theme/ThemeContext';
 import RegisterScreen from '../screens/RegisterScreen';
 import RegisterScreen2 from '../screens/RegisterScreen2';
 import Home1 from '../screens/Home1';
+import AlertScreen from '../screens/AlertScreen';
+import ReportScreen from '../screens/ReportScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -60,6 +62,24 @@ export default function AppNavigator() {
         component={Home1}
         options={{ 
           title: 'Home1',
+          headerShown: 'Atras',
+        }}
+      />
+
+      <Stack.Screen 
+        name="Alert"
+        component={AlertScreen}
+        options={{ 
+          title: 'Alert',
+          headerShown: 'Atras',
+        }}
+      />
+
+      <Stack.Screen 
+        name="Report"
+        component={ReportScreen}
+        options={{ 
+          title: 'Report',
           headerShown: 'Atras',
         }}
       />
