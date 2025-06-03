@@ -1,27 +1,34 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Image, Pressable, TouchableWithoutFeedback } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 
 const EdushieldWelcome = ({ navigation }) => {
   const { colors, isDark } = useTheme();
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Text style={[styles.title, { color: colors.primary }]}>EDUSHIELD</Text>
+    <View style={[styles.container, { backgroundColor: 'black' }]}>
+
+      <Image
+        source={require('../../assets/edushield-high-resolution-logo-transparent (1).png')}
+        style={styles.logo}
+        resizeMode="contain"
+      />
+
+      <Text style={[styles.title]}>EDUSHIELD</Text>
       
-      <Text style={[styles.welcomeText, { color: colors.text }]}>Bienvenido, inicia sesión o registrate.</Text>
+      <Text style={[styles.welcomeText]}>Bienvenido, inicia sesión o registrate.</Text>
       
       <Pressable 
-        style={[styles.mainButton, { backgroundColor: colors.primary }]}
+        style={[styles.mainButton]}
         onPress={() => navigation.navigate('Login')}
       >
         <Text style={[styles.mainButtonText, { color: colors.buttonText || 'white' }]}>Continúa con correo institucional UDG</Text>
       </Pressable>
       
       <View style={styles.signInContainer}>
-        <Text style={[styles.signInText, { color: colors.textSecondary }]}>¿Ya tienes una cuenta? </Text>
+        <Text style={[styles.signInText]}>¿Ya tienes una cuenta? </Text>
         <Pressable onPress={() => navigation.navigate('Login')}>
-          <Text style={[styles.signInLink, { color: colors.primary }]}>Sign In</Text>
+          <Text style={[styles.signInLink]}>Sign In</Text>
         </Pressable>
       </View>
     </View>
@@ -40,11 +47,13 @@ const styles = StyleSheet.create({
     fontSize: 48,
     fontWeight: 'bold',
     marginBottom: 40,
+    color: 'white',
   },
   welcomeText: {
     fontSize: 20,
     textAlign: 'center',
     marginBottom: 5,
+    color: 'white',
   },
   mainButton: {
     paddingVertical: 15,
@@ -54,19 +63,31 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     width: '80%',
     alignItems: 'center',
+    backgroundColor: 'red',
+
   },
   mainButtonText: {
     fontSize: 22,
     fontWeight: 'bold',
     textAlign: 'center',
+    color: 'white',
   },
   signInContainer: {
     flexDirection: 'row',
     marginTop: 20,
+    color: 'white',
   },
-  signInText: {},
+  signInText: {
+    color: 'white',
+  },
   signInLink: {
     fontWeight: 'bold',
+    color: 'red',
+  },
+  logo: {
+    width: 200,
+    height: 100,
+    marginBottom: 20,
   },
 });
 
