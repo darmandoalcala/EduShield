@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TextInput, Image, TouchableOpacity } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 
-const LoginScreen = ({ navigation }) => {
+const RegisterScreen = ({ navigation }) => {
   const { colors } = useTheme();
 
   return (
@@ -17,8 +17,8 @@ const LoginScreen = ({ navigation }) => {
       </View>
 
       <View style={[styles.textContainer]}>
-        <Text style={[styles.welcome, { color: 'white' }]}>¡BIENVENIDO DE VUELTA!</Text>
-        <Text style={[styles.subtext, { color: 'white' }]}>Inicia sesión con tu correo UDG</Text>
+        <Text style={[styles.welcome, { color: 'white' }]}>¡BIENVENIDO!</Text>
+        <Text style={[styles.subtext, { color: 'white' }]}>Ingresa tu informacion para crear una cuenta</Text>
       </View>
 
       <TextInput
@@ -27,7 +27,7 @@ const LoginScreen = ({ navigation }) => {
           color: colors.text,
           borderColor: colors.border
         }]}
-        placeholder="Correo institucional UDG"
+        placeholder="Ingresa tu nombre completo"
         placeholderTextColor={colors.textSecondary}
       />
 
@@ -37,21 +37,29 @@ const LoginScreen = ({ navigation }) => {
           color: colors.text,
           borderColor: colors.border
         }]}
-        placeholder="Contraseña"
+        placeholder="Ingresa tu carrera"
+        placeholderTextColor={colors.textSecondary}
+        secureTextEntry
+      />
+
+       <TextInput
+        style={[styles.input, {
+          backgroundColor: colors.card,
+          color: colors.text,
+          borderColor: colors.border
+        }]}
+        placeholder="Ingresa tu centro universitario"
         placeholderTextColor={colors.textSecondary}
         secureTextEntry
       />
 
       <TouchableOpacity
         style={[styles.button, { backgroundColor: 'red' }]}
-        onPress={() => navigation.navigate('Home')}
+        onPress={() => navigation.navigate('Register2')}
       >
-        <Text style={[styles.buttonText, { color: colors.buttonText || 'white' }]}>Ingresar</Text>
+        <Text style={[styles.buttonText, { color: colors.buttonText || 'white' }]}>Continuar</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.goBack()}>
-        <Text style={[styles.backText, { color: 'white' }]}>Olvide mi contraseña</Text>
-      </TouchableOpacity>
     </View>
   );
 };
@@ -117,4 +125,4 @@ subtext: {
   },
 });
 
-export default LoginScreen;
+export default RegisterScreen;

@@ -20,7 +20,7 @@ const EdushieldWelcome = ({ navigation }) => {
       
       <Pressable 
         style={[styles.mainButton]}
-        onPress={() => navigation.navigate('Login')}
+        onPress={() => navigation.navigate('Register')}
       >
         <Text style={[styles.mainButtonText, { color: colors.buttonText || 'white' }]}>Continúa con correo institucional UDG</Text>
       </Pressable>

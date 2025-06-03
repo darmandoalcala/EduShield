@@ -5,6 +5,9 @@ import LoginScreen from '../screens/LoginScreen';
 //AGREGAR TODAS LAS PANTALLAS DESPUÉS
 
 import { useTheme } from '../theme/ThemeContext';
+import RegisterScreen from '../screens/RegisterScreen';
+import RegisterScreen2 from '../screens/RegisterScreen2';
+import Home1 from '../screens/Home1';
 
 const Stack = createNativeStackNavigator();
 
@@ -36,6 +39,31 @@ export default function AppNavigator() {
           headerShown: 'Atras',
         }}
       />
+      <Stack.Screen 
+        name="Register" 
+        component={RegisterScreen}
+        options={{ 
+          title: 'Registro de usuario',
+          headerShown: 'Atras',
+        }}
+      />
+      <Stack.Screen 
+        name="Register2"
+        component={RegisterScreen2}
+        options={{ 
+          title: 'Registro de usuario',
+          headerShown: 'Atras',
+        }}
+      />
+      <Stack.Screen 
+        name="Home"
+        component={Home1}
+        options={{ 
+          title: 'Home1',
+          headerShown: 'Atras',
+        }}
+      />
+       
       {/* Otras pantallas */}
     </Stack.Navigator>
   );
