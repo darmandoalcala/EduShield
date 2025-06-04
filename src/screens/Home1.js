@@ -139,8 +139,8 @@ navBar: {
   bottom: 0,
   left: 0,
   right: 0,
-  paddingHorizontal: 20,
-  paddingVertical: 15,
+  paddingHorizontal: 30,
+  paddingVertical: 30,
   backgroundColor: '#333333',
 },
   navButton: {

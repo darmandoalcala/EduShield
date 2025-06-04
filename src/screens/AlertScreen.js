@@ -5,28 +5,25 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
+  ScrollView, // ← se agrega ScrollView
 } from 'react-native';
 
 const AlertScreen = ({ navigation }) => {
-  // Función al presionar el ícono de perfil
   const handleProfilePress = () => {
     console.log('Botón de perfil presionado');
-    // navigation.navigate('Profile'); // descomenta si quieres navegar
+    // navigation.navigate('Profile');
   };
 
-  // Función genérica para los botones de la barra inferior
   const handleButtonPress = (screen) => {
     console.log(`Navegar a sección: ${screen}`);
-    // navigation.navigate(screen);      // descomenta para navegación real
+    // navigation.navigate(screen);
   };
 
   return (
     <View style={styles.container}>
-      {/* ----------------------- */}
-      {/* Barra de Título / Header */}
+      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>EDUSHIELD</Text>
-
         <TouchableOpacity
           style={styles.profileButton}
           onPress={handleProfilePress}
@@ -39,18 +36,18 @@ const AlertScreen = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {/* ----------------------- */}
-      {/* Contenido principal */}
-      <View style={styles.content}>
-        <Text style={styles.mensaje}>
-          Hasta aquí llegaron, perras
+      {/* ScrollView como en Home1 */}
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.content}>
+          <Text style={styles.mensaje}>
+            Hasta aquí llegaron, perras
 
-          {'\n\n'}
-          Saquen la lavada alv y unas perritas cocker
-        </Text>
-      </View>
+            {'\n\n'}
+            Saquen la lavada alv y unas perritas cocker
+          </Text>
+        </View>
+      </ScrollView>
 
-      {/* ----------------------- */}
       {/* Barra de navegación inferior */}
       <View style={styles.navBar}>
         <TouchableOpacity
@@ -88,28 +85,30 @@ const AlertScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  // Contenedor principal con fondo negro
   container: {
     flex: 1,
     backgroundColor: 'black',
   },
-
-  // Header fijo en la parte superior
+  scrollContainer: {
+    padding: 20,
+    paddingBottom: 100,
+    alignItems: 'center',
+  },
   header: {
     width: '100%',
     height: 60,
-    flexDirection: 'row',            // Texto e ícono en fila
-    alignItems: 'center',            // Centrado vertical
-    justifyContent: 'space-between', // Separar extremos
-    paddingHorizontal: 16,           // Espacio a los lados
-    backgroundColor: 'black',        // Fondo del header también negro
-    borderBottomWidth: 1,            // Línea inferior para separación
-    borderBottomColor: '#333',       // Línea ligeramente más clara que negro
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    backgroundColor: 'black',
+    borderBottomWidth: 1,
+    borderBottomColor: '#333',
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: 'white',                  // Texto en blanco
+    color: 'white',
   },
   profileButton: {
     width: 36,
@@ -122,25 +121,20 @@ const styles = StyleSheet.create({
   profileIcon: {
     width: '100%',
     height: '100%',
-    tintColor: 'white', // El ícono se verá blanco
+    tintColor: 'white',
   },
-
-  // Contenido principal debajo del header
   content: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingTop: 20, // Pequeño margen desde el header
+    paddingTop: 20,
   },
   mensaje: {
     fontSize: 16,
     lineHeight: 22,
     textAlign: 'center',
-    color: 'white', // Texto en blanco
+    color: 'white',
   },
-
-  // Barra de navegación inferior
   navBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -150,9 +144,9 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    backgroundColor: '#333333',   
+    paddingHorizontal: 30,
+    paddingVertical: 30,
+    backgroundColor: '#333333',
   },
   navButton: {
     flex: 1,
@@ -161,7 +155,7 @@ const styles = StyleSheet.create({
   navImage: {
     width: 28,
     height: 28,
-    tintColor: 'gray',        // Íconos en blanco
+    tintColor: 'gray',
   },
 });
 

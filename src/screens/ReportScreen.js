@@ -1,5 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  ScrollView, // ← Se agrega ScrollView
+} from 'react-native';
 
 const ReportScreen = () => {
   const handleProfilePress = () => {
@@ -25,7 +32,7 @@ const ReportScreen = () => {
           onPress={handleProfilePress}
         >
           <Image
-            source={require('/workspaces/EduShield/assets/icon.png')} // Ajusta la ruta a tu ícono
+            source={require('/workspaces/EduShield/assets/icon.png')}
             style={styles.profileIcon}
             resizeMode="contain"
           />
@@ -33,13 +40,15 @@ const ReportScreen = () => {
       </View>
 
       {/* ----------------------- */}
-      {/* Contenido principal (mensaje) */}
-      <View style={styles.content}>
-        <Text style={styles.mensaje}>
-          Hasta aquí llegaron, perras{'\n'}
-          Saquen la lavada alv y unas perritas cocker
-        </Text>
-      </View>
+      {/* ScrollView como en Home1 */}
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.content}>
+          <Text style={styles.mensaje}>
+            Hasta aquí llegaron, perras{'\n'}
+            Saquen la lavada alv y unas perritas cocker
+          </Text>
+        </View>
+      </ScrollView>
 
       {/* ----------------------- */}
       {/* Barra de navegación inferior */}
@@ -85,22 +94,29 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
   },
 
+  // ScrollView container como en Home1
+  scrollContainer: {
+    padding: 20,
+    paddingBottom: 100,
+    alignItems: 'center',
+  },
+
   // Header fijo en la parte superior
   header: {
     width: '100%',
     height: 60,
-    flexDirection: 'row',            // Texto e ícono en fila
-    alignItems: 'center',            // Centrado vertical
-    justifyContent: 'space-between', // Separar extremos
-    paddingHorizontal: 16,           // Espacio a los lados
-    backgroundColor: 'black',        // Fondo del header también negro
-    borderBottomWidth: 1,            // Línea inferior para separación
-    borderBottomColor: '#333',       // Línea sutil
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    backgroundColor: 'black',
+    borderBottomWidth: 1,
+    borderBottomColor: '#333',
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: 'white',                  // Texto en blanco
+    color: 'white',
   },
   profileButton: {
     width: 36,
@@ -113,16 +129,15 @@ const styles = StyleSheet.create({
   profileIcon: {
     width: '100%',
     height: '100%',
-    tintColor: 'white',              // Ícono en blanco
+    tintColor: 'white',
   },
 
-  // Contenido principal debajo del header
+  // Contenido dentro del scroll
   content: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
-    marginTop: 20,                   // Separación desde el header
+    marginTop: 20,
   },
   mensaje: {
     color: 'white',
@@ -140,19 +155,20 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: 20,
-    paddingVertical: 15,
+    paddingHorizontal: 30,
+    paddingVertical: 30,
     backgroundColor: '#333333',
   },
   navButton: {
-    flex: 1, // Distribuye el espacio equitativamente
+    flex: 1,
     alignItems: 'center',
   },
   navImage: {
-    width: 30,        // Tamaño de las imágenes
+    width: 30,
     height: 30,
-    tintColor: 'gray', // Color gris para las imágenes
+    tintColor: 'gray',
   },
 });
 
 export default ReportScreen;
+
