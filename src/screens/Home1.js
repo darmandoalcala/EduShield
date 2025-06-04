@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'black', // Fondo negro respetado
   },
   scrollContainer: {
-    padding: 20,
+    marginTop: 100,
     paddingBottom: 100, // Espacio para el menú inferior
     alignItems: 'center',
   },

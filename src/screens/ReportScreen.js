@@ -104,6 +104,7 @@ const styles = StyleSheet.create({
   // Header fijo en la parte superior
   header: {
     width: '100%',
+    marginTop: 50,
     height: 60,
     flexDirection: 'row',
     alignItems: 'center',

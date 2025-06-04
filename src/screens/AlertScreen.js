@@ -90,12 +90,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
   },
   scrollContainer: {
-    padding: 20,
     paddingBottom: 100,
     alignItems: 'center',
   },
+
+
   header: {
     width: '100%',
+    marginTop: 50,
     height: 60,
     flexDirection: 'row',
     alignItems: 'center',
