@@ -5,23 +5,36 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
-  ScrollView, // ← se agrega ScrollView
+  ScrollView,
 } from 'react-native';
+import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+
+const userRegion = {
+  latitude: 20.6976,
+  longitude: -103.3468,
+  latitudeDelta: 0.01,
+  longitudeDelta: 0.01,
+};
 
 const AlertScreen = ({ navigation }) => {
   const handleProfilePress = () => {
     console.log('Botón de perfil presionado');
-    // navigation.navigate('Profile');
   };
 
   const handleButtonPress = (screen) => {
     console.log(`Navegar a sección: ${screen}`);
-    // navigation.navigate(screen);
+  };
+
+  const handleCancelAlert = () => {
+    console.log('Cancelar Alerta');
   };
 
   return (
     <View style={styles.container}>
-      {/* Header */}
+      {/* ----------------------- */}
+      {/* Header (sin cambios) */}
+      {/* ----------------------- */}
       <View style={styles.header}>
         <Text style={styles.title}>EDUSHIELD</Text>
         <TouchableOpacity
@@ -36,19 +49,77 @@ const AlertScreen = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {/* ScrollView como en Home1 */}
+      {/* ----------------------- */}
+      {/* Contenido desplazable */}
+      {/* ----------------------- */}
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.content}>
-          <Text style={styles.mensaje}>
-            Hasta aquí llegaron, perras
 
-            {'\n\n'}
-            Saquen la lavada alv y unas perritas cocker
-          </Text>
+        {/* ----------------------- */}
+        {/* Sección 1: Mapa */}
+        {/* ----------------------- */}
+        <View style={styles.mapSection}>
+          <MapView
+            provider={PROVIDER_GOOGLE}
+            style={styles.map}
+            region={userRegion}
+            showsUserLocation
+          >
+            <Marker coordinate={userRegion} />
+          </MapView>
         </View>
+
+        {/* ----------------------- */}
+        {/* Sección 2: Localización / Zonas de riesgo */}
+        {/* ----------------------- */}
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            style={styles.evidenceButton}
+            onPress={() => console.log('Localización')}
+          >
+            <Icon
+              name="crosshairs-gps"
+              size={20}
+              color="#FFF"
+              style={styles.iconLeft}
+            />
+            <Text style={styles.evidenceText}>Localización</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.evidenceButton}
+            onPress={() => console.log('Zonas de riesgo')}
+          >
+            <Icon
+              name="alert-outline"
+              size={20}
+              color="#FFF"
+              style={styles.iconLeft}
+            />
+            <Text style={styles.evidenceText}>Zonas de riesgo</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* ----------------------- */}
+        {/* Sección 3: Cancelar Alerta */}
+        {/* ----------------------- */}
+        <TouchableOpacity
+          style={styles.sendButton}
+          onPress={handleCancelAlert}
+        >
+          <Icon
+            name="close-circle-outline"
+            size={20}
+            color="#FFF"
+            style={styles.iconLeft}
+          />
+          <Text style={styles.sendButtonText}>Cancelar Alerta</Text>
+        </TouchableOpacity>
+
       </ScrollView>
 
-      {/* Barra de navegación inferior */}
+      {/* ----------------------- */}
+      {/* Barra de navegación inferior (sin cambios) */}
+      {/* ----------------------- */}
       <View style={styles.navBar}>
         <TouchableOpacity
           style={styles.navButton}
@@ -91,6 +162,8 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     paddingBottom: 100,
+    paddingHorizontal: 16,
+    paddingTop: 30,
     alignItems: 'center',
   },
 
@@ -158,6 +231,66 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     tintColor: 'gray',
+  },
+
+   mapSection: {
+    marginBottom: 16,
+    width: '100%',
+  },
+
+  // Mapa de Google
+  map: {
+    width: '100%',
+    height: 350,
+    borderRadius: 8,
+  },
+
+  // Fila de los dos botones (Localización / Zonas de riesgo)
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 25,
+    height: 70,
+  },
+
+  // Botones “Localización” y “Zonas de riesgo”
+  evidenceButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#333333',
+    borderRadius: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginHorizontal: 8,
+  },
+  evidenceText: {
+    flex: 1,
+    color: '#FFF',
+    fontSize: 17,
+  },
+
+  // Ícono a la izquierda de cada botón
+  iconLeft: {
+    marginRight: 8,
+  },
+
+  // Botón rojo “Cancelar Alerta”
+  sendButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FF3B30',
+    borderRadius: 6,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    marginTop: 50,
+    width: '70%',
+  },
+  sendButtonText: {
+    color: '#FFF',
+    fontSize: 20,
+    fontWeight: '600',
   },
 });
 

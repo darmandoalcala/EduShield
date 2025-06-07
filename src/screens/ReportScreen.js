@@ -228,8 +228,9 @@ const styles = StyleSheet.create({
   // ScrollView container como en Home1
   scrollContainer: {
   paddingHorizontal: 16,
-  paddingTop: 20,
+  paddingTop: 50,
   paddingBottom: 100,
+  alignItems: 'center',
   },
 
   // Header fijo en la parte superior
@@ -273,7 +274,7 @@ const styles = StyleSheet.create({
   },
   mensaje: {
     color: 'white',
-    fontSize: 24,
+    fontSize: 25,
     textAlign: 'center',
   },
 
@@ -307,6 +308,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginBottom: 16,
     width: '100%',
+    height:60,
   },
 
   // ----------------------------
@@ -332,12 +334,12 @@ const styles = StyleSheet.create({
   // ----------------------------
   pickerPlaceholder: {
     flex: 1,
-    height: 20,
     justifyContent: 'center',
+    marginBottom: 5,
   },
   pickerText: {
     color: '#FFF',
-    fontSize: 15,
+    fontSize: 17,
   },
 
     pickerContainer: {
@@ -359,17 +361,13 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   
-  iconSide: {
-    marginLeft: 285,  
-    marginTop: 5,      // Amplía la zona táctil
-  },
   // ----------------------------
   // Texto para mostrar fecha/hora
   // ----------------------------
   textInfo: {
     flex: 1,
     color: '#FFF',
-    fontSize: 15,
+    fontSize: 17,
   },
 
 
@@ -401,7 +399,7 @@ const styles = StyleSheet.create({
   evidenceText: {
     flex: 1,
     color: '#FFF',
-    fontSize: 14,
+    fontSize: 14.5,
   },
 
   // ----------------------------
@@ -445,12 +443,13 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     paddingVertical: 14,
     paddingHorizontal: 16,
-    marginTop: 8,
-    width: '100%',
+    marginTop: 20,
+    height: 60,
+    width: '70%',
   },
   sendButtonText: {
     color: '#FFF',
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: '600',
   },
 });
