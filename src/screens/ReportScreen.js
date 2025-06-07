@@ -12,9 +12,11 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
+const centers = ['CUCEI', 'CUAAD', 'CUCEV', 'CUCS'];
+
 const ReportScreen = () => {
-  // Estado para el Picker de Centros Universitarios
-  const [selectedCenter, setSelectedCenter] = useState('CUCEI');
+  // Inicializas el estado al primer elemento del array
+  const [selectedCenter, setSelectedCenter] = useState(centers[0]);
 
   const handleEditCenter = () => {
     console.log('Editar selección de centro universitario');
@@ -62,6 +64,10 @@ const ReportScreen = () => {
         {/* ---------------------------------------------------
              1) SECCIÓN: Combobox para "Seleccion de Centro Universitario"
            --------------------------------------------------- */}
+      <Text style={styles.instructionAText}>
+          Selecciona tu centro universitario
+        </Text>
+        
         <View style={styles.sectionBox}>
           <View style={styles.row}>
             {/* Ícono placeholder (más adelante puedes reemplazarlo por <Icon> o <Image>) */}
@@ -88,7 +94,7 @@ const ReportScreen = () => {
 
             {/* Ícono de lápiz a la derecha */}
             <TouchableOpacity onPress={handleEditCenter} style={styles.iconSide}>
-              <Icon name="pencil-outline" size={20} color="#FFF" />
+              <Icon name="pencil-outline" size={20} color="#FFF" marginBottom = {10} marginLeft = {285}/>
             </TouchableOpacity>
 
             </View>
@@ -98,13 +104,17 @@ const ReportScreen = () => {
         {/* ---------------------------------------------------
              2) SECCIÓN: Fecha y hora con ícono lápiz a la izquierda
            --------------------------------------------------- */}
+      <Text style={styles.instructionAText}>
+          Fecha y hora exacta del incidente
+        </Text>
+
           <View style={styles.sectionBox}>
             <View style={styles.row}> 
               {/* Ícono de calendario a la izquierda */}
-              <Icon name="calendar-outline" size={20} color="#FFF" style={styles.iconLeft} />
+              <Icon name="calendar-outline" size={20} color="#FFF" style={styles.iconLeft}  marginTop = {10} />
 
               {/* Texto de fecha/hora ocupa el resto del espacio */}
-              <Text style={styles.textInfo}>
+              <Text style={styles.textInfo} marginTop = {8}>
                 02/11/2024, 07:30 PM
                 {/* Si usas estado: {dateTime} */}
               </Text>
@@ -114,6 +124,9 @@ const ReportScreen = () => {
         {/* ---------------------------------------------------
              3) SECCIÓN: Descripción de los hechos
            --------------------------------------------------- */}
+        <Text style={styles.instructionAText}>
+          Da un breve resumen de los hechos
+        </Text>
         <View style={styles.sectionBox}>
           <View style={styles.rowWithSpace}>
             {/* Ícono de alerta a la izquierda (solo diseño, sin Touchable) */}
@@ -122,18 +135,23 @@ const ReportScreen = () => {
               size={20}
               color="#FFF"
               style={styles.iconLeft}
+              marginBottom = {20}
             />
+          {/* contenedor central: instrucción + campo editable */}
+          <View style={{ flex: 1, justifyContent: 'center' }}>
+            {/* texto de instrucción */}
+            <Text style={styles.instructionText}>
+              
+            </Text>
 
-            {/* TextInput que ocupa todo el espacio intermedio */}
+            {/* TextInput centrado verticalmente */}
             <TextInput
               style={styles.textInputFlex}
-              placeholder="Da un pequeño desglosé de lo que pasó"
+              placeholder="Escribe aqui..."
               placeholderTextColor="#888"
               multiline
-              // value={description}
-              // onChangeText={setDescription}
             />
-
+          </View>
             {/* Ícono de lápiz a la derecha, dentro de Touchable para editar */}
             <TouchableOpacity onPress={() => console.log('Editar descripción')}>
               <Icon
@@ -141,6 +159,7 @@ const ReportScreen = () => {
                 size={20}
                 color="#FFF"
                 style={styles.iconRight}
+                marginBottom = {20}
               />
             </TouchableOpacity>
           </View>
@@ -149,6 +168,10 @@ const ReportScreen = () => {
         {/* ---------------------------------------------------
              4) SECCIÓN: Botones de evidencia (Video y Foto)
            --------------------------------------------------- */}
+      <Text style={styles.instructionAText}>
+          Recuerda que puedes agregar evidencia mas exacta en video o foto
+        </Text>
+
         <View style={styles.sectionBox}>
           <View style={[styles.row, { justifyContent: 'space-between' }]}>
             <TouchableOpacity
@@ -168,6 +191,10 @@ const ReportScreen = () => {
             </TouchableOpacity>
           </View>
         </View>
+
+        <Text style={styles.instructionAText}>
+          Cualquier evidencia queda respaldada por la ley de proteccion de los datos.
+        </Text>
 
         {/* ---------------------------------------------------
              5) BOTÓN FINAL: Reporte de incidente
@@ -228,9 +255,8 @@ const styles = StyleSheet.create({
   // ScrollView container como en Home1
   scrollContainer: {
   paddingHorizontal: 16,
-  paddingTop: 50,
+  paddingTop: 40,
   paddingBottom: 100,
-  alignItems: 'center',
   },
 
   // Header fijo en la parte superior
@@ -306,11 +332,17 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    marginBottom: 16,
+    marginBottom: 15,
     width: '100%',
-    height:60,
+    height:65,
   },
 
+  instructionAText: {
+    color: '#aaa',
+    fontSize: 18,
+    marginBottom: 10,
+    textAlign: 'left', 
+  },
   // ----------------------------
   // Fila horizontal alineada en eje vertical al centro
   // ----------------------------
@@ -332,10 +364,17 @@ const styles = StyleSheet.create({
   // Placeholder del Picker (combobox):
   // fondo transparente, ocupa todo el espacio disponible
   // ----------------------------
+
+  iconSide:{
+    zIndex:1,
+    position: 'absolute',
+
+  },
+
   pickerPlaceholder: {
     flex: 1,
     justifyContent: 'center',
-    marginBottom: 5,
+    marginTop:10,
   },
   pickerText: {
     color: '#FFF',
@@ -352,15 +391,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
 
-  // --------------------------------
-  // Estilo para el Picker en sí
-  // --------------------------------
-  picker: {
-    color: '#FFF',
-    width: '100%',
-    height: '100%',
-  },
-  
   // ----------------------------
   // Texto para mostrar fecha/hora
   // ----------------------------
@@ -374,13 +404,23 @@ const styles = StyleSheet.create({
   // ----------------------------
   // TextInput placeholder para descripción de los hechos
   // ----------------------------
-  textInputPlaceholder: {
+
+  // TextInput editable
+  instructionText: {
+  color: '#aaa',
+  fontSize: 14,
+  fontStyle: 'italic',
+  marginBottom: 4,
+  marginTop: 75,
+},
+  textInputFlex: {
     flex: 1,
     color: '#FFF',
     fontSize: 15,
     minHeight: 60,
-    textAlignVertical: 'top',   // En Android, asegura que el multiline escriba desde arriba
-    padding: 0,                 // Quita padding interno para que encaje bien
+    textAlignVertical: 'center',  // Android
+    textAlign: 'center',          // horizontal
+
   },
 
   // ----------------------------
@@ -444,6 +484,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 16,
     marginTop: 20,
+    marginLeft: '60',
     height: 60,
     width: '70%',
   },
