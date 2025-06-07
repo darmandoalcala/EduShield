@@ -48,37 +48,7 @@ const Home1 = ({ navigation }) => {
           Nota, una vez que se toque o se reporte, se enviará de inmediato una llamada de alerta y un SMS a los contactos cercanos y de emergencia. Puedes cancelarlo si la situación se resuelve.
         </Text>
       </ScrollView>
-<View style={styles.navBar}>
-        <TouchableOpacity
-          style={styles.navButton}
-          onPress={() => handleButtonPress('Inicio')}
-        >
-          <Image
-            source={require('../../assets/splash-icon.png')} // Actualiza la ruta si es necesario
-            style={styles.navImage}
-          />
-        </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.navButton}
-          onPress={() => handleButtonPress('Buscar')}
-        >
-          <Image
-            source={require('../../assets/splash-icon.png')} // Actualiza la ruta si es necesario
-            style={styles.navImage}
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.navButton}
-          onPress={() => handleButtonPress('Perfil')}
-        >
-          <Image
-            source={require('../../assets/splash-icon.png')} // Actualiza la ruta si es necesario
-            style={styles.navImage}
-          />
-        </TouchableOpacity>
-      </View>
     </View>
   );
 };

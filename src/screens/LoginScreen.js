@@ -44,7 +44,7 @@ const LoginScreen = ({ navigation }) => {
 
       <TouchableOpacity
         style={[styles.button, { backgroundColor: 'red' }]}
-        onPress={() => navigation.navigate('Home')}
+        onPress={() => navigation.replace("MainApp")}
       >
         <Text style={[styles.buttonText, { color: colors.buttonText || 'white' }]}>Ingresar</Text>
       </TouchableOpacity>
