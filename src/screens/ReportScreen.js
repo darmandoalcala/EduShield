@@ -65,7 +65,7 @@ const ReportScreen = () => {
              1) SECCIÓN: Combobox para "Seleccion de Centro Universitario"
            --------------------------------------------------- */}
       <Text style={styles.instructionAText}>
-          Selecciona tu centro universitario
+          Selecciona tu centro universitario.
         </Text>
         
         <View style={styles.sectionBox}>
@@ -105,7 +105,7 @@ const ReportScreen = () => {
              2) SECCIÓN: Fecha y hora con ícono lápiz a la izquierda
            --------------------------------------------------- */}
       <Text style={styles.instructionAText}>
-          Fecha y hora exacta del incidente
+          Fecha y hora exacta del incidente.
         </Text>
 
           <View style={styles.sectionBox}>
@@ -125,7 +125,7 @@ const ReportScreen = () => {
              3) SECCIÓN: Descripción de los hechos
            --------------------------------------------------- */}
         <Text style={styles.instructionAText}>
-          Da un breve resumen de los hechos
+          Da un breve resumen de los hechos.
         </Text>
         <View style={styles.sectionBox}>
           <View style={styles.rowWithSpace}>
@@ -168,9 +168,6 @@ const ReportScreen = () => {
         {/* ---------------------------------------------------
              4) SECCIÓN: Botones de evidencia (Video y Foto)
            --------------------------------------------------- */}
-      <Text style={styles.instructionAText}>
-          Recuerda que puedes agregar evidencia mas exacta en video o foto
-        </Text>
 
         <View style={styles.sectionBox}>
           <View style={[styles.row, { justifyContent: 'space-between' }]}>
@@ -193,7 +190,7 @@ const ReportScreen = () => {
         </View>
 
         <Text style={styles.instructionAText}>
-          Cualquier evidencia queda respaldada por la ley de proteccion de los datos.
+          Cualquier evidencia queda respaldada por la ley de proteccion de datos.
         </Text>
 
         {/* ---------------------------------------------------
