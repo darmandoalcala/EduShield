@@ -73,7 +73,7 @@ const SettingsScreen = ({ navigation }) => {
 
         <Pressable 
           style={styles.settingItem}
-          onPress={() => navigation.navigate('About')}
+          onPress={() => navigation.navigate('EditP')}
         >
           <View style={styles.settingInfo}>  
             <Text style={styles.settingText}>Editar perfil</Text>
