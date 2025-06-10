@@ -82,7 +82,7 @@ const SettingsScreen = ({ navigation }) => {
 
         <Pressable 
           style={styles.settingItem}
-          onPress={() => navigation.navigate('Help')}
+          onPress={() => navigation.navigate('Privacy')}
         >
           <View style={styles.settingInfo}>
             <Text style={styles.settingText}>Configuracion de privacidad</Text>

@@ -13,6 +13,7 @@ import SettingsScreen from '../screens/SettingsScreen';
 import { useTheme } from '../theme/ThemeContext';
 import PersonalContact from '../screens/PersonalContact';
 import EditProfile from '../screens/EditProfile';
+import PrivacyScreen from '../screens/PrivacyScreen';
 
 const Tab = createBottomTabNavigator();     //navigator tab (para home, contacts & settings)
 const Stack = createNativeStackNavigator(); //navigator Stack
@@ -109,6 +110,7 @@ export default function AppNavigator() {
       <Stack.Screen name="Report" component={ReportScreen} />
       <Stack.Screen name="Personal" component={PersonalContact} />
       <Stack.Screen name="EditP" component={EditProfile} />
+      <Stack.Screen name="Privacy" component={PrivacyScreen} />      
       {/* mas pantallas... */}
 
       {/* Pantallas CON tab bar (agrupadas en MainAppTabs) */}
