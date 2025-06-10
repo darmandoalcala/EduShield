@@ -8,6 +8,9 @@ import {
   Image,
 Switch,
 } from 'react-native';
+// al inicio de PrivacySettings.js
+import Icon from 'react-native-vector-icons/FontAwesome';
+
 
 
 const SettingsScreen = ({ navigation }) => {

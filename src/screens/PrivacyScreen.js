@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 export default function Privacy() {
   const [cameraAccess, setCameraAccess] = useState(true);
@@ -56,7 +57,7 @@ export default function Privacy() {
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Configuración Privacidad</Text>
-        {/* Icono de engranaje puede ir aquí */}
+        <Icon name="cog" size={24} color="#fff" />
       </View>
 
       {renderToggle('Acceso a cámara', cameraAccess, setCameraAccess)}
@@ -71,7 +72,7 @@ export default function Privacy() {
       </View>
 
       <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-        <Text style={styles.saveButtonText}>Guardar cambios</Text>
+        <Text style={styles.saveButtonText}>Guardar</Text>
       </TouchableOpacity>
     </ScrollView>
   );
