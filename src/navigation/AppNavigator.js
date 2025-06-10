@@ -11,6 +11,7 @@ import ReportScreen from '../screens/ReportScreen';
 import ContactsScreen from '../screens/ContactsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import { useTheme } from '../theme/ThemeContext';
+import PersonalContact from '../screens/PersonalContact';
 
 const Tab = createBottomTabNavigator();     //navigator tab (para home, contacts & settings)
 const Stack = createNativeStackNavigator(); //navigator Stack
@@ -105,7 +106,7 @@ export default function AppNavigator() {
       <Stack.Screen name="Home" component={Home1} />
       <Stack.Screen name="Alert" component={AlertScreen} />
       <Stack.Screen name="Report" component={ReportScreen} />
-
+      <Stack.Screen name="Personal" component={PersonalContact} />
       {/* mas pantallas... */}
 
       {/* Pantallas CON tab bar (agrupadas en MainAppTabs) */}

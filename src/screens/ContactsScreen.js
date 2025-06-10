@@ -35,7 +35,9 @@ const ContactsScreen = ({ navigation }) => {
   };
 
   return (
+    
     <View style={styles.outerContainer}>
+      
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Text style={styles.header}>CONTACTOS</Text>
         
@@ -76,8 +78,8 @@ const ContactsScreen = ({ navigation }) => {
         ))}
       </ScrollView>
 
-      <Pressable 
-        onPress={() => navigation.navigate('AddContact')} 
+      <Pressable  
+        onPress={() => navigation.navigate('Personal')} 
         style={styles.addContactButton}
       >
         <Image 
@@ -86,6 +88,7 @@ const ContactsScreen = ({ navigation }) => {
         />
         <Text style={styles.addContactText}>Agregar contactos personales</Text>
       </Pressable>
+
     </View>
   );
 };
