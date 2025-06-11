@@ -95,7 +95,7 @@ const SettingsScreen = ({ navigation }) => {
 
         <Pressable 
           style={styles.settingItem}
-          onPress={() => navigation.navigate('Help')}
+          onPress={() => navigation.navigate('Location')}
         >
           <View style={styles.settingInfo}>
             <Text style={styles.settingText}>Configuracion de localizacion</Text>
@@ -105,7 +105,7 @@ const SettingsScreen = ({ navigation }) => {
 
         <Pressable 
           style={styles.settingItem}
-          onPress={() => navigation.navigate('Help')}
+          onPress={() => navigation.navigate('CentroU')}
         >
           <View style={styles.settingInfo}>
             <Text style={styles.settingText}>Cambiar centro universitario</Text>
@@ -140,6 +140,7 @@ const SettingsScreen = ({ navigation }) => {
         >
           <Text style={styles.logoutText}>Cerrar sesion</Text>
         </Pressable>
+            <Text style={styles.smallText}>All Rights reserved @EDUSHIELD2025</Text>
       </ScrollView>
     </View>
   );
@@ -191,6 +192,15 @@ const styles = StyleSheet.create({
   logoutText: {
     color: 'white',
     fontSize: 16,
+  },
+        // EDUSHIELD2025
+
+  smallText: {
+    color: '#aaa',
+    fontSize: 12,
+    marginVertical: 10,
+    textAlign: 'center',
+    marginTop:15,
   },
 });
 

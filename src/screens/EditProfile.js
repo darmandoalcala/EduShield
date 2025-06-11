@@ -130,6 +130,7 @@ export default function EditP() {
       <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
         <Text style={styles.saveButtonText}>Guardar</Text>
       </TouchableOpacity>
+        <Text style={styles.smallText}>All Rights reserved @EDUSHIELD2025</Text>
     </ScrollView>
   );
 }
@@ -239,5 +240,14 @@ const styles = StyleSheet.create({
   saveButtonText: {
     color: '#fff',
     fontSize: 20,
+  },
+        // EDUSHIELD2025
+    smallText: {
+      color: '#aaa',
+      fontSize: 12,
+      marginVertical: 10,
+      textAlign: 'center',
+      marginTop:70,
+      marginBottom:15,
   },
 });

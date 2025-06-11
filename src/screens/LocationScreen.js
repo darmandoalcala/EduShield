@@ -8,74 +8,53 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-export default function Privacy() {
-  const [cameraAccess, setCameraAccess] = useState(true);
-  const [galleryAccess, setGalleryAccess] = useState(true);
-  const [shareLocation, setShareLocation] = useState(true);
-
-  const handleClearHistory = () => {
-    // Lógica para eliminar historial de incidentes
-  };
-
-  const handleSave = () => {
-    // Lógica para guardar cambios de configuración
-  };
+export default function Location() {
+  const [locationEnabled, setLocationEnabled] = useState(true);
+  const [highPrecision, setHighPrecision] = useState(false);
+  const [historyEnabled, setHistoryEnabled] = useState(true);
 
   const renderToggle = (label, value, onToggle) => (
     <View style={styles.settingRow}>
       <Text style={styles.settingLabel}>{label}</Text>
       <View style={styles.toggleGroup}>
         <TouchableOpacity
-          style={[
-            styles.toggleButton,
-            value && styles.toggleSelected,
-          ]}
+          style={[styles.toggleButton, value && styles.toggleSelected]}
           onPress={() => onToggle(true)}
         >
-          <Text style={[
-            styles.toggleText,
-            value && styles.toggleTextSelected,
-          ]}>SI</Text>
+          <Text style={[styles.toggleText, value && styles.toggleTextSelected]}>SI</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[
-            styles.toggleButton,
-            !value && styles.toggleSelected,
-          ]}
+          style={[styles.toggleButton, !value && styles.toggleSelected]}
           onPress={() => onToggle(false)}
         >
-          <Text style={[
-            styles.toggleText,
-            !value && styles.toggleTextSelected,
-          ]}>NO</Text>
+          <Text style={[styles.toggleText, !value && styles.toggleTextSelected]}>NO</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 
+  const handleSave = () => {
+    // Lógica para guardar configuración
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Configuración Privacidad</Text>
+        <Text style={styles.title}>Configuración localizacion</Text>
         <Icon name="cog" size={24} color="#fff" />
       </View>
 
-      {renderToggle('Acceso a cámara', cameraAccess, setCameraAccess)}
-      {renderToggle('Acceso a galería', galleryAccess, setGalleryAccess)}
-      {renderToggle('Compartir ubicación con mis contactos', shareLocation, setShareLocation)}
-
-      <View style={styles.settingRow}>
-        <Text style={styles.settingLabel}>Eliminar todo historial de mis incidentes</Text>
-        <TouchableOpacity style={styles.clearButton} onPress={handleClearHistory}>
-          <Text style={styles.clearButtonText}>Eliminar</Text>
-        </TouchableOpacity>
-      </View>
+      {renderToggle('Activar localización', locationEnabled, setLocationEnabled)}
+      {renderToggle('Precisión GPS ALTA', highPrecision, setHighPrecision)}
+      {renderToggle('Historial de ubicaciones ACTIVO', historyEnabled, setHistoryEnabled)}
 
       <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
         <Text style={styles.saveButtonText}>Guardar</Text>
+
       </TouchableOpacity>
-          <Text style={styles.smallText}>All Rights reserved @EDUSHIELD2025</Text>
+                <Text style={styles.smallText}>All Rights reserved @EDUSHIELD2025</Text>
     </ScrollView>
+
   );
 }
 
@@ -94,7 +73,7 @@ const styles = StyleSheet.create({
   title: {
     flex: 1,
     color: '#fff',
-    fontSize: 30,
+    fontSize: 28,
     fontWeight: 'bold',
   },
   settingRow: {
@@ -106,7 +85,7 @@ const styles = StyleSheet.create({
   settingLabel: {
     flex: 1,
     color: '#aaa',
-    fontSize: 20,
+    fontSize: 21,
   },
   toggleGroup: {
     flexDirection: 'row',
@@ -149,20 +128,18 @@ const styles = StyleSheet.create({
     height: 50,
     marginLeft:70,
     alignItems: 'center',
-    marginTop: 90,
+    marginTop: 100,
   },
   saveButtonText: {
     color: '#fff',
     fontSize: 22,
 
   },
-      // EDUSHIELD2025
     smallText: {
-      color: '#aaa',
-      fontSize: 12,
-      marginVertical: 10,
-      textAlign: 'center',
-      marginTop:70,
-      marginBottom:15,
-  },
+    color: '#aaa',
+    fontSize: 12,
+    marginVertical: 10,
+    textAlign: 'center',
+    marginTop:150,
+  }
 });

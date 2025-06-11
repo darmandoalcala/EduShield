@@ -78,6 +78,7 @@ const ContactsScreen = ({ navigation }) => {
         ))}
       </ScrollView>
 
+
       <Pressable  
         onPress={() => navigation.navigate('Personal')} 
         style={styles.addContactButton}
@@ -87,9 +88,11 @@ const ContactsScreen = ({ navigation }) => {
           style={styles.addContactLogo} 
         />
         <Text style={styles.addContactText}>Agregar contactos personales</Text>
+        
       </Pressable>
-
+      
     </View>
+
   );
 };
 
@@ -166,6 +169,16 @@ const styles = StyleSheet.create({
     height: 20,
     tintColor: 'white',
   },
+        // EDUSHIELD2025
+    smallText: {
+      color: '#aaa',
+      fontSize: 12,
+      marginVertical: 10,
+      textAlign: 'center',
+      marginTop:5,
+      marginBottom:5,
+  },
+
 });
 
 export default ContactsScreen;
