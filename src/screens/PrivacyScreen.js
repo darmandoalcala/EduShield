@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     height: 50,
     marginLeft:70,
     alignItems: 'center',
-    marginTop: 90,
+    marginTop: 'auto',
   },
   saveButtonText: {
     color: '#fff',
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
       fontSize: 12,
       marginVertical: 10,
       textAlign: 'center',
-      marginTop:70,
+      marginTop:20,
       marginBottom:15,
   },
 });

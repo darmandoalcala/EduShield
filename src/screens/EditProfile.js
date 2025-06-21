@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'red',
     borderRadius: 25,
     paddingVertical: 12,
-    marginTop: 20,
+    marginTop: 'auto',
     width: '50%',
     alignItems: 'center',
   },
@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
       fontSize: 12,
       marginVertical: 10,
       textAlign: 'center',
-      marginTop:70,
+      marginTop:20,
       marginBottom:15,
   },
 });

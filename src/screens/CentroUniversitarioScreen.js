@@ -59,6 +59,7 @@ export default function CentroU() {
       <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
         <Text style={styles.saveButtonText}>Guardar</Text>
       </TouchableOpacity>
+          <Text style={styles.smallText}>All Rights reserved @EDUSHIELD2025</Text>
     </ScrollView>
   );
 }
@@ -119,15 +120,25 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   saveButton: {
-    backgroundColor: '#e74c3c',
+    backgroundColor: 'red',
     paddingVertical: 15,
     borderRadius: 25,
     alignItems: 'center',
     marginTop: 'auto',
+    width: '60%',
+    marginLeft:70,
+    height: 50,
   },
   saveButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 22,
     fontWeight: 'bold',
   },
+    smallText: {
+    color: '#aaa',
+    fontSize: 12,
+    marginVertical: 10,
+    textAlign: 'center',
+    marginTop:20,
+  }
 });
