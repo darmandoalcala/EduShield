@@ -71,6 +71,7 @@ export default function PersonalContact() {
       <TouchableOpacity style={styles.saveButton} onPress={handleSaveContact}>
         <Text style={styles.saveButtonText}>Agregar contacto</Text>
       </TouchableOpacity>
+        <Text style={styles.smallText}>All Rights reserved @EDUSHIELD2025</Text>
     </ScrollView>
   );
 }
@@ -78,9 +79,10 @@ export default function PersonalContact() {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    paddingTop: 150,
+    paddingTop: 130,
     backgroundColor: '#000',
     alignItems: 'center',
+    padding: 5,
   },
   photoButton: {
     marginBottom: 35,
@@ -115,7 +117,7 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   saveButton: {
-    marginTop: 30,
+    marginTop: 'auto',
     backgroundColor: '#e60000',
     borderRadius: 25,
     paddingVertical: 12,
@@ -125,5 +127,14 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 20,
     textAlign: 'center',
+  },
+        // EDUSHIELD2025
+    smallText: {
+      color: '#aaa',
+      fontSize: 12,
+      marginVertical: 10,
+      textAlign: 'center',
+      marginTop:20,
+      marginBottom:20,
   },
 });

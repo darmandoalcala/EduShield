@@ -135,7 +135,7 @@ const SettingsScreen = ({ navigation }) => {
 
           <Pressable
       style={styles.cardContainer}
-      onPress={() => navigation.navigate('CentroU')}
+      onPress={() => navigation.navigate('AyudaGuia')}
         >
       <Text style={styles.title}>Ayuda & Guía</Text>
       <Text style={styles.item}>- ¿Cómo usar EDUSHIELD?</Text>

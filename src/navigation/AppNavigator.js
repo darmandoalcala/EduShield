@@ -16,6 +16,7 @@ import EditProfile from '../screens/EditProfile';
 import PrivacyScreen from '../screens/PrivacyScreen';
 import LocationScreen from '../screens/LocationScreen';
 import CentroUniversitarioScreen from '../screens/CentroUniversitarioScreen';
+import ayudaYguiaScreen from '../screens/ayudaYguiaScreen';
 
 
 
@@ -117,6 +118,7 @@ export default function AppNavigator() {
       <Stack.Screen name="Privacy" component={PrivacyScreen} /> 
       <Stack.Screen name="Location" component={LocationScreen} />
       <Stack.Screen name="CentroU" component={CentroUniversitarioScreen} /> 
+      <Stack.Screen name="AyudaGuia" component={ayudaYguiaScreen} /> 
 
       {/* mas pantallas... */}
 
