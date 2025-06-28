@@ -1,9 +1,32 @@
-import React from 'react';
-import { View, Text, StyleSheet, TextInput, Image, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TextInput, Image, TouchableOpacity, Alert } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 
 const LoginScreen = ({ navigation }) => {
   const { colors } = useTheme();
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const validarCorreoUDG = (correo) => {
+    const regex = /^[a-zA-Z0-9._%+-]+@alumnos\.udg\.mx$/;       //Expresion regular para "@alumnos.udg.mx"
+    return regex.test(correo);
+  };
+
+  const manejarIngreso = () => {
+    if (!validarCorreoUDG(email)) {
+      Alert.alert('Correo inválido', 'Debes usar un correo institucional (@alumnos.udg.mx)');
+      return;
+    }
+
+    if (!password) {
+      Alert.alert('Contraseña requerida', 'Por favor ingresa tu contraseña');
+      return;
+    }
+
+    // Si pasa validación, navega a MainApp
+    navigation.replace("MainApp");
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: 'black' }]}>
@@ -29,6 +52,10 @@ const LoginScreen = ({ navigation }) => {
         }]}
         placeholder="Correo institucional UDG"
         placeholderTextColor={colors.textSecondary}
+        keyboardType="email-address"
+        autoCapitalize="none"
+        value={email}
+        onChangeText={setEmail}
       />
 
       <TextInput
@@ -40,11 +67,13 @@ const LoginScreen = ({ navigation }) => {
         placeholder="Contraseña"
         placeholderTextColor={colors.textSecondary}
         secureTextEntry
+        value={password}
+        onChangeText={setPassword}
       />
 
       <TouchableOpacity
         style={[styles.button, { backgroundColor: 'red' }]}
-        onPress={() => navigation.replace("MainApp")}
+        onPress={manejarIngreso}                              //VALIDA INICIO DE SESION
       >
         <Text style={[styles.buttonText, { color: colors.buttonText || 'white' }]}>Ingresar</Text>
       </TouchableOpacity>
@@ -75,7 +104,7 @@ const styles = StyleSheet.create({
     marginRight: -40,
   },
   title: {
-    fontSize: 38,
+    fontSize: 36,
     fontWeight: 'bold',
   },
 textContainer: {
@@ -83,7 +112,7 @@ textContainer: {
   alignItems: 'center',
 },
 welcome: {
-  fontSize: 22,
+  fontSize: 20,
   fontWeight: 'bold',
   textAlign: 'center',
   marginBottom: 5,
