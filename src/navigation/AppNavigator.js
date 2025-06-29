@@ -11,6 +11,14 @@ import ReportScreen from '../screens/ReportScreen';
 import ContactsScreen from '../screens/ContactsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import { useTheme } from '../theme/ThemeContext';
+import PersonalContact from '../screens/PersonalContact';
+import EditProfile from '../screens/EditProfile';
+import PrivacyScreen from '../screens/PrivacyScreen';
+import LocationScreen from '../screens/LocationScreen';
+import CentroUniversitarioScreen from '../screens/CentroUniversitarioScreen';
+import ayudaYguiaScreen from '../screens/ayudaYguiaScreen';
+
+
 
 const Tab = createBottomTabNavigator();     //navigator tab (para home, contacts & settings)
 const Stack = createNativeStackNavigator(); //navigator Stack
@@ -105,6 +113,12 @@ export default function AppNavigator() {
       <Stack.Screen name="Home" component={Home1} />
       <Stack.Screen name="Alert" component={AlertScreen} />
       <Stack.Screen name="Report" component={ReportScreen} />
+      <Stack.Screen name="Personal" component={PersonalContact} />
+      <Stack.Screen name="EditP" component={EditProfile} />
+      <Stack.Screen name="Privacy" component={PrivacyScreen} /> 
+      <Stack.Screen name="Location" component={LocationScreen} />
+      <Stack.Screen name="CentroU" component={CentroUniversitarioScreen} /> 
+      <Stack.Screen name="AyudaGuia" component={ayudaYguiaScreen} /> 
 
       {/* mas pantallas... */}
 

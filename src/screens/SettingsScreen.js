@@ -8,6 +8,9 @@ import {
   Image,
 Switch,
 } from 'react-native';
+// al inicio de PrivacySettings.js
+import Icon from 'react-native-vector-icons/FontAwesome';
+
 
 
 const SettingsScreen = ({ navigation }) => {
@@ -73,7 +76,7 @@ const SettingsScreen = ({ navigation }) => {
 
         <Pressable 
           style={styles.settingItem}
-          onPress={() => navigation.navigate('About')}
+          onPress={() => navigation.navigate('EditP')}
         >
           <View style={styles.settingInfo}>  
             <Text style={styles.settingText}>Editar perfil</Text>
@@ -82,7 +85,7 @@ const SettingsScreen = ({ navigation }) => {
 
         <Pressable 
           style={styles.settingItem}
-          onPress={() => navigation.navigate('Help')}
+          onPress={() => navigation.navigate('Privacy')}
         >
           <View style={styles.settingInfo}>
             <Text style={styles.settingText}>Configuracion de privacidad</Text>
@@ -92,7 +95,7 @@ const SettingsScreen = ({ navigation }) => {
 
         <Pressable 
           style={styles.settingItem}
-          onPress={() => navigation.navigate('Help')}
+          onPress={() => navigation.navigate('Location')}
         >
           <View style={styles.settingInfo}>
             <Text style={styles.settingText}>Configuracion de localizacion</Text>
@@ -102,7 +105,7 @@ const SettingsScreen = ({ navigation }) => {
 
         <Pressable 
           style={styles.settingItem}
-          onPress={() => navigation.navigate('Help')}
+          onPress={() => navigation.navigate('CentroU')}
         >
           <View style={styles.settingInfo}>
             <Text style={styles.settingText}>Cambiar centro universitario</Text>
@@ -115,7 +118,7 @@ const SettingsScreen = ({ navigation }) => {
           onPress={() => navigation.navigate('Help')}
         >
           <View style={styles.settingInfo}>
-            <Text style={styles.settingText}>Eliminar reporte</Text>
+            <Text style={styles.settingText}>Mis reportes</Text>
           </View>
           
         </Pressable>
@@ -130,13 +133,31 @@ const SettingsScreen = ({ navigation }) => {
           
         </Pressable>
 
+          <Pressable
+      style={styles.cardContainer}
+      onPress={() => navigation.navigate('AyudaGuia')}
+        >
+      <Text style={styles.title}>Ayuda & Guía</Text>
+      <Text style={styles.item}>- ¿Cómo usar EDUSHIELD?</Text>
+      <Text style={styles.item}>- ¿Qué hacer durante una emergencia?</Text>
+    </Pressable>
+
         {/* Botón de cerrar sesión */}
         <Pressable 
-          style={[styles.logoutButton, { marginTop: 40 }]}
+          style={[styles.logoutButton, { marginTop: 20 }]}
           onPress={handleLogout}
         >
           <Text style={styles.logoutText}>Cerrar sesion</Text>
         </Pressable>
+
+                <Pressable 
+          style={[styles.logoutButton, { marginTop: 10 }]}
+          onPress={() => navigation.navigate('CentroU')}
+        >
+          <Text style={styles.logoutText}>Eliminar cuenta </Text>
+        </Pressable>
+
+            <Text style={styles.smallText}>All Rights reserved @EDUSHIELD2025</Text>
       </ScrollView>
     </View>
   );
@@ -147,6 +168,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'black',
   },
+
   scrollContainer: {
     padding: 20,
     paddingBottom: 50,
@@ -156,14 +178,14 @@ const styles = StyleSheet.create({
     fontSize: 34,
     fontWeight: 'bold',
     marginTop: 30,
-    marginBottom: 30,
+    marginBottom: 10,
     textAlign: 'left',
   },
   sectionTitle: {
     color: 'gray',
     fontSize: 20,
     fontWeight: '600',
-    marginTop: 25,
+    marginTop: 20,
     marginBottom: 15,
     marginLeft: 10,
   },
@@ -188,6 +210,41 @@ const styles = StyleSheet.create({
   logoutText: {
     color: 'white',
     fontSize: 16,
+    textAlign: 'center',
+  },
+        // EDUSHIELD2025
+
+  smallText: {
+    color: '#aaa',
+    fontSize: 12,
+    marginVertical: 10,
+    textAlign: 'center',
+    marginTop:'25', 
+    marginBottom: 55,
+   },
+    cardContainer: {
+    backgroundColor: '#1a1a1a',
+    borderRadius: 10,
+    padding: 17,
+    marginBottom: 5,
+    marginTop:10,
+    marginHorizontal: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  title: {
+    color: 'red',
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  item: {
+    color: '#ff4d4d',
+    fontSize: 14,
+    marginBottom: 4,
   },
 });
 

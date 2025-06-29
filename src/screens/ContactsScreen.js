@@ -35,7 +35,9 @@ const ContactsScreen = ({ navigation }) => {
   };
 
   return (
+    
     <View style={styles.outerContainer}>
+      
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Text style={styles.header}>CONTACTOS</Text>
         
@@ -76,8 +78,9 @@ const ContactsScreen = ({ navigation }) => {
         ))}
       </ScrollView>
 
-      <Pressable 
-        onPress={() => navigation.navigate('AddContact')} 
+
+      <Pressable  
+        onPress={() => navigation.navigate('Personal')} 
         style={styles.addContactButton}
       >
         <Image 
@@ -85,8 +88,11 @@ const ContactsScreen = ({ navigation }) => {
           style={styles.addContactLogo} 
         />
         <Text style={styles.addContactText}>Agregar contactos personales</Text>
+        
       </Pressable>
+      
     </View>
+
   );
 };
 
@@ -163,6 +169,16 @@ const styles = StyleSheet.create({
     height: 20,
     tintColor: 'white',
   },
+        // EDUSHIELD2025
+    smallText: {
+      color: '#aaa',
+      fontSize: 12,
+      marginVertical: 10,
+      textAlign: 'center',
+      marginTop:5,
+      marginBottom:5,
+  },
+
 });
 
 export default ContactsScreen;
