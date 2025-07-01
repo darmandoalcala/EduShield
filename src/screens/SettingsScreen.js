@@ -152,7 +152,7 @@ const SettingsScreen = ({ navigation }) => {
 
                 <Pressable 
           style={[styles.logoutButton, { marginTop: 10 }]}
-          onPress={() => navigation.navigate('CentroU')}
+          onPress={() => navigation.navigate('EliminarCuenta')}
         >
           <Text style={styles.logoutText}>Eliminar cuenta </Text>
         </Pressable>

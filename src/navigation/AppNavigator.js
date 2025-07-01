@@ -17,8 +17,7 @@ import PrivacyScreen from '../screens/PrivacyScreen';
 import LocationScreen from '../screens/LocationScreen';
 import CentroUniversitarioScreen from '../screens/CentroUniversitarioScreen';
 import ayudaYguiaScreen from '../screens/ayudaYguiaScreen';
-
-
+import EliminarCuentaScreen from '../screens/EliminarCuentaScreen';
 
 const Tab = createBottomTabNavigator();     //navigator tab (para home, contacts & settings)
 const Stack = createNativeStackNavigator(); //navigator Stack
@@ -119,6 +118,7 @@ export default function AppNavigator() {
       <Stack.Screen name="Location" component={LocationScreen} />
       <Stack.Screen name="CentroU" component={CentroUniversitarioScreen} /> 
       <Stack.Screen name="AyudaGuia" component={ayudaYguiaScreen} /> 
+      <Stack.Screen name="EliminarCuenta" component={EliminarCuentaScreen} /> 
 
       {/* mas pantallas... */}
 

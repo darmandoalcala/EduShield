@@ -476,7 +476,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FF3B30',   // Rojo brillante
+    backgroundColor: 'red',   // Rojo brillante
     borderRadius: 6,
     paddingVertical: 14,
     paddingHorizontal: 16,

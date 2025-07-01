@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
   },
   reportButtonText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 22,
   },
   noteText: {
     color: '#aaa',
