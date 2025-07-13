@@ -8,6 +8,7 @@ import {
   Image,
   Alert
 } from 'react-native';
+import HeaderBar from '../components/HeaderBar';
 
 const ContactsScreen = ({ navigation }) => {
   // Datos de ejemplo
@@ -37,6 +38,7 @@ const ContactsScreen = ({ navigation }) => {
   return (
     
     <View style={styles.outerContainer}>
+      <HeaderBar navigation={navigation} showBackButton={false} />
       
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Text style={styles.header}>CONTACTOS</Text>

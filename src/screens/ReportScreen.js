@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -11,10 +11,11 @@ import {
 
 import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import HeaderBar from '../components/HeaderBar';
 
 const centers = ['CUCEI', 'CUAAD', 'CUCEV', 'CUCS'];
 
-const ReportScreen = () => {
+const ReportScreen = ({ navigation }) => {
   // Inicializas el estado al primer elemento del array
   const [selectedCenter, setSelectedCenter] = useState(centers[0]);
 
@@ -41,22 +42,7 @@ const ReportScreen = () => {
 
   return (
     <View style={styles.container}>
-      {/* ----------------------- */}
-      {/* Barra de Título / Header (sin cambios) */}
-      <View style={styles.header}>
-        <Text style={styles.title}>EDUSHIELD</Text>
-
-        <TouchableOpacity
-          style={styles.profileButton}
-          onPress={handleProfilePress}
-        >
-          <Image
-            source={require('/workspaces/EduShield/assets/icon.png')}
-            style={styles.profileIcon}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
-      </View>
+      <HeaderBar navigation={navigation} showBackButton={true} />
 
       {/* ----------------------- */}
       {/* ScrollView con las nuevas secciones */}

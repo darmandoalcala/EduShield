@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,24 +6,31 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
+  Alert,
 } from 'react-native';
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
+import * as Location from 'expo-location';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-
-const userRegion = {
-  latitude: 20.6976,
-  longitude: -103.3468,
-  latitudeDelta: 0.01,
-  longitudeDelta: 0.01,
-};
+import HeaderBar from '../components/HeaderBar';
 
 const AlertScreen = ({ navigation }) => {
+  const [location, setLocation] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permiso denegado', 'No se puede acceder a la ubicación.');
+        return;
+      }
+
+      let currentLocation = await Location.getCurrentPositionAsync({});
+      setLocation(currentLocation.coords);
+    })();
+  }, []);
+
   const handleProfilePress = () => {
     console.log('Botón de perfil presionado');
-  };
-
-  const handleButtonPress = (screen) => {
-    console.log(`Navegar a sección: ${screen}`);
   };
 
   const handleCancelAlert = () => {
@@ -32,94 +39,65 @@ const AlertScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      {/* ----------------------- */}
-      {/* Header (sin cambios) */}
-      {/* ----------------------- */}
-      <View style={styles.header}>
-        <Text style={styles.title}>EDUSHIELD</Text>
-        <TouchableOpacity
-          style={styles.profileButton}
-          onPress={handleProfilePress}
-        >
-          <Image
-            source={require('/workspaces/EduShield/assets/icon.png')}
-            style={styles.profileIcon}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
-      </View>
+      <HeaderBar navigation={navigation} showBackButton={true} />
 
-      {/* ----------------------- */}
-      {/* Contenido desplazable */}
-      {/* ----------------------- */}
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-
-        {/* ----------------------- */}
-        {/* Sección 1: Mapa */}
-        {/* ----------------------- */}
         <View style={styles.mapSection}>
           <MapView
             provider={PROVIDER_GOOGLE}
             style={styles.map}
-            region={userRegion}
+            region={
+              location
+                ? {
+                    latitude: location.latitude,
+                    longitude: location.longitude,
+                    latitudeDelta: 0.01,
+                    longitudeDelta: 0.01,
+                  }
+                : {
+                    latitude: 20.6976,
+                    longitude: -103.3468,
+                    latitudeDelta: 0.01,
+                    longitudeDelta: 0.01,
+                  }
+            }
             showsUserLocation
           >
-            <Marker coordinate={userRegion} />
+            {location && (
+              <Marker
+                coordinate={{
+                  latitude: location.latitude,
+                  longitude: location.longitude,
+                }}
+                title="Tu ubicación"
+              />
+            )}
           </MapView>
         </View>
 
-        {/* ----------------------- */}
-        {/* Sección 2: Localización / Zonas de riesgo */}
-        {/* ----------------------- */}
         <View style={styles.buttonRow}>
-          <TouchableOpacity
-            style={styles.evidenceButton}
-            onPress={() => console.log('Localización')}
-          >
-            <Icon
-              name="crosshairs-gps"
-              size={20}
-              color="#FFF"
-              style={styles.iconLeft}
-            />
+          <TouchableOpacity style={styles.evidenceButton} onPress={() => console.log('Localización')}>
+            <Icon name="crosshairs-gps" size={20} color="#FFF" style={styles.iconLeft} />
             <Text style={styles.evidenceText}>Localización</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.evidenceButton}
-            onPress={() => console.log('Zonas de riesgo')}
-          >
-            <Icon
-              name="alert-outline"
-              size={20}
-              color="#FFF"
-              style={styles.iconLeft}
-            />
+          <TouchableOpacity style={styles.evidenceButton} onPress={() => console.log('Zonas de riesgo')}>
+            <Icon name="alert-outline" size={20} color="#FFF" style={styles.iconLeft} />
             <Text style={styles.evidenceText}>Zonas de riesgo</Text>
           </TouchableOpacity>
         </View>
 
-        {/* ----------------------- */}
-        {/* Sección 3: Cancelar Alerta */}
-        {/* ----------------------- */}
-        <TouchableOpacity
-          style={styles.sendButton}
-          onPress={handleCancelAlert}
-        >
-          <Icon
-            name="close-circle-outline"
-            size={20}
-            color="#FFF"
-            style={styles.iconLeft}
-          />
+        <TouchableOpacity style={styles.sendButton} onPress={handleCancelAlert}>
+          <Icon name="close-circle-outline" size={20} color="#FFF" style={styles.iconLeft} />
           <Text style={styles.sendButtonText}>Cancelar Alerta</Text>
         </TouchableOpacity>
-
       </ScrollView>
-
     </View>
   );
 };
+
+// ... tus estilos siguen igual ...
+
 
 const styles = StyleSheet.create({
   container: {

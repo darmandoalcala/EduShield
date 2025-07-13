@@ -10,7 +10,7 @@ Switch,
 } from 'react-native';
 // al inicio de PrivacySettings.js
 import Icon from 'react-native-vector-icons/FontAwesome';
-
+import HeaderBar from '../components/HeaderBar';
 
 
 const SettingsScreen = ({ navigation }) => {
@@ -41,6 +41,7 @@ const SettingsScreen = ({ navigation }) => {
 
   return (
     <View style={styles.outerContainer}>
+      <HeaderBar navigation={navigation} showBackButton={false} /> 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Text style={styles.header}>CONFIGURACIÓN</Text>
         

@@ -10,6 +10,7 @@ import {
   Alert
 } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
+import HeaderBar from '../components/HeaderBar';
 
 const Home1 = ({ navigation }) => {
   const { colors, isDark } = useTheme();
@@ -24,6 +25,7 @@ const Home1 = ({ navigation }) => {
 
   return (
     <View style={styles.outerContainer}>
+      <HeaderBar navigation={navigation} showBackButton={false} /> 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Text style={styles.instructionText}>
           Toca el botón de SOS para alertar a otros usuarios.
