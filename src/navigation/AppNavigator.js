@@ -22,6 +22,45 @@ import EliminarCuentaScreen from '../screens/EliminarCuentaScreen';
 const Tab = createBottomTabNavigator();     //navigator tab (para home, contacts & settings)
 const Stack = createNativeStackNavigator(); //navigator Stack
 
+//NAVEGADORES PARA PANTALLAS NUEVAS DENTRO DE PANTALLAS INICIALES
+const HomeStack = createNativeStackNavigator(); //navigator Stack para Home1
+const ContactsStack = createNativeStackNavigator(); //navigator Stack para ContactsScreen
+const SettingsStack = createNativeStackNavigator(); //navigator Stack para SettingsScreen
+
+//COMPONENTE PARA STACK DENTRO DE INICIO
+function HomeStackScreen() {
+  return (
+    <HomeStack.Navigator screenOptions={{ headerShown: false }}>
+      <HomeStack.Screen name="Home1" component={Home1} />
+      <HomeStack.Screen name="Alert" component={AlertScreen} />
+      <HomeStack.Screen name="Report" component={ReportScreen} />
+    </HomeStack.Navigator>
+  );
+}
+//COMPONENTE PARA STACK DENTRO DE CONTACTOS
+function ContactsStackScreen() {
+  return (
+    <ContactsStack.Navigator screenOptions={{headerShown: false }}>
+      <ContactsStack.Screen name="Contacts" component={ContactsScreen} />
+      <ContactsStack.Screen name="Personal" component={PersonalContact} />
+    </ContactsStack.Navigator>
+  );
+}
+//COMPONENTE PARA STACK DENTRO DE CONFIGURACIÓN
+function SettingsStackScreen() {
+  return (
+    <SettingsStack.Navigator screenOptions={{headerShown: false }}>
+      <SettingsStack.Screen name="Settings" component={SettingsScreen} />
+      <SettingsStack.Screen name="EditP" component={EditProfile} />
+      <SettingsStack.Screen name="Privacy" component={PrivacyScreen} /> 
+      <SettingsStack.Screen name="Location" component={LocationScreen} />
+      <SettingsStack.Screen name="CentroU" component={CentroUniversitarioScreen} /> 
+      <SettingsStack.Screen name="AyudaGuia" component={ayudaYguiaScreen} /> 
+      <SettingsStack.Screen name="EliminarCuenta" component={EliminarCuentaScreen} />
+    </SettingsStack.Navigator>
+  );
+}
+
 //COMPONENTE PARA NAVEGADOR INFERIOR DE HOME, CONTACTS Y SETTINGS
 function MainAppTabs() {
   const { colors } = useTheme();
@@ -50,7 +89,7 @@ function MainAppTabs() {
     >
       <Tab.Screen 
         name="Inicio" 
-        component={Home1}
+        component={HomeStackScreen}
         options={{
           tabBarIcon: ({ focused, color, size }) => (
             <Image
@@ -62,7 +101,7 @@ function MainAppTabs() {
       />
       <Tab.Screen 
         name="Contactos" 
-        component={ContactsScreen}
+        component={ContactsStackScreen}
         options={{
           tabBarIcon: ({ focused, color, size }) => (
             <Image
@@ -74,7 +113,7 @@ function MainAppTabs() {
       />
       <Tab.Screen 
         name="Configuración" 
-        component={SettingsScreen}
+        component={SettingsStackScreen}
         options={{
           tabBarIcon: ({ focused, color, size }) => (
             <Image
@@ -110,15 +149,6 @@ export default function AppNavigator() {
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="Register2" component={RegisterScreen2} />
       <Stack.Screen name="Home" component={Home1} />
-      <Stack.Screen name="Alert" component={AlertScreen} />
-      <Stack.Screen name="Report" component={ReportScreen} />
-      <Stack.Screen name="Personal" component={PersonalContact} />
-      <Stack.Screen name="EditP" component={EditProfile} />
-      <Stack.Screen name="Privacy" component={PrivacyScreen} /> 
-      <Stack.Screen name="Location" component={LocationScreen} />
-      <Stack.Screen name="CentroU" component={CentroUniversitarioScreen} /> 
-      <Stack.Screen name="AyudaGuia" component={ayudaYguiaScreen} /> 
-      <Stack.Screen name="EliminarCuenta" component={EliminarCuentaScreen} /> 
 
       {/* mas pantallas... */}
 

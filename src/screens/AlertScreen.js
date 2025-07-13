@@ -117,40 +117,6 @@ const AlertScreen = ({ navigation }) => {
 
       </ScrollView>
 
-      {/* ----------------------- */}
-      {/* Barra de navegación inferior (sin cambios) */}
-      {/* ----------------------- */}
-      <View style={styles.navBar}>
-        <TouchableOpacity
-          style={styles.navButton}
-          onPress={() => handleButtonPress('Inicio')}
-        >
-          <Image
-            source={require('/workspaces/EduShield/assets/splash-icon.png')}
-            style={styles.navImage}
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.navButton}
-          onPress={() => handleButtonPress('Buscar')}
-        >
-          <Image
-            source={require('/workspaces/EduShield/assets/splash-icon.png')}
-            style={styles.navImage}
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.navButton}
-          onPress={() => handleButtonPress('Perfil')}
-        >
-          <Image
-            source={require('/workspaces/EduShield/assets/splash-icon.png')}
-            style={styles.navImage}
-          />
-        </TouchableOpacity>
-      </View>
     </View>
   );
 };
