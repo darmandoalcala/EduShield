@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   link: {
-    color: '#e74c3c',
+    color: 'red',
     textDecorationLine: 'underline',
   },
 
