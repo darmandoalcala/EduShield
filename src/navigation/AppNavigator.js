@@ -18,6 +18,13 @@ import LocationScreen from '../screens/LocationScreen';
 import CentroUniversitarioScreen from '../screens/CentroUniversitarioScreen';
 import ayudaYguiaScreen from '../screens/ayudaYguiaScreen';
 import EliminarCuentaScreen from '../screens/EliminarCuentaScreen';
+import SeleccionarReporteScreen from '../screens/SeleccionarReporteScreen';
+import DetalleReporteScreen from '../screens/DetalleReporteScreen';
+import MisReporteScreen from '../screens/MisReporteScreen';
+import DetalleMisReporteScreen from '../screens/DetalleMisReporteScreen';
+
+
+
 
 const Tab = createBottomTabNavigator();     //navigator tab (para home, contacts & settings)
 const Stack = createNativeStackNavigator(); //navigator Stack
@@ -57,6 +64,11 @@ function SettingsStackScreen() {
       <SettingsStack.Screen name="CentroU" component={CentroUniversitarioScreen} /> 
       <SettingsStack.Screen name="AyudaGuia" component={ayudaYguiaScreen} /> 
       <SettingsStack.Screen name="EliminarCuenta" component={EliminarCuentaScreen} />
+      <SettingsStack.Screen name="SeleccionarReporte" component={SeleccionarReporteScreen} />
+      <SettingsStack.Screen name="DetalleReporte" component={DetalleReporteScreen} />
+      <SettingsStack.Screen name="MisReportes" component={MisReporteScreen} />
+      <SettingsStack.Screen name="DetalleMisReporte" component={DetalleMisReporteScreen} />
+
     </SettingsStack.Navigator>
   );
 }

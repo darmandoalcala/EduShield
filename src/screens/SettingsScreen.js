@@ -116,20 +116,20 @@ const SettingsScreen = ({ navigation }) => {
 
         <Pressable 
           style={styles.settingItem}
-          onPress={() => navigation.navigate('Help')}
+          onPress={() => navigation.navigate('SeleccionarReporte')}
         >
           <View style={styles.settingInfo}>
-            <Text style={styles.settingText}>Mis reportes</Text>
+            <Text style={styles.settingText}>Historial de incidentes en reportes</Text>
           </View>
           
         </Pressable>
 
         <Pressable 
           style={styles.settingItem}
-          onPress={() => navigation.navigate('Help')}
+          onPress={() => navigation.navigate('MisReportes')}
         >
           <View style={styles.settingInfo}>
-            <Text style={styles.settingText}>Historial de incidentes en reportes</Text>
+            <Text style={styles.settingText}>Mis Reportes</Text>
           </View>
           
         </Pressable>
