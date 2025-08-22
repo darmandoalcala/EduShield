@@ -7,8 +7,11 @@ import {
   ScrollView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { useNavigation } from '@react-navigation/native';
+import HeaderBar from '../components/HeaderBar';
 
 export default function Location() {
+  const navigation = useNavigation();
   const [locationEnabled, setLocationEnabled] = useState(true);
   const [highPrecision, setHighPrecision] = useState(false);
   const [historyEnabled, setHistoryEnabled] = useState(true);
@@ -38,31 +41,35 @@ export default function Location() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Configuración localizacion</Text>
-        <Icon name="cog" size={24} color="#fff" />
-      </View>
+    <View style={styles.container}>
+      <HeaderBar navigation={navigation} showBackButton={false} />
 
-      {renderToggle('Activar localización', locationEnabled, setLocationEnabled)}
-      {renderToggle('Precisión GPS ALTA', highPrecision, setHighPrecision)}
-      {renderToggle('Historial de ubicaciones ACTIVO', historyEnabled, setHistoryEnabled)}
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Configuración localización</Text>
+            <Icon name="cog" size={30} color="#fff" style={{ marginTop: 20 }} />
+        </View>
 
-      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-        <Text style={styles.saveButtonText}>Guardar</Text>
+        {renderToggle('Activar localización', locationEnabled, setLocationEnabled)}
+        {renderToggle('Precisión GPS ALTA', highPrecision, setHighPrecision)}
+        {renderToggle('Historial de ubicaciones ACTIVO', historyEnabled, setHistoryEnabled)}
 
-      </TouchableOpacity>
-                <Text style={styles.smallText}>All Rights reserved @EDUSHIELD2025</Text>
-    </ScrollView>
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+          <Text style={styles.saveButtonText}>Guardar</Text>
+        </TouchableOpacity>
 
+        <Text style={styles.smallText}>All Rights reserved @EDUSHIELD2025</Text>
+      </ScrollView>
+    </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#000',
-    padding: 20,
-    paddingTop: 160,
+    padding: 10,
+    paddingTop: 2,
     flexGrow: 1,
   },
   header: {
@@ -75,6 +82,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 28,
     fontWeight: 'bold',
+    marginTop: 25,
   },
   settingRow: {
     flexDirection: 'row',

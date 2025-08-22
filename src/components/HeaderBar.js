@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     borderBottomColor: '#333',
     borderBottomWidth: 1,
-    marginTop: 30, // espacio para evitar notch
+    marginTop: 40, // espacio para evitar notch
   },
   title: {
     color: 'white',
