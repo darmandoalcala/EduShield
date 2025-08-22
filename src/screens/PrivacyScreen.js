@@ -3,87 +3,80 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
   ScrollView,
+  TouchableOpacity,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import { useNavigation } from '@react-navigation/native';
+import HeaderBar from '../components/HeaderBar';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-export default function Privacy() {
-  const [cameraAccess, setCameraAccess] = useState(true);
-  const [galleryAccess, setGalleryAccess] = useState(true);
-  const [shareLocation, setShareLocation] = useState(true);
+export default function PrivacySettings() {
+  const navigation = useNavigation();
+
+  const [cameraAccess, setCameraAccess] = useState(false);
+  const [galleryAccess, setGalleryAccess] = useState(false);
+  const [shareLocation, setShareLocation] = useState(false);
 
   const handleClearHistory = () => {
-    // Lógica para eliminar historial de incidentes
+    console.log('Historial eliminado');
   };
 
   const handleSave = () => {
-    // Lógica para guardar cambios de configuración
+    console.log('Configuración guardada');
   };
 
-  const renderToggle = (label, value, onToggle) => (
+  const renderToggle = (label, value, setValue) => (
     <View style={styles.settingRow}>
       <Text style={styles.settingLabel}>{label}</Text>
-      <View style={styles.toggleGroup}>
-        <TouchableOpacity
-          style={[
-            styles.toggleButton,
-            value && styles.toggleSelected,
-          ]}
-          onPress={() => onToggle(true)}
-        >
-          <Text style={[
-            styles.toggleText,
-            value && styles.toggleTextSelected,
-          ]}>SI</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.toggleButton,
-            !value && styles.toggleSelected,
-          ]}
-          onPress={() => onToggle(false)}
-        >
-          <Text style={[
-            styles.toggleText,
-            !value && styles.toggleTextSelected,
-          ]}>NO</Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity
+        style={[styles.toggleButton, value && styles.toggleActive]}
+        onPress={() => setValue(!value)}
+      >
+        <Text style={styles.toggleText}>{value ? 'Activado' : 'Desactivado'}</Text>
+      </TouchableOpacity>
     </View>
   );
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Configuración Privacidad</Text>
-        <Icon name="cog" size={24} color="#fff" />
-      </View>
+    <View style={styles.container}>
+      <HeaderBar navigation={navigation} showBackButton={false} />
 
-      {renderToggle('Acceso a cámara', cameraAccess, setCameraAccess)}
-      {renderToggle('Acceso a galería', galleryAccess, setGalleryAccess)}
-      {renderToggle('Compartir ubicación con mis contactos', shareLocation, setShareLocation)}
+      <ScrollView contentContainerStyle={styles.container}>
+        <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+          <View style={styles.header}>
+            <Text style={styles.title}>Configuración Privacidad</Text>
+            <Icon name="cog" size={30} color="#fff" style={{ marginTop: 10 }} />
+          </View>
 
-      <View style={styles.settingRow}>
-        <Text style={styles.settingLabel}>Eliminar todo historial de mis incidentes</Text>
-        <TouchableOpacity style={styles.clearButton} onPress={handleClearHistory}>
-          <Text style={styles.clearButtonText}>Eliminar</Text>
-        </TouchableOpacity>
-      </View>
+          {renderToggle('Acceso a cámara', cameraAccess, setCameraAccess)}
+          {renderToggle('Acceso a galería', galleryAccess, setGalleryAccess)}
+          {renderToggle('Compartir ubicación con mis contactos', shareLocation, setShareLocation)}
 
-      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-        <Text style={styles.saveButtonText}>Guardar</Text>
-      </TouchableOpacity>
+          <View style={styles.settingRow}>
+            <Text style={styles.settingLabel}>Eliminar todo historial de mis incidentes</Text>
+            <TouchableOpacity style={styles.clearButton} onPress={handleClearHistory}>
+              <Text style={styles.clearButtonText}>Eliminar</Text>
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+            <Text style={styles.saveButtonText}>Guardar</Text>
+          </TouchableOpacity>
+
           <Text style={styles.smallText}>All Rights reserved @EDUSHIELD2025</Text>
-    </ScrollView>
+        </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
+
+
 
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#000',
-    padding: 20,
-    paddingTop: 160,
+    padding: 10,
+    paddingTop: 10,
     flexGrow: 1,
   },
   header: {
@@ -96,6 +89,8 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 30,
     fontWeight: 'bold',
+    marginTop: 15,
+
   },
   settingRow: {
     flexDirection: 'row',
