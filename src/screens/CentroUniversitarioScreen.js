@@ -4,11 +4,14 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  SafeAreaView,
   ScrollView,
 } from 'react-native';
 
+import { useNavigation } from '@react-navigation/native';
+import HeaderBar from '../components/HeaderBar';
+
 export default function CentroU() {
+  const navigation = useNavigation(); 
   const [selectedCampus, setSelectedCampus] = useState('CUCEI');
   const [showDropdown, setShowDropdown] = useState(false);
 
@@ -25,7 +28,9 @@ export default function CentroU() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
+      <HeaderBar navigation={navigation} showBackButton={false} />
+
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>
           Configura el Centro Universitario que quieres ver en el mapa
@@ -67,7 +72,7 @@ export default function CentroU() {
           <Text style={styles.smallText}>All Rights reserved @EDUSHIELD2025</Text>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -78,16 +83,14 @@ const styles = StyleSheet.create({
   },
   content: {
     flexGrow: 1,
-    padding: 20,
+    padding: 15,
     justifyContent: 'flex-start',
-
-
   },
   title: {
-    marginTop: 80,
+    marginTop: 20,
     color: '#fff',
     fontSize: 25,
-    marginBottom: 40,
+    marginBottom: 20,
   },
   inputGroup: {
     zIndex: 2,

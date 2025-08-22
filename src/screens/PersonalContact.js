@@ -31,6 +31,7 @@ export default function PersonalContact() {
       <HeaderBar navigation={navigation} showBackButton={false} />
 
       <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+        
         <TouchableOpacity style={styles.photoButton} onPress={handleAddPhoto}>
           <Image
             source={require('/workspaces/EduShield/assets/contact.png')}
