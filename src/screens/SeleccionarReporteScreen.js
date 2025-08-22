@@ -1,55 +1,65 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, ScrollView, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import HeaderBar from '../components/HeaderBar';
 import { reportesMock } from '../data/mockReportes';
 
-export default function SeleccionarReporteScreen({ navigation }) {
+export default function SeleccionarReporteScreen() {
+  const navigation = useNavigation();
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>
-        Aquí podrás estar informado sobre lo que pasa en tu centro universitario
-      </Text>
+    <View style={styles.container}>
+      <HeaderBar navigation={navigation} showBackButton={false} />
 
-      <Text style={styles.instruccion}>
-        Selecciona el reporte que quieras ver
-      </Text>
+      <ScrollView contentContainerStyle={styles.content}>
+        <Text style={styles.title}>
+          Aquí podrás estar informado sobre lo que pasa en tu centro universitario
+        </Text>
 
-      {reportesMock.map(reporte => (
-        <TouchableOpacity
-          key={reporte.id}
-          style={styles.item}
-          onPress={() => navigation.navigate('DetalleReporte', { id: reporte.id })}
-        >
-          <Text style={styles.text}>
-            {reporte.descripcion.length > 20
-              ? `${reporte.descripcion.slice(0, 20)}...`
-              : reporte.descripcion}
-          </Text>
-        </TouchableOpacity>
-      ))}
+        <Text style={styles.instruccion}>
+          Selecciona el reporte que quieras ver
+        </Text>
 
-      <Text style={styles.nota}>
-        Nota: Cualquier reporte será anónimo ante este público.
-      </Text>
-      <Text style={styles.smallText}>
-        All Rights reserved @EDUSHIELD2025
-      </Text>
-    </ScrollView>
+        {reportesMock.map(reporte => (
+          <TouchableOpacity
+            key={reporte.id}
+            style={styles.item}
+            onPress={() => navigation.navigate('DetalleReporte', { id: reporte.id })}
+          >
+            <Text style={styles.text}>
+              {reporte.descripcion.length > 20
+                ? `${reporte.descripcion.slice(0, 20)}...`
+                : reporte.descripcion}
+            </Text>
+          </TouchableOpacity>
+        ))}
+
+        <Text style={styles.nota}>
+          Nota: Cualquier reporte será anónimo ante este público.
+        </Text>
+        <Text style={styles.smallText}>
+          All Rights reserved @EDUSHIELD2025
+        </Text>
+      </ScrollView>
+    </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    paddingTop: 150,
+    paddingTop: 10,
     backgroundColor: '#000',
     flexGrow: 1, 
-    paddingBottom: 100, // importante para ScrollView
+    paddingBottom: 150, // importante para ScrollView
   },
   title: {
     color: '#fff',
     fontSize: 25,
     marginBottom: 10,
     textAlign: 'center',
+    marginTop: 15,
   },
   instruccion: {
     color: 'red',
@@ -81,7 +91,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginVertical: 10,
     textAlign: 'center',
-    marginTop: 20,
-    marginBottom: 20,
+    marginTop: 10,
+    marginBottom: 50,
   },
 });

@@ -8,61 +8,68 @@ import {
   Modal,
   Linking,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import HeaderBar from '../components/HeaderBar';
 
 export default function AyudaGuia() {
   const [showVideo, setShowVideo] = useState(false);
+  const navigation = useNavigation();
 
   const handleEmailPress = () => {
     Linking.openURL('mailto:edushield@gmail.com');
   };
 
-    return (
-        <>
-        {showVideo && (
-            <Modal transparent={true} animationType="slide">
-            <View style={styles.videoModal}>
-                {/* Aquí coloca tu componente de video */}
-                <View style={styles.videoContent} />
-                <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => setShowVideo(false)}
-                >
-                <Text style={styles.closeButtonText}>Cerrar</Text>
-                </TouchableOpacity>
-            </View>
-            </Modal>
-        )}
-        <ScrollView contentContainerStyle={styles.container}>
-            <View style={styles.card}>
-            <Text style={styles.title}>Ayuda & Guide</Text>
-            <Text style={styles.subtitle}>- Cómo usar EDUSHIELD?</Text>
+  return (
+    <View style={styles.mainContainer}>
+      {/* 🔹 Header con botón de regreso */}
+      <HeaderBar navigation={navigation} showBackButton={true} />
 
-            {!showVideo && (
-                <TouchableOpacity
-                style={styles.videoPlaceholder}
-                onPress={() => setShowVideo(true)}
-                >
-                <Text style={styles.videoPlaceholderText}>Demo Video</Text>
-                </TouchableOpacity>
-            )}
+      {showVideo && (
+        <Modal transparent={true} animationType="slide">
+          <View style={styles.videoModal}>
+            {/* Aquí coloca tu componente de video */}
+            <View style={styles.videoContent} />
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setShowVideo(false)}
+            >
+              <Text style={styles.closeButtonText}>Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
+      )}
 
-            <Text style={styles.subtitle}>- Qué hacer durante una emergencia?</Text>
-            <Text style={styles.questionText}>
-                Recuerda detalles del agresor, ubicación, posibles riesgos y busca un lugar seguro.
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.card}>
+          <Text style={styles.title}>Ayuda & Guía</Text>
+          <Text style={styles.subtitle}>- Cómo usar EDUSHIELD?</Text>
+
+          {!showVideo && (
+            <TouchableOpacity
+              style={styles.videoPlaceholder}
+              onPress={() => setShowVideo(true)}
+            >
+              <Text style={styles.videoPlaceholderText}>Demo Video</Text>
+            </TouchableOpacity>
+          )}
+
+          <Text style={styles.subtitle}>- Qué hacer durante una emergencia?</Text>
+          <Text style={styles.questionText}>
+            Recuerda detalles del agresor, ubicación, posibles riesgos y busca un lugar seguro.
+          </Text>
+
+          <Text style={styles.infoText}>
+            Más información escríbenos al correo{' '}
+            <Text style={styles.link} onPress={handleEmailPress}>
+              edushield@gmail.com
             </Text>
-
-            <Text style={styles.infoText}>
-                Más información escríbenos al correo{' '}
-                <Text style={styles.link} onPress={handleEmailPress}>
-                edushield@gmail.com
-                </Text>
-            </Text>
-            </View>
-            <Text style={styles.smallText}>All Rights reserved @EDUSHIELD2025</Text>
-        </ScrollView>
-        </>
-    );
-    }
+          </Text>
+        </View>
+        <Text style={styles.smallText}>All Rights reserved @EDUSHIELD2025</Text>
+      </ScrollView>
+    </View>
+  );
+}
 
 const styles = StyleSheet.create({
   container: {
