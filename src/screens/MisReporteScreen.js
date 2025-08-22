@@ -1,37 +1,46 @@
 import React from 'react';
 import { ScrollView, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import HeaderBar from '../components/HeaderBar';
 import { misreportesMock } from '../data/mockMisReportes';
 
-export default function MisReporteScreen({ navigation }) {
+export default function MisReporteScreen() {
+  const navigation = useNavigation();
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>
-        Aquí podrás consultar tus últimos reportes en EDUSHIELD
-      </Text>
+    <View style={styles.container}>
+      <HeaderBar navigation={navigation} showBackButton={false} />
 
-      <Text style={styles.instruccion}>
-        Selecciona el reporte que quieras ver
-      </Text>
+      <ScrollView contentContainerStyle={styles.content}>
+        <Text style={styles.title}>
+          Aquí podrás consultar tus últimos reportes en EDUSHIELD
+        </Text>
 
-      {misreportesMock.map(reporte => (
-        <TouchableOpacity
-          key={reporte.id}
-          style={styles.item}
-          onPress={() => navigation.navigate('DetalleMisReporte', { id: reporte.id })}
-        >
-          <Text style={styles.text}>{reporte.fecha}</Text>
-        </TouchableOpacity>
-      ))}
+        <Text style={styles.instruccion}>
+          Selecciona el reporte que quieras ver
+        </Text>
 
-      <Text style={styles.smallText}>All Rights reserved @EDUSHIELD2025</Text>
-    </ScrollView>
+        {misreportesMock.map(reporte => (
+          <TouchableOpacity
+            key={reporte.id}
+            style={styles.item}
+            onPress={() => navigation.navigate('DetalleMisReporte', { id: reporte.id })}
+          >
+            <Text style={styles.text}>{reporte.fecha}</Text>
+          </TouchableOpacity>
+        ))}
+
+        <Text style={styles.smallText}>All Rights reserved @EDUSHIELD2025</Text>
+      </ScrollView>
+    </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    paddingTop: 150,
+    paddingTop: 1,
     backgroundColor: '#000',
     flexGrow: 1,
     paddingBottom:150,
@@ -41,6 +50,7 @@ const styles = StyleSheet.create({
     fontSize: 23,
     marginBottom: 10,
     textAlign: 'center',
+    marginTop: 20,
   },
   instruccion: {
     color: 'red',

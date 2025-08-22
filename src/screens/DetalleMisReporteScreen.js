@@ -1,14 +1,18 @@
 import React from 'react';
 import { ScrollView, View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
-import { reportesMock } from '../data/mockReportes'; //Cambiar en back 
+import { useNavigation } from '@react-navigation/native';
+import HeaderBar from '../components/HeaderBar';
+import { reportesMock } from '../data/mockReportes';
 
 export default function DetalleReporteScreen({ route }) {
+  const navigation = useNavigation();
   const { id } = route.params;
   const reporte = reportesMock.find(r => r.id === id);
 
   if (!reporte) {
     return (
       <View style={styles.container}>
+        <HeaderBar navigation={navigation} showBackButton={true} />
         <Text style={{ color: 'white', textAlign: 'center', marginTop: 100 }}>
           Reporte no encontrado
         </Text>
@@ -17,34 +21,39 @@ export default function DetalleReporteScreen({ route }) {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.label}>Fecha reporte: {reporte.fecha}</Text>
-      <Text style={styles.label}>Hora: {reporte.hora}</Text>
-      <Text style={styles.label}>Descripción:</Text>
-      <View style={styles.descripcion}>
-        <Text style={styles.text}>{reporte.descripcion}</Text>
-      </View>
+    <View style={styles.container}>
+      <HeaderBar navigation={navigation} showBackButton={true} />
 
-      <Text style={styles.label}>Evidencias:</Text>
-      <View style={styles.imageContainer}>
-        {reporte.evidencias.map((img, index) => (
-          <Image key={index} source={{ uri: img }} style={styles.image} />
-        ))}
-      </View>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.label}>Fecha reporte: {reporte.fecha}</Text>
+        <Text style={styles.label}>Hora: {reporte.hora}</Text>
+        <Text style={styles.label}>Descripción:</Text>
+        <View style={styles.descripcion}>
+          <Text style={styles.text}>{reporte.descripcion}</Text>
+        </View>
 
-      <TouchableOpacity style={styles.deleteButton} onPress={() => {}}>
-        <Text style={styles.deleteText}>Eliminar Reporte</Text>
-      </TouchableOpacity>
+        <Text style={styles.label}>Evidencias:</Text>
+        <View style={styles.imageContainer}>
+          {reporte.evidencias.map((img, index) => (
+            <Image key={index} source={{ uri: img }} style={styles.image} />
+          ))}
+        </View>
 
-      <Text style={styles.smallText}>All Rights reserved @EDUSHIELD2025</Text>
-    </ScrollView>
+        <TouchableOpacity style={styles.deleteButton} onPress={() => {}}>
+          <Text style={styles.deleteText}>Eliminar Reporte</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.smallText}>All Rights reserved @EDUSHIELD2025</Text>
+      </ScrollView>
+    </View>
   );
 }
 
+
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    paddingTop: 150,
+    padding: 10,
+    paddingTop: 10,
     backgroundColor: '#000',
     flexGrow: 1,
   },
@@ -58,10 +67,13 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 8,
     marginBottom: 15,
+    marginTop: 10,
   },
   text: {
     color: '#000',
     fontSize:18,
+    marginTop: 1,
+
   },
   imageContainer: {
     flexDirection: 'row',
