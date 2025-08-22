@@ -8,10 +8,13 @@ import {
   Image,
   ScrollView,
 } from 'react-native';
-
+import { useNavigation } from '@react-navigation/native';
+import HeaderBar from '../components/HeaderBar';
 import { Picker } from '@react-native-picker/picker';
 
 export default function EditP() {
+  const navigation = useNavigation();
+
   const [fullName, setFullName] = useState('');
   const [major, setMajor] = useState('');
   const [campus, setCampus] = useState('CUCEI');
@@ -20,118 +23,124 @@ export default function EditP() {
   const campusOptions = ['CUCEI', 'CUCEA', 'CUCS'];
 
   const handleAddPhoto = () => {
-    // Lógica para seleccionar o tomar foto
     console.log('Editar foto');
   };
 
   const handleSave = () => {
-    // Lógica para guardar datos
     console.log({ fullName, major, campus, gender });
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <TouchableOpacity style={styles.avatarContainer} onPress={handleAddPhoto}>
-        <Image
-          source={require('/workspaces/EduShield/assets/contact.png')}
-          style={styles.avatar}
-        />
-        <Text style={styles.editPhotoText}>Editar foto</Text>
-      </TouchableOpacity>
+    <View style={styles.container}>
+      <HeaderBar navigation={navigation} showBackButton={false} />
 
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Nombre completo</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Ingresa tu nombre completo"
-          placeholderTextColor="#aaa"
-          value={fullName}
-          onChangeText={setFullName}
-        />
-      </View>
-
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Carrera</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Ingresa tu carrera"
-          placeholderTextColor="#aaa"
-          value={major}
-          onChangeText={setMajor}
-        />
-      </View>
-
-
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Centro universitario</Text>
-        <TouchableOpacity
-          style={styles.dropdownButton}
-          onPress={() => setShowDropdown(!showDropdown)}
-        >
-          <Text style={styles.dropdownText}>{campus}</Text>
-          <Text style={styles.dropdownArrow}>{showDropdown ? '▲' : '▼'}</Text>
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <TouchableOpacity style={styles.avatarContainer} onPress={handleAddPhoto}>
+          <Image
+            source={require('/workspaces/EduShield/assets/contact.png')}
+            style={styles.avatar}
+          />
+          <Text style={styles.editPhotoText}>Editar foto</Text>
         </TouchableOpacity>
-        {showDropdown && (
-          <View style={styles.dropdownContainer}>
-            {campusOptions.map(option => (
-              <TouchableOpacity
-                key={option}
-                style={styles.optionItem}
-                onPress={() => {
-                  setCampus(option);
-                  setShowDropdown(false);
-                }}
-              >
-                <Text style={styles.optionText}>{option}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-      </View>
 
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Género *</Text>
-        <View style={styles.genderContainer}>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Nombre completo</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Ingresa tu nombre completo"
+            placeholderTextColor="#aaa"
+            value={fullName}
+            onChangeText={setFullName}
+          />
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Carrera</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Ingresa tu carrera"
+            placeholderTextColor="#aaa"
+            value={major}
+            onChangeText={setMajor}
+          />
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Centro universitario</Text>
           <TouchableOpacity
-            style={[
-              styles.genderButton,
-              gender === 'MASCULINO' && styles.genderSelected,
-            ]}
-            onPress={() => setGender('MASCULINO')}
+            style={styles.dropdownButton}
+            onPress={() => setShowDropdown(!showDropdown)}
           >
-            <Text
-              style={[
-                styles.genderText,
-                gender === 'MASCULINO' && styles.genderTextSelected,
-              ]}
-            >
-              MASCULINO
-            </Text>
+            <Text style={styles.dropdownText}>{campus}</Text>
+            <Text style={styles.dropdownArrow}>{showDropdown ? '▲' : '▼'}</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.genderButton,
-              gender === 'FEMENINO' && styles.genderSelected,
-            ]}
-            onPress={() => setGender('FEMENINO')}
-          >
-            <Text
+          {showDropdown && (
+            <View style={styles.dropdownContainer}>
+              {campusOptions.map(option => (
+                <TouchableOpacity
+                  key={option}
+                  style={styles.optionItem}
+                  onPress={() => {
+                    setCampus(option);
+                    setShowDropdown(false);
+                  }}
+                >
+                  <Text style={styles.optionText}>{option}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Género *</Text>
+          <View style={styles.genderContainer}>
+            <TouchableOpacity
               style={[
-                styles.genderText,
-                gender === 'FEMENINO' && styles.genderTextSelected,
+                styles.genderButton,
+                gender === 'MASCULINO' && styles.genderSelected,
               ]}
+              onPress={() => setGender('MASCULINO')}
             >
-              FEMENINO
-            </Text>
+              <Text
+                style={[
+                  styles.genderText,
+                  gender === 'MASCULINO' && styles.genderTextSelected,
+                ]}
+              >
+                MASCULINO
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.genderButton,
+                gender === 'FEMENINO' && styles.genderSelected,
+              ]}
+              onPress={() => setGender('FEMENINO')}
+            >
+              <Text
+                style={[
+                  styles.genderText,
+                  gender === 'FEMENINO' && styles.genderTextSelected,
+                ]}
+              >
+                FEMENINO
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+
+        <View style={styles.bottomButtonContainer}>
+          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+            <Text style={styles.saveButtonText}>Guardar</Text>
           </TouchableOpacity>
         </View>
-      </View>
 
-      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-        <Text style={styles.saveButtonText}>Guardar</Text>
-      </TouchableOpacity>
+
         <Text style={styles.smallText}>All Rights reserved @EDUSHIELD2025</Text>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -139,11 +148,11 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     backgroundColor: '#000',
-    paddingTop: 120,
-    alignItems: 'center',
-    padding: 20,
+    padding: 10,
+
   },
   avatarContainer: {
+    paddingTop: 10,
     alignItems: 'center',
     marginBottom: 35,
   },
@@ -237,6 +246,13 @@ const styles = StyleSheet.create({
     width: '50%',
     alignItems: 'center',
   },
+
+  
+bottomButtonContainer: {
+  alignItems: 'center',
+},
+
+
   saveButtonText: {
     color: '#fff',
     fontSize: 20,
