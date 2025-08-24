@@ -65,7 +65,7 @@ export default function EliminarCuenta() {
   };
 
   return (
-    <SafeAreaView style={styles.mainContainer}>
+    <View style={styles.mainContainer}>
       <StatusBar barStyle="light-content" />
       {/* Header fijo */}
       <HeaderBar navigation={navigation} showBackButton={true} /* title="ELIMINAR CUENTA" */ />
@@ -103,7 +103,7 @@ export default function EliminarCuenta() {
         <View style={{ height: 24 }} />
         <Text style={styles.smallText}>All Rights reserved @EDUSHIELD2025</Text>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 

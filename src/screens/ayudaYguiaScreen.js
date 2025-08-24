@@ -69,7 +69,7 @@ export default function AyudaGuia() {
   const videoId = getYouTubeId('https://youtu.be/3gMOYZoMtEs?si=n6uR3MDIMq9nWTda'); 
 
   return (
-    <SafeAreaView style={styles.mainContainer}>
+    <View style={styles.mainContainer}>
       <StatusBar barStyle="light-content" />
       {/* Header con botón de regreso */}
       <HeaderBar navigation={navigation} showBackButton={true} />
@@ -162,7 +162,7 @@ export default function AyudaGuia() {
           <Text style={styles.smallText}>All Rights reserved @EDUSHIELD2025</Text>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
