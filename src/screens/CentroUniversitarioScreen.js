@@ -19,13 +19,23 @@ export default function CentroU() {
     'CUCEI',
     'CUCEA',
     'CUCS',
-    'VOCACIONAL',
-    'PREPARATORIA 12',
   ];
 
   const handleSave = () => {
     // Lógica para guardar selección
   };
+
+
+  
+  const handleOptionSelect = (option) => {
+    if (option !== 'CUCEI') {
+      alert('Solo hay opción para CUCEI como centro universitario');
+      return;
+    }
+    setSelectedCampus(option);
+    setShowDropdown(false);
+  };
+
 
   return (
     <View style={styles.container}>
@@ -53,8 +63,7 @@ export default function CentroU() {
                   key={option}
                   style={styles.optionItem}
                   onPress={() => {
-                    setSelectedCampus(option);
-                    setShowDropdown(false);
+                    handleOptionSelect(option);
                   }}
                 >
                   <Text style={styles.optionText}>{option}</Text>
