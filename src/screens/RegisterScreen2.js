@@ -171,6 +171,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 15,
     marginBottom: 20,
+    fontSize: 17,
   },
   button: {
     height: 50,

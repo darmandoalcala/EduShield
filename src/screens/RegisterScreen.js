@@ -1,57 +1,70 @@
-import React from 'react';
-import { View, Text, StyleSheet, TextInput, Image, TouchableOpacity } from 'react-native';
-import { useTheme } from '../theme/ThemeContext';
+import React, { useState } from "react";
+import { View, Text, StyleSheet, TextInput, Image, TouchableOpacity } from "react-native";
+import { Picker } from "@react-native-picker/picker";
+import { useTheme } from "../theme/ThemeContext";
 
-const RegisterScreen = ({ navigation }) => {
+export default function RegisterScreen({ navigation }) {
   const { colors } = useTheme();
+  const [selectedValue, setSelectedValue] = useState("CUCEI");
 
   return (
-    <View style={[styles.container, { backgroundColor: 'black' }]}>
-        <View style={styles.headerContainer}>
-        <Text style={[styles.title, { color: 'white' }]}>EDUSHIELD</Text>
+    <View style={[styles.container, { backgroundColor: "black" }]}>
+      <View style={styles.headerContainer}>
+        <Text style={[styles.title, { color: "white" }]}>EDUSHIELD</Text>
         <Image
-          source={require('../../assets/edushield-high-resolution-logo-transparent (1).png')}
+          source={require("../../assets/edushield-high-resolution-logo-transparent (1).png")}
           style={styles.logo}
           resizeMode="contain"
         />
       </View>
 
-      <View style={[styles.textContainer]}>
-        <Text style={[styles.welcome, { color: 'white' }]}>¡BIENVENIDO!</Text>
-        <Text style={[styles.subtext, { color: 'white' }]}>Ingresa tu informacion para crear una cuenta</Text>
+      <View style={styles.textContainer}>
+        <Text style={[styles.welcome, { color: "white" }]}>¡BIENVENIDO!</Text>
+        <Text style={[styles.subtext, { color: "white" }]}>
+          Ingresa tu información para crear una cuenta
+        </Text>
       </View>
 
       <TextInput
-        style={[styles.input, {
-          backgroundColor: colors.card,
-          color: colors.text,
-          borderColor: colors.border
-        }]}
+        style={[
+          styles.input,
+          {
+            backgroundColor: colors.card,
+            color: colors.text,
+            borderColor: colors.border,
+          },
+        ]}
         placeholder="Ingresa tu nombre completo"
         placeholderTextColor={colors.textSecondary}
       />
 
       <TextInput
-        style={[styles.input, {
-          backgroundColor: colors.card,
-          color: colors.text,
-          borderColor: colors.border
-        }]}
+        style={[
+          styles.input,
+          {
+            backgroundColor: colors.card,
+            color: colors.text,
+            borderColor: colors.border,
+          },
+        ]}
         placeholder="Ingresa tu carrera"
         placeholderTextColor={colors.textSecondary}
         secureTextEntry
       />
 
-       <TextInput
-        style={[styles.input, {
+    <View
+      style={[
+        styles.input,
+        {
           backgroundColor: colors.card,
-          color: colors.text,
-          borderColor: colors.border
-        }]}
-        placeholder="Ingresa tu centro universitario"
-        placeholderTextColor={colors.textSecondary}
-        secureTextEntry
-      />
+          borderColor: colors.border,
+        },
+      ]}
+    >
+      <Text style={{ color: colors.text, paddingVertical: 14,   fontSize: 18 }}>
+        CUCEI
+      </Text>
+    </View>
 
       <TouchableOpacity
         style={[styles.button, { backgroundColor: 'red' }]}
@@ -97,7 +110,7 @@ welcome: {
   marginBottom: 5,
 },
 subtext: {
-  fontSize: 16,
+  fontSize: 17,
   textAlign: 'center',
 },
   input: {
@@ -106,6 +119,7 @@ subtext: {
     borderRadius: 8,
     paddingHorizontal: 15,
     marginBottom: 20,
+    fontSize: 17,
   },
   button: {
     height: 50,
@@ -125,4 +139,3 @@ subtext: {
   },
 });
 
-export default RegisterScreen;
