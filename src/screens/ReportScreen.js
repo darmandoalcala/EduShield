@@ -16,12 +16,10 @@ import HeaderBar from '../components/HeaderBar';
 const centers = ['CUCEI', 'CUAAD', 'CUCEV', 'CUCS'];
 
 const ReportScreen = ({ navigation }) => {
-  // Inicializas el estado al primer elemento del array
   const [selectedCenter, setSelectedCenter] = useState(centers[0]);
 
   const handleEditCenter = () => {
     console.log('Editar selección de centro universitario');
-    // Aquí, si lo deseas, puedes mostrar un modal u otra UI para editar.
   };
 
   const handleProfilePress = () => {
@@ -44,117 +42,57 @@ const ReportScreen = ({ navigation }) => {
     <View style={styles.container}>
       <HeaderBar navigation={navigation} showBackButton={true} />
 
-      {/* ----------------------- */}
-      {/* ScrollView con las nuevas secciones */}
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* ---------------------------------------------------
-             1) SECCIÓN: Combobox para "Seleccion de Centro Universitario"
-           --------------------------------------------------- */}
-      <Text style={styles.instructionAText}>
-          Selecciona tu centro universitario.
-        </Text>
-        
+        {/* 1) Centro Universitario fijo */}
+        <Text style={styles.instructionAText}>Centro Universitario asignado:</Text>
         <View style={styles.sectionBox}>
           <View style={styles.row}>
-            {/* Ícono placeholder (más adelante puedes reemplazarlo por <Icon> o <Image>) */}
             <Text style={styles.iconLeft}>🎓</Text>
-
             <View style={styles.pickerPlaceholder}>
-              <Text style={styles.pickerText}>CUCEI ▼</Text>
-
-        {/* Contenedor del Picker, ocupa el espacio central */}
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={selectedCenter}
-                onValueChange={(itemValue) => setSelectedCenter(itemValue)}
-                style={styles.picker}
-                dropdownIconColor="#FFF"  // para que la flecha salga blanca en Android
-                mode="dropdown"
-              >
-                <Picker.Item label="CUCEI" value="CUCEI" />
-                <Picker.Item label="CUAAD" value="CUAAD" />
-                <Picker.Item label="CUCEV" value="CUCEV" />
-                <Picker.Item label="CUCS" value="CUCS" />
-              </Picker>
+              <Text style={styles.pickerText}>CUCEI</Text>
             </View>
-
-            {/* Ícono de lápiz a la derecha */}
             <TouchableOpacity onPress={handleEditCenter} style={styles.iconSide}>
-              <Icon name="pencil-outline" size={20} color="#FFF" marginBottom = {10} marginLeft = {285}/>
-            </TouchableOpacity>
-
-            </View>
-          </View>
-        </View>
-
-        {/* ---------------------------------------------------
-             2) SECCIÓN: Fecha y hora con ícono lápiz a la izquierda
-           --------------------------------------------------- */}
-      <Text style={styles.instructionAText}>
-          Fecha y hora exacta del incidente.
-        </Text>
-
-          <View style={styles.sectionBox}>
-            <View style={styles.row}> 
-              {/* Ícono de calendario a la izquierda */}
-              <Icon name="calendar-outline" size={20} color="#FFF" style={styles.iconLeft}  marginTop = {10} />
-
-              {/* Texto de fecha/hora ocupa el resto del espacio */}
-              <Text style={styles.textInfo} marginTop = {8}>
-                02/11/2024, 07:30 PM
-                {/* Si usas estado: {dateTime} */}
-              </Text>
-            </View>
-          </View>
-
-        {/* ---------------------------------------------------
-             3) SECCIÓN: Descripción de los hechos
-           --------------------------------------------------- */}
-        <Text style={styles.instructionAText}>
-          Da un breve resumen de los hechos.
-        </Text>
-        <View style={styles.sectionBox}>
-          <View style={styles.rowWithSpace}>
-            {/* Ícono de alerta a la izquierda (solo diseño, sin Touchable) */}
-            <Icon
-              name="alert-circle-outline"
-              size={20}
-              color="#FFF"
-              style={styles.iconLeft}
-              marginBottom = {20}
-            />
-          {/* contenedor central: instrucción + campo editable */}
-          <View style={{ flex: 1, justifyContent: 'center' }}>
-            {/* texto de instrucción */}
-            <Text style={styles.instructionText}>
-              
-            </Text>
-
-            {/* TextInput centrado verticalmente */}
-            <TextInput
-              style={styles.textInputFlex}
-              placeholder="Escribe aqui..."
-              placeholderTextColor="#888"
-              multiline
-            />
-          </View>
-            {/* Ícono de lápiz a la derecha, dentro de Touchable para editar */}
-            <TouchableOpacity onPress={() => console.log('Editar descripción')}>
               <Icon
                 name="pencil-outline"
                 size={20}
                 color="#FFF"
-                style={styles.iconRight}
-                marginBottom = {20}
+                style={{ marginTop: 10, marginLeft: 310 }}
               />
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* ---------------------------------------------------
-             4) SECCIÓN: Botones de evidencia (Video y Foto)
-           --------------------------------------------------- */}
+        {/* 2) Fecha y hora del incidente */}
+        <Text style={styles.instructionAText}>Fecha y hora exacta del incidente.</Text>
+        <View style={styles.sectionBox}>
+          <View style={styles.row}>
+            <Icon name="calendar-outline" size={20} color="#FFF" style={styles.iconLeft} />
+            <Text style={styles.textInfo}>02/11/2024, 07:30 PM</Text>
+          </View>
+        </View>
+  
+        {/* 3) Descripción de los hechos */}
+        <Text style={styles.instructionAText}>Da un breve resumen de los hechos.</Text>
+        <View style={styles.sectionBox}>
+          <View style={styles.rowWithSpace}>
+            <Icon name="alert-circle-outline" size={20} color="#FFF" style={styles.iconLeft} />
+            <View style={{ flex: 1, justifyContent: 'center' }}>
+              <Text style={styles.instructionText}></Text>
+              <TextInput
+                style={styles.textInputFlex}
+                placeholder="Escribe aquí..."
+                placeholderTextColor="#888"
+                placeholderTextFontSize={20}
+                multiline
+              />
+            </View>
+            <TouchableOpacity onPress={() => console.log('Editar descripción')}>
+              <Icon name="pencil-outline" size={20} color="#FFF" style={styles.iconRight} />
+            </TouchableOpacity>
+          </View>
+        </View>
 
+        {/* 4) Botones de evidencia */}
         <View style={styles.sectionBox}>
           <View style={[styles.row, { justifyContent: 'space-between' }]}>
             <TouchableOpacity
@@ -176,12 +114,10 @@ const ReportScreen = ({ navigation }) => {
         </View>
 
         <Text style={styles.instructionAText}>
-          Cualquier evidencia queda respaldada por la ley de proteccion de datos.
+          Cualquier evidencia queda respaldada por la ley de protección de datos.
         </Text>
 
-        {/* ---------------------------------------------------
-             5) BOTÓN FINAL: Reporte de incidente
-           --------------------------------------------------- */}
+        {/* 5) Botón final */}
         <TouchableOpacity
           style={styles.sendButtonPlaceholder}
           onPress={() => console.log('Reporte enviado')}
@@ -190,10 +126,10 @@ const ReportScreen = ({ navigation }) => {
           <Text style={styles.iconRight}>⚠️</Text>
         </TouchableOpacity>
       </ScrollView>
-
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   // Contenedor principal con fondo negro
@@ -250,7 +186,7 @@ const styles = StyleSheet.create({
   },
   mensaje: {
     color: 'white',
-    fontSize: 25,
+    fontSize: 20,
     textAlign: 'center',
   },
 
@@ -361,7 +297,7 @@ const styles = StyleSheet.create({
   fontSize: 14,
   fontStyle: 'italic',
   marginBottom: 4,
-  marginTop: 75,
+  marginTop: 95,
 },
   textInputFlex: {
     flex: 1,
