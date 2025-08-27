@@ -30,6 +30,16 @@ export default function EditP() {
     console.log({ fullName, major, campus, gender });
   };
 
+    const handleOptionSelect = (option) => {
+      if (option !== 'CUCEI') {
+        alert('Solo hay opción para CUCEI como centro universitario');
+        return;
+      }
+      setSelectedCampus(option);
+      setShowDropdown(false);
+    };
+
+
   return (
     <View style={styles.container}>
       <HeaderBar navigation={navigation} showBackButton={false} />
@@ -81,7 +91,7 @@ export default function EditP() {
                   key={option}
                   style={styles.optionItem}
                   onPress={() => {
-                    setCampus(option);
+                    handleOptionSelect(option);
                     setShowDropdown(false);
                   }}
                 >
