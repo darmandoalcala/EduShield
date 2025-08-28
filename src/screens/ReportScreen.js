@@ -73,9 +73,9 @@ const ReportScreen = ({ navigation }) => {
   
         {/* 3) Descripción de los hechos */}
         <Text style={styles.instructionAText}>Da un breve resumen de los hechos.</Text>
-        <View style={styles.sectionBox}>
+        <View style={styles.sectionBoxes}>
           <View style={styles.rowWithSpace}>
-            <Icon name="alert-circle-outline" size={20} color="#FFF" style={styles.iconLeft} />
+            <Icon name="alert-circle-outline" size={20} color="#FFF" marginTop={-25} style={styles.iconLeft} />
             <View style={{ flex: 1, justifyContent: 'center' }}>
               <Text style={styles.instructionText}></Text>
               <TextInput
@@ -87,7 +87,7 @@ const ReportScreen = ({ navigation }) => {
               />
             </View>
             <TouchableOpacity onPress={() => console.log('Editar descripción')}>
-              <Icon name="pencil-outline" size={20} color="#FFF" style={styles.iconRight} />
+              <Icon name="pencil-outline" size={20} color="#FFF" marginTop={-25} style={styles.iconRight} />
             </TouchableOpacity>
           </View>
         </View>
@@ -220,7 +220,16 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginBottom: 15,
     width: '100%',
-    height:65,
+    height:55,
+  },
+  sectionBoxes: {
+    backgroundColor: '#1A1A1A',   // Gris muy oscuro
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 15,
+    width: '100%',
+    height:150,
   },
 
   instructionAText: {
@@ -297,13 +306,13 @@ const styles = StyleSheet.create({
   fontSize: 14,
   fontStyle: 'italic',
   marginBottom: 4,
-  marginTop: 95,
+  marginTop: 40,
 },
   textInputFlex: {
     flex: 1,
     color: '#FFF',
     fontSize: 15,
-    minHeight: 60,
+    minHeight:  50,
     textAlignVertical: 'center',  // Android
     textAlign: 'center',          // horizontal
 
@@ -349,10 +358,12 @@ const styles = StyleSheet.create({
     flex: 1,
     color: '#FFF',
     fontSize: 15,
-    minHeight: 60,
+    minHeight: 90,
     textAlignVertical: 'Top',
     padding: 0,
     marginHorizontal: 8,
+    marginTop:55,
+
   },
   iconRight: {
     marginLeft: 8,
