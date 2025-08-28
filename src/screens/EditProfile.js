@@ -20,6 +20,7 @@ export default function EditP() {
   const [campus, setCampus] = useState('CUCEI');
   const [gender, setGender] = useState('MASCULINO');
   const [showDropdown, setShowDropdown] = useState(false);
+
   const campusOptions = ['CUCEI', 'CUCEA', 'CUCS'];
 
   const handleAddPhoto = () => {
@@ -30,14 +31,14 @@ export default function EditP() {
     console.log({ fullName, major, campus, gender });
   };
 
-    const handleOptionSelect = (option) => {
-      if (option !== 'CUCEI') {
-        alert('Solo hay opción para CUCEI como centro universitario');
-        return;
-      }
-      setSelectedCampus(option);
-      setShowDropdown(false);
-    };
+  const handleOptionSelect = (option) => {
+    if (option !== 'CUCEI') {
+      alert('Solo hay opción para CUCEI como centro universitario');
+      return;
+    }
+    setCampus(option); // ✅ usar el setter correcto
+    setShowDropdown(false);
+  };
 
 
   return (
@@ -90,10 +91,7 @@ export default function EditP() {
                 <TouchableOpacity
                   key={option}
                   style={styles.optionItem}
-                  onPress={() => {
-                    handleOptionSelect(option);
-                    setShowDropdown(false);
-                  }}
+                  onPress={() => handleOptionSelect(option)} // ✅ ya no duplicas
                 >
                   <Text style={styles.optionText}>{option}</Text>
                 </TouchableOpacity>
