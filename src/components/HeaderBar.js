@@ -14,7 +14,7 @@ const HeaderBar = ({ showBackButton = true }) => {
         </TouchableOpacity>
       ) : (
         <View style={{ width: 24 }} />
-      )}<Text style={styles.title}>EDUSHIELD</Text><TouchableOpacity onPress={() => console.log('Perfil')}>
+      )}<Text style={styles.title}>EDUSHIELD</Text><TouchableOpacity onPress={() => navigation.navigate('EditP')}>
         <Image
           source={require('../../assets/icon.png')}
           style={styles.profileIcon}

@@ -31,41 +31,19 @@ const RegisterScreen2 = ({ navigation }) => {
         </Text>
       </View>
 
-      <View style={styles.genderContainer}>
-        <TouchableOpacity
-          style={[
-            styles.genderOption,
-            selectedGender === 'Masculino' && styles.genderOptionSelected,
-          ]}
-          onPress={() => setSelectedGender('Masculino')}
-        >
-          <Text
-            style={[
-              styles.genderText,
-              selectedGender === 'Masculino' && styles.genderTextSelected,
-            ]}
-          >
-            Masculino
-          </Text>
-        </TouchableOpacity>
+      <TextInput
+        style={[
+          styles.input,
+          {
+            backgroundColor: colors.card,
+            color: colors.text,
+            borderColor: colors.border,
+          },
+        ]}
+        placeholder="¿Cual es tu género?"
+        placeholderTextColor={colors.textSecondary}
+      />
 
-        <TouchableOpacity
-          style={[
-            styles.genderOption,
-            selectedGender === 'Femenino' && styles.genderOptionSelected,
-          ]}
-          onPress={() => setSelectedGender('Femenino')}
-        >
-          <Text
-            style={[
-              styles.genderText,
-              selectedGender === 'Femenino' && styles.genderTextSelected,
-            ]}
-          >
-            Femenino
-          </Text>
-        </TouchableOpacity>
-      </View>
 
       <TextInput
         style={[

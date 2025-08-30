@@ -100,44 +100,16 @@ export default function EditP() {
           )}
         </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Género *</Text>
-          <View style={styles.genderContainer}>
-            <TouchableOpacity
-              style={[
-                styles.genderButton,
-                gender === 'MASCULINO' && styles.genderSelected,
-              ]}
-              onPress={() => setGender('MASCULINO')}
-            >
-              <Text
-                style={[
-                  styles.genderText,
-                  gender === 'MASCULINO' && styles.genderTextSelected,
-                ]}
-              >
-                MASCULINO
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.genderButton,
-                gender === 'FEMENINO' && styles.genderSelected,
-              ]}
-              onPress={() => setGender('FEMENINO')}
-            >
-              <Text
-                style={[
-                  styles.genderText,
-                  gender === 'FEMENINO' && styles.genderTextSelected,
-                ]}
-              >
-                FEMENINO
-              </Text>
-            </TouchableOpacity>
-          </View>
+       <View style={styles.inputGroup}>
+          <Text style={styles.label}>Género</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Ingresa tu género"
+            placeholderTextColor="#aaa"
+            value={major}
+            onChangeText={setMajor}
+          />
         </View>
-
 
         <View style={styles.bottomButtonContainer}>
           <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
