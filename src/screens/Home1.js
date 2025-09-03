@@ -49,6 +49,11 @@ const Home1 = ({ navigation }) => {
         <Text style={styles.noteText}>
           Nota, una vez que se toque o se reporte, se enviará de inmediato una llamada de alerta y un SMS a los contactos cercanos y de emergencia. Puedes cancelarlo si la situación se resuelve.
         </Text>
+
+        <Pressable  onPress={() => navigation.navigate('Chatbot')} style={styles.reportButton}>
+            <Text style={styles.reportButtonText}>Ir al chatbot</Text>       
+        </Pressable>
+
       </ScrollView>
 
     </View>
