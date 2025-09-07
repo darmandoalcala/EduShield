@@ -22,6 +22,7 @@ import SeleccionarReporteScreen from '../screens/SeleccionarReporteScreen';
 import DetalleReporteScreen from '../screens/DetalleReporteScreen';
 import MisReporteScreen from '../screens/MisReporteScreen';
 import DetalleMisReporteScreen from '../screens/DetalleMisReporteScreen';
+import ChatbotScreen from '../screens/ChatbotScreen';
 
 
 
@@ -161,6 +162,7 @@ export default function AppNavigator() {
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="Register2" component={RegisterScreen2} />
       <Stack.Screen name="Home" component={Home1} />
+      <Stack.Screen name="Chatbot" component={ChatbotScreen} />
 
       {/* mas pantallas... */}
 
