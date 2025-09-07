@@ -163,6 +163,8 @@ export default function AppNavigator() {
       <Stack.Screen name="Register2" component={RegisterScreen2} />
       <Stack.Screen name="Home" component={Home1} />
       <Stack.Screen name="Chatbot" component={ChatbotScreen} />
+      <Stack.Screen name="EditP" component={EditProfile} />
+
 
       {/* mas pantallas... */}
 

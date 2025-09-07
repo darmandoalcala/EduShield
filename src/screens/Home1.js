@@ -11,6 +11,8 @@ import {
 } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import HeaderBar from '../components/HeaderBar';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+
 
 const Home1 = ({ navigation }) => {
   const { colors, isDark } = useTheme();
@@ -47,11 +49,12 @@ const Home1 = ({ navigation }) => {
         </Pressable>
 
         <Text style={styles.noteText}>
-          Nota, una vez que se toque o se reporte, se enviará de inmediato una llamada de alerta y un SMS a los contactos cercanos y de emergencia. Puedes cancelarlo si la situación se resuelve.
+          Nota, una vez que se toque o se reporte, se enviará de inmediato un SMS a los contactos cercanos y de emergencia. Puedes cancelarlo si la situación se resuelve.
         </Text>
 
         <Pressable  onPress={() => navigation.navigate('Chatbot')} style={styles.reportButton}>
-            <Text style={styles.reportButtonText}>Ir al chatbot</Text>       
+            <Text style={styles.reportButtonText}>Chat de ayuda</Text> 
+          <Icon name="robot" size={20} marginLeft={51} marginTop={5} color="white" />      
         </Pressable>
 
       </ScrollView>
@@ -66,7 +69,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'black', // Fondo negro respetado
   },
   scrollContainer: {
-    marginTop: 100,
+    marginTop: 50,
     paddingBottom: 100, // Espacio para el menú inferior
     alignItems: 'center',
   },
@@ -106,6 +109,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
     paddingHorizontal: 10,
+    marginBottom:20,
   },
 navBar: {
   flexDirection: 'row',
