@@ -1,62 +1,66 @@
 import React, { useState, useRef } from "react";
-import {
+import { 
   View,
   Text,
   TextInput,
   TouchableOpacity,
   FlatList,
   KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  Keyboard
+  Keyboard,
+  StyleSheet
 } from "react-native";
-import { classifyText } from "../ml/KeywordClassifier";
-import { botReply } from "../chatbot/Bot";
-import { useNavigation } from '@react-navigation/native';
-import HeaderBar from '../components/HeaderBar';
+import { useNavigation } from "@react-navigation/native";
+import HeaderBar from "../components/HeaderBar";
+import { classifyByBackend } from "../chatbot/api";
 
 export default function ChatbotScreen() {
-    const navigation = useNavigation();
+  const navigation = useNavigation();
   const [messages, setMessages] = useState([
     { id: "sys-1", role: "bot", text: "Hola, soy el asistente de EduShield. Cuéntame tu situación." }
   ]);
   const [input, setInput] = useState("");
   const flatListRef = useRef(null);
 
-  const onSend = () => {
+  const onSend = async () => {
     const trimmed = input.trim();
     if (!trimmed) return;
 
     const userMsg = { id: `u-${Date.now()}`, role: "user", text: trimmed };
-    const category = classifyText(trimmed);
-    const reply = botReply(category);
-    const botMsg = { id: `b-${Date.now()}`, role: "bot", text: `${reply}\n\n(Detectado: ${category})` };
-
-    setMessages(prev => [botMsg, userMsg, ...prev]);
+    setMessages(prev => [userMsg, ...prev]);
     setInput("");
 
-    // Desplaza el FlatList al último mensaje
+    try {
+      const data = await classifyByBackend(trimmed); // llama al backend
+      const botMsg = { 
+        id: `b-${Date.now()}`, 
+        role: "bot", 
+        text: `${data.reply}\n\n(Detectado: ${data.category})` 
+      };
+      setMessages(prev => [botMsg, ...prev]);
+    } catch (err) {
+      const errorMsg = { 
+        id: `b-${Date.now()}`, 
+        role: "bot", 
+        text: "⚠️ No pude conectar con el servidor. Intenta de nuevo." 
+      };
+      setMessages(prev => [errorMsg, ...prev]);
+    }
+
     setTimeout(() => {
       flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
     }, 100);
-
-    // Cierra el teclado
     Keyboard.dismiss();
   };
 
   const renderItem = ({ item }) => (
     <View style={[styles.bubble, item.role === "user" ? styles.user : styles.bot]}>
-      <Text style={[styles.text, item.role === "user" ? { color: "#fff" } : { color: "#fff" }]}>{item.text}</Text>
+      <Text style={[styles.text, { color: "#fff" }]}>{item.text}</Text>
     </View>
   );
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior="padding" 
-  keyboardVerticalOffset={0} 
-    >
-        <HeaderBar navigation={navigation} showBackButton={false} />
+    <KeyboardAvoidingView style={styles.container} behavior="padding" keyboardVerticalOffset={0}>
+      <HeaderBar navigation={navigation} showBackButton={false} />
       <FlatList
         ref={flatListRef}
         style={styles.list}
@@ -67,7 +71,6 @@ export default function ChatbotScreen() {
         contentContainerStyle={{ paddingBottom: 10 }}
         keyboardShouldPersistTaps="handled"
       />
-
       <View style={styles.inputBar}>
         <TextInput
           style={styles.input}
@@ -83,6 +86,7 @@ export default function ChatbotScreen() {
     </KeyboardAvoidingView>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "black" },
