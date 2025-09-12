@@ -8,7 +8,7 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
+// import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import HeaderBar from '../components/HeaderBar';
@@ -43,36 +43,12 @@ const AlertScreen = ({ navigation }) => {
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.mapSection}>
-          <MapView
-            provider={PROVIDER_GOOGLE}
-            style={styles.map}
-            region={
-              location
-                ? {
-                    latitude: location.latitude,
-                    longitude: location.longitude,
-                    latitudeDelta: 0.01,
-                    longitudeDelta: 0.01,
-                  }
-                : {
-                    latitude: 20.6976,
-                    longitude: -103.3468,
-                    latitudeDelta: 0.01,
-                    longitudeDelta: 0.01,
-                  }
-            }
-            showsUserLocation
-          >
-            {location && (
-              <Marker
-                coordinate={{
-                  latitude: location.latitude,
-                  longitude: location.longitude,
-                }}
-                title="Tu ubicación"
-              />
-            )}
-          </MapView>
+          <View style={[styles.map, { backgroundColor: '#333', justifyContent: 'center', alignItems: 'center' }]}>
+            <Text style={{ color: 'white', fontSize: 16 }}>Mapa temporal</Text>
+            <Text style={{ color: '#666', fontSize: 12, marginTop: 5 }}>
+              {location ? `${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}` : 'Obteniendo ubicación...'}
+            </Text>
+          </View>
         </View>
 
         <View style={styles.buttonRow}>
@@ -95,6 +71,7 @@ const AlertScreen = ({ navigation }) => {
     </View>
   );
 };
+
 
 // ... tus estilos siguen igual ...
 
