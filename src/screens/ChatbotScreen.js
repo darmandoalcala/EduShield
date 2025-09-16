@@ -60,7 +60,7 @@ export default function ChatbotScreen() {
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding" keyboardVerticalOffset={0}>
-      <HeaderBar navigation={navigation} showBackButton={false} />
+      <HeaderBar navigation={navigation} showBackButton={true} />
       <FlatList
         ref={flatListRef}
         style={styles.list}

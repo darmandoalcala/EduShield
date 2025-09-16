@@ -43,7 +43,7 @@ export default function EditP() {
 
   return (
     <View style={styles.container}>
-      <HeaderBar navigation={navigation} showBackButton={false} />
+      <HeaderBar navigation={navigation} showBackButton={true} />
 
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <TouchableOpacity style={styles.avatarContainer} onPress={handleAddPhoto}>
