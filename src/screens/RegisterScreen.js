@@ -1,3 +1,5 @@
+// RegisterScreen 
+
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TextInput, Image, TouchableOpacity, Alert, ToastAndroid, Platform } from "react-native";
 import { Picker } from "@react-native-picker/picker";

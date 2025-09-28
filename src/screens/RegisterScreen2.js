@@ -1,3 +1,7 @@
+// RegisterScreen2.js
+
+// RegisterScreen2.js - SOLO CAMBIOS DE LÓGICA API
+
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -11,17 +15,50 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActionSheetIOS,
+  ActivityIndicator, // 👈 AGREGAR ESTO
 } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
-// Importar para manejo de imágenes (necesitarás instalar estas librerías)
-// import { launchImageLibrary, launchCamera, MediaType } from 'react-native-image-picker';
-// import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
+
+// AGREGAR ESTE SERVICIO API
+//const API_BASE_URL = 'http://10.0.2.2:3001'; // Para emulador Android
+//const API_BASE_URL = 'http://localhost:3001'; // Para iOS simulator
+//const API_BASE_URL = 'http://192.168.1.100:3001'; // Para dispositivo físico
+const API_BASE_URL = 'http://10.6.5.87:3001'
+
+const ApiService = {
+  async registerUser(userData) {
+    try {
+      console.log('🚀 Enviando datos de registro:', userData);
+      
+      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+
+      const data = await response.json();
+      console.log('📥 Respuesta del servidor:', data);
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Error en el registro');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('❌ Error en registerUser:', error);
+      throw error;
+    }
+  }
+};
 
 const RegisterScreen2 = ({ navigation, route }) => {
   const { colors } = useTheme();
-  const { userData } = route.params || {}; // Datos del RegisterScreen anterior
+  const { userData } = route.params || {}; 
   
-  // Estados para los campos del formulario
+  // Estados existentes (sin cambios)
   const [nombre, setNombre] = useState('');
   const [apellido, setApellido] = useState('');
   const [codigoEstudiante, setCodigoEstudiante] = useState('');
@@ -32,8 +69,9 @@ const RegisterScreen2 = ({ navigation, route }) => {
   const [profileImage, setProfileImage] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // 👈 NUEVO estado
 
-  // Opciones de género
+  // Opciones de género (sin cambios)
   const genderOptions = [
     { label: 'Masculino', value: 'MASCULINO' },
     { label: 'Femenino', value: 'FEMENINO' },
@@ -41,66 +79,46 @@ const RegisterScreen2 = ({ navigation, route }) => {
     { label: 'Prefiero no decir', value: 'PREFIERO_NO_DECIR' }
   ];
 
-  // Validación de código de estudiante (asumiendo formato numérico)
+  // Validaciones (sin cambios)
   const validateCodigoEstudiante = (codigo) => {
-    const codigoRegex = /^[0-9]{9}$/; // Asumiendo 9 dígitos
+    const codigoRegex = /^[0-9]{9}$/;
     return codigoRegex.test(codigo);
   };
 
-  // Validación de teléfono mexicano
   const validateTelefono = (telefono) => {
-    const telefonoRegex = /^[0-9]{10}$/; // 10 dígitos
+    const telefonoRegex = /^[0-9]{10}$/;
     return telefonoRegex.test(telefono);
   };
 
-  // Validación de contraseña segura (más flexible)
   const validatePassword = (password) => {
-    // Al menos 8 caracteres, una mayúscula, una minúscula y un número
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/;
     return passwordRegex.test(password);
   };
 
-  // Función para seleccionar imagen
+  // Funciones de imagen (sin cambios)
   const selectImage = () => {
-    const options = [
-      'Tomar foto',
-      'Elegir de galería',
-      'Cancelar'
-    ];
+    const options = ['Tomar foto', 'Elegir de galería', 'Cancelar'];
 
     if (Platform.OS === 'ios') {
       ActionSheetIOS.showActionSheetWithOptions(
-        {
-          options: options,
-          cancelButtonIndex: 2,
-        },
+        { options: options, cancelButtonIndex: 2 },
         (buttonIndex) => {
-          if (buttonIndex === 0) {
-            openCamera();
-          } else if (buttonIndex === 1) {
-            openGallery();
-          }
+          if (buttonIndex === 0) openCamera();
+          else if (buttonIndex === 1) openGallery();
         }
       );
     } else {
-      Alert.alert(
-        'Seleccionar imagen',
-        'Elige una opción',
-        [
-          { text: 'Tomar foto', onPress: openCamera },
-          { text: 'Elegir de galería', onPress: openGallery },
-          { text: 'Cancelar', style: 'cancel' }
-        ]
-      );
+      Alert.alert('Seleccionar imagen', 'Elige una opción', [
+        { text: 'Tomar foto', onPress: openCamera },
+        { text: 'Elegir de galería', onPress: openGallery },
+        { text: 'Cancelar', style: 'cancel' }
+      ]);
     }
   };
 
-  // Función para abrir cámara (simulada)
   const openCamera = () => {
     console.log('Abrir cámara');
     Alert.alert('Función no implementada', 'Esta función requiere react-native-image-picker');
-    
-    // Simulación de imagen seleccionada
     setProfileImage({
       uri: 'https://via.placeholder.com/150x150/red/white?text=FOTO',
       type: 'image/jpeg',
@@ -108,12 +126,9 @@ const RegisterScreen2 = ({ navigation, route }) => {
     });
   };
 
-  // Función para abrir galería (simulada)
   const openGallery = () => {
     console.log('Abrir galería');
     Alert.alert('Función no implementada', 'Esta función requiere react-native-image-picker');
-    
-    // Simulación de imagen seleccionada
     setProfileImage({
       uri: 'https://via.placeholder.com/150x150/blue/white?text=GALERIA',
       type: 'image/jpeg',
@@ -121,16 +136,11 @@ const RegisterScreen2 = ({ navigation, route }) => {
     });
   };
 
-  // Función para remover imagen
   const removeImage = () => {
-    Alert.alert(
-      'Remover foto',
-      '¿Estás seguro de que quieres remover la foto de perfil?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Remover', style: 'destructive', onPress: () => setProfileImage(null) }
-      ]
-    );
+    Alert.alert('Remover foto', '¿Estás seguro de que quieres remover la foto de perfil?', [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Remover', style: 'destructive', onPress: () => setProfileImage(null) }
+    ]);
   };
 
   const renderGenderOption = (option) => (
@@ -159,8 +169,9 @@ const RegisterScreen2 = ({ navigation, route }) => {
     </TouchableOpacity>
   );
 
+  // 👈 FUNCIÓN PRINCIPAL MODIFICADA PARA API
   const handleRegister = async () => {
-    // Validaciones
+    // Validaciones locales (sin cambios)
     if (!nombre.trim()) {
       Alert.alert('Error', 'El nombre es obligatorio.');
       return;
@@ -212,10 +223,7 @@ const RegisterScreen2 = ({ navigation, route }) => {
     }
 
     if (!validatePassword(password)) {
-      Alert.alert(
-        'Error', 
-        'La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.'
-      );
+      Alert.alert('Error', 'La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.');
       return;
     }
 
@@ -224,44 +232,59 @@ const RegisterScreen2 = ({ navigation, route }) => {
       return;
     }
 
-    // Preparar datos completos para enviar al backend
+    // 👈 PREPARAR DATOS SEGÚN EL FORMATO QUE ESPERA EL BACKEND
     const completeUserData = {
-      // Datos del RegisterScreen anterior
-      email: userData?.email || '',
-      centro: userData?.centro || 'CUCEI',
-      // Datos del RegisterScreen2 actual
-      nombre: nombre.trim(),
-      apellido: apellido.trim(),
       codigo_estudiante: codigoEstudiante.trim(),
-      telefono: telefono.trim(),
+      nombre_completo: `${nombre.trim()} ${apellido.trim()}`, // ¡IMPORTANTE! El backend espera esto
+      email: userData?.email || '',
       password: password,
       sexo: selectedGender,
-      // Datos por defecto
-      rol_id: 1,
-      centro_id: 1,
-      foto_perfil: profileImage ? profileImage.uri : null,
+      telefono: telefono.trim(),
     };
 
-    try {
-      console.log('Datos para enviar al backend:', completeUserData);
-      
-      Alert.alert(
-        'Registro exitoso',
-        '¡Tu cuenta ha sido creada correctamente!',
-        [
-          {
-            text: 'Continuar',
-            onPress: () => navigation.replace('MainApp')
-          }
-        ]
-      );
+    console.log('📤 Datos para enviar:', completeUserData);
 
+    // 👈 LLAMADA A LA API
+    setIsLoading(true);
+
+    try {
+      const response = await ApiService.registerUser(completeUserData);
+      
+      if (response.success) {
+        Alert.alert(
+          '🎉 ¡Registro exitoso!',
+          `¡Bienvenido ${nombre}! Tu cuenta ha sido creada correctamente.`,
+          [
+            {
+              text: 'Continuar',
+              onPress: () => {
+                // Por ahora navegar de vuelta al login
+                navigation.navigate('LoginScreen'); // o 'MainApp' si tienes esa pantalla
+              }
+            }
+          ]
+        );
+      }
     } catch (error) {
-      console.error('Error en registro:', error);
-      Alert.alert('Error', 'Hubo un problema al crear tu cuenta. Intenta nuevamente.');
+      console.error('❌ Error completo:', error);
+      
+      let errorMessage = 'Hubo un problema al crear tu cuenta. Intenta nuevamente.';
+      
+      if (error.message.includes('fetch')) {
+        errorMessage = 'No se pudo conectar al servidor. Verifica tu conexión a internet.';
+      } else if (error.message.includes('ya existe')) {
+        errorMessage = 'Ya existe una cuenta con este email o código estudiantil.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      Alert.alert('Error', errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  // 👈 TODO EL RESTO DEL COMPONENTE SIN CAMBIOS, SOLO AGREGAMOS isLoading DONDE SEA NECESARIO
   return (
     <KeyboardAvoidingView 
       style={styles.container} 
@@ -299,6 +322,7 @@ const RegisterScreen2 = ({ navigation, route }) => {
           <TouchableOpacity 
             style={styles.imageSelector}
             onPress={selectImage}
+            disabled={isLoading} // 👈 Deshabilitar mientras carga
           >
             {profileImage ? (
               <Image 
@@ -307,12 +331,8 @@ const RegisterScreen2 = ({ navigation, route }) => {
               />
             ) : (
               <View style={[styles.imagePlaceholder, { backgroundColor: colors.card, borderColor: colors.border }]}>
-                <Text style={[styles.imagePlaceholderText, { color: colors.text }]}>
-                  📷
-                </Text>
-                <Text style={[styles.imagePlaceholderSubtext, { color: colors.text }]}>
-                  Toca para agregar
-                </Text>
+                <Text style={[styles.imagePlaceholderText, { color: colors.text }]}>📷</Text>
+                <Text style={[styles.imagePlaceholderSubtext, { color: colors.text }]}>Toca para agregar</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -321,22 +341,16 @@ const RegisterScreen2 = ({ navigation, route }) => {
             <TouchableOpacity 
               style={styles.removeImageButton}
               onPress={removeImage}
+              disabled={isLoading} // 👈 Deshabilitar mientras carga
             >
               <Text style={styles.removeImageText}>❌ Remover foto</Text>
             </TouchableOpacity>
           )}
         </View>
 
-        {/* NOMBRE COMPLETO */}
+        {/* INPUTS - Solo agregar editable={!isLoading} */}
         <TextInput
-          style={[
-            styles.input,
-            {
-              backgroundColor: colors.card,
-              color: colors.text,
-              borderColor: colors.border,
-            },
-          ]}
+          style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]}
           placeholder="Nombre completo"
           placeholderTextColor={colors.textSecondary}
           value={nombre}
@@ -344,18 +358,11 @@ const RegisterScreen2 = ({ navigation, route }) => {
           maxLength={100}
           autoCapitalize="words"
           returnKeyType="next"
+          editable={!isLoading} // 👈
         />
 
-        {/* APELLIDO */}
         <TextInput
-          style={[
-            styles.input,
-            {
-              backgroundColor: colors.card,
-              color: colors.text,
-              borderColor: colors.border,
-            },
-          ]}
+          style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]}
           placeholder="Apellidos"
           placeholderTextColor={colors.textSecondary}
           value={apellido}
@@ -363,18 +370,11 @@ const RegisterScreen2 = ({ navigation, route }) => {
           maxLength={100}
           autoCapitalize="words"
           returnKeyType="next"
+          editable={!isLoading} // 👈
         />
 
-        {/* CÓDIGO DE ESTUDIANTE */}
         <TextInput
-          style={[
-            styles.input,
-            {
-              backgroundColor: colors.card,
-              color: colors.text,
-              borderColor: colors.border,
-            },
-          ]}
+          style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]}
           placeholder="Código de estudiante (9 dígitos)"
           placeholderTextColor={colors.textSecondary}
           value={codigoEstudiante}
@@ -382,18 +382,11 @@ const RegisterScreen2 = ({ navigation, route }) => {
           maxLength={9}
           keyboardType="numeric"
           returnKeyType="next"
+          editable={!isLoading} // 👈
         />
 
-        {/* TELÉFONO */}
         <TextInput
-          style={[
-            styles.input,
-            {
-              backgroundColor: colors.card,
-              color: colors.text,
-              borderColor: colors.border,
-            },
-          ]}
+          style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]}
           placeholder="Teléfono (10 dígitos)"
           placeholderTextColor={colors.textSecondary}
           value={telefono}
@@ -401,6 +394,7 @@ const RegisterScreen2 = ({ navigation, route }) => {
           maxLength={10}
           keyboardType="phone-pad"
           returnKeyType="next"
+          editable={!isLoading} // 👈
         />
 
         {/* SELECTOR DE GÉNERO */}
@@ -412,15 +406,7 @@ const RegisterScreen2 = ({ navigation, route }) => {
         {/* CONTRASEÑA */}
         <View style={styles.passwordContainer}>
           <TextInput
-            style={[
-              styles.input,
-              {
-                backgroundColor: colors.card,
-                color: colors.text,
-                borderColor: colors.border,
-                paddingRight: 50,
-              },
-            ]}
+            style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border, paddingRight: 50 }]}
             placeholder="Contraseña"
             placeholderTextColor={colors.textSecondary}
             value={password}
@@ -428,10 +414,12 @@ const RegisterScreen2 = ({ navigation, route }) => {
             maxLength={255}
             secureTextEntry={!showPassword}
             returnKeyType="next"
+            editable={!isLoading} // 👈
           />
           <TouchableOpacity
             style={styles.eyeButton}
             onPress={() => setShowPassword(!showPassword)}
+            disabled={isLoading} // 👈
           >
             <Text style={[styles.eyeText, { color: colors.text }]}>
               {showPassword ? '🙈' : '👁️'}
@@ -442,15 +430,7 @@ const RegisterScreen2 = ({ navigation, route }) => {
         {/* CONFIRMAR CONTRASEÑA */}
         <View style={styles.passwordContainer}>
           <TextInput
-            style={[
-              styles.input,
-              {
-                backgroundColor: colors.card,
-                color: colors.text,
-                borderColor: colors.border,
-                paddingRight: 50,
-              },
-            ]}
+            style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border, paddingRight: 50 }]}
             placeholder="Confirmar contraseña"
             placeholderTextColor={colors.textSecondary}
             value={confirmPassword}
@@ -458,10 +438,12 @@ const RegisterScreen2 = ({ navigation, route }) => {
             maxLength={255}
             secureTextEntry={!showConfirmPassword}
             returnKeyType="done"
+            editable={!isLoading} // 👈
           />
           <TouchableOpacity
             style={styles.eyeButton}
             onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+            disabled={isLoading} // 👈
           >
             <Text style={[styles.eyeText, { color: colors.text }]}>
               {showConfirmPassword ? '🙈' : '👁️'}
@@ -479,21 +461,26 @@ const RegisterScreen2 = ({ navigation, route }) => {
           </Text>
         </View>
 
-        {/* BOTÓN REGISTRARSE */}
+        {/* 👈 BOTÓN CON LOADING */}
         <TouchableOpacity
           style={[
             styles.button, 
             { 
               backgroundColor: 'red',
-              opacity: (nombre && apellido && codigoEstudiante && telefono && selectedGender && password && confirmPassword) ? 1 : 0.6
+              opacity: (nombre && apellido && codigoEstudiante && telefono && selectedGender && password && confirmPassword && !isLoading) ? 1 : 0.6
             }
           ]}
           onPress={handleRegister}
-          disabled={!(nombre && apellido && codigoEstudiante && telefono && selectedGender && password && confirmPassword)}
+          disabled={!(nombre && apellido && codigoEstudiante && telefono && selectedGender && password && confirmPassword) || isLoading}
         >
-          <Text style={[styles.buttonText, { color: 'white' }]}>
-            Regístrate
-          </Text>
+          {isLoading ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <ActivityIndicator size="small" color="white" style={{ marginRight: 8 }} />
+              <Text style={[styles.buttonText, { color: 'white' }]}>Registrando...</Text>
+            </View>
+          ) : (
+            <Text style={[styles.buttonText, { color: 'white' }]}>Regístrate</Text>
+          )}
         </TouchableOpacity>
 
         {/* INDICADOR DE PROGRESO */}
@@ -501,14 +488,13 @@ const RegisterScreen2 = ({ navigation, route }) => {
           <View style={styles.progressBar}>
             <View style={[styles.progressFill, { width: '66%' }]} />
           </View>
-          <Text style={[styles.progressText, { color: 'white' }]}>
-            Paso 2 de 3
-          </Text>
+          <Text style={[styles.progressText, { color: 'white' }]}>Paso 2 de 3</Text>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
