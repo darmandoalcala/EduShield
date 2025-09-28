@@ -1,3 +1,5 @@
+// backend2/controllers/authController.js
+
 const bcrypt = require('bcryptjs');
 const Database = require('../config/database');
 
