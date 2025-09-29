@@ -1,19 +1,52 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Image, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Image, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
+
+// URL del backend en Codespaces
+const API_BASE_URL = 'https://symmetrical-acorn-45pj6px5rr9hqvwv-3001.app.github.dev';
+
+const ApiService = {
+  async loginUser(credentials) {
+    try {
+      console.log('🚀 Enviando credenciales de login:', { email: credentials.email });
+
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(credentials),
+      });
+
+      const data = await response.json();
+      console.log('📥 Respuesta del servidor:', data);
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error en el login');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('❌ Error en loginUser:', error);
+      throw error;
+    }
+  }
+};
 
 const LoginScreen = ({ navigation }) => {
   const { colors } = useTheme();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const validarCorreoUDG = (correo) => {
-    const regex = /^[a-zA-Z0-9._%+-]+@alumnos\.udg\.mx$/;       //Expresion regular para "@alumnos.udg.mx"
+    const regex = /^[a-zA-Z0-9._%+-]+@alumnos\.udg\.mx$/;
     return regex.test(correo);
   };
 
-  const manejarIngreso = () => {
+  const manejarIngreso = async () => {
     if (!validarCorreoUDG(email)) {
       Alert.alert('Correo inválido', 'Debes usar un correo institucional (@alumnos.udg.mx)');
       return;
@@ -24,13 +57,47 @@ const LoginScreen = ({ navigation }) => {
       return;
     }
 
-    // Si pasa validación, navega a MainApp
-    navigation.replace("MainApp");
+    // Preparar credenciales
+    const credentials = {
+      email: email.trim().toLowerCase(),
+      password: password,
+    };
+
+    setIsLoading(true);
+
+    try {
+      const response = await ApiService.loginUser(credentials);
+
+      if (response.success) {
+        console.log('✅ Login exitoso:', response.data);
+
+        // Si pasa validación del backend, navega a MainApp
+        navigation.replace("MainApp", {
+          user: response.data
+        });
+      }
+    } catch (error) {
+      console.error('❌ Error en login:', error);
+
+      let errorMessage = 'Hubo un problema al iniciar sesión. Intenta nuevamente.';
+
+      if (error.message.includes('fetch')) {
+        errorMessage = 'No se pudo conectar al servidor. Verifica tu conexión a internet.';
+      } else if (error.message.includes('Credenciales inválidas')) {
+        errorMessage = 'Email o contraseña incorrectos. Por favor verifica tus datos.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      Alert.alert('Error de inicio de sesión', errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <View style={[styles.container, { backgroundColor: 'black' }]}>
-        <View style={styles.headerContainer}>
+      <View style={styles.headerContainer}>
         <Text style={[styles.title, { color: 'white' }]}>EDUSHIELD</Text>
         <Image
           source={require('../../assets/edushield-high-resolution-logo-transparent (1).png')}
@@ -56,6 +123,7 @@ const LoginScreen = ({ navigation }) => {
         autoCapitalize="none"
         value={email}
         onChangeText={setEmail}
+        editable={!isLoading}
       />
 
       <TextInput
@@ -69,16 +137,31 @@ const LoginScreen = ({ navigation }) => {
         secureTextEntry
         value={password}
         onChangeText={setPassword}
+        editable={!isLoading}
       />
 
       <TouchableOpacity
-        style={[styles.button, { backgroundColor: 'red' }]}
-        onPress={manejarIngreso}                              //VALIDA INICIO DE SESION
+        style={[styles.button, {
+          backgroundColor: 'red',
+          opacity: isLoading ? 0.6 : 1
+        }]}
+        onPress={manejarIngreso}
+        disabled={isLoading}
       >
-        <Text style={[styles.buttonText, { color: colors.buttonText || 'white' }]}>Ingresar</Text>
+        {isLoading ? (
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <ActivityIndicator size="small" color="white" style={{ marginRight: 8 }} />
+            <Text style={[styles.buttonText, { color: 'white' }]}>Iniciando...</Text>
+          </View>
+        ) : (
+            <Text style={[styles.buttonText, { color: colors.buttonText || 'white' }]}>Ingresar</Text>
+        )}
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.goBack()}>
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        disabled={isLoading}
+      >
         <Text style={[styles.backText, { color: 'white' }]}>Olvide mi contraseña</Text>
       </TouchableOpacity>
     </View>

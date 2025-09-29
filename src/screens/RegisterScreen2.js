@@ -1,5 +1,3 @@
-// RegisterScreen2.js
-
 // RegisterScreen2.js - SOLO CAMBIOS DE LÓGICA API
 
 import React, { useState, useEffect } from 'react';
@@ -19,17 +17,15 @@ import {
 } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 
-// AGREGAR ESTE SERVICIO API
-//const API_BASE_URL = 'http://10.0.2.2:3001'; // Para emulador Android
-//const API_BASE_URL = 'http://localhost:3001'; // Para iOS simulator
-//const API_BASE_URL = 'http://192.168.1.100:3001'; // Para dispositivo físico
-const API_BASE_URL = 'http://10.6.5.87:3001'
+// 👈 AGREGAR ESTE SERVICIO API
+// Backend en GitHub Codespaces
+const API_BASE_URL = 'https://symmetrical-acorn-45pj6px5rr9hqvwv-3001.app.github.dev';
 
 const ApiService = {
   async registerUser(userData) {
     try {
       console.log('🚀 Enviando datos de registro:', userData);
-      
+
       const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
@@ -41,7 +37,7 @@ const ApiService = {
 
       const data = await response.json();
       console.log('📥 Respuesta del servidor:', data);
-      
+
       if (!response.ok) {
         throw new Error(data.message || 'Error en el registro');
       }
@@ -56,8 +52,8 @@ const ApiService = {
 
 const RegisterScreen2 = ({ navigation, route }) => {
   const { colors } = useTheme();
-  const { userData } = route.params || {}; 
-  
+  const { userData } = route.params || {};
+
   // Estados existentes (sin cambios)
   const [nombre, setNombre] = useState('');
   const [apellido, setApellido] = useState('');
@@ -249,7 +245,7 @@ const RegisterScreen2 = ({ navigation, route }) => {
 
     try {
       const response = await ApiService.registerUser(completeUserData);
-      
+
       if (response.success) {
         Alert.alert(
           '🎉 ¡Registro exitoso!',
@@ -259,7 +255,7 @@ const RegisterScreen2 = ({ navigation, route }) => {
               text: 'Continuar',
               onPress: () => {
                 // Por ahora navegar de vuelta al login
-                navigation.navigate('LoginScreen'); // o 'MainApp' si tienes esa pantalla
+                navigation.navigate('Login'); // o 'MainApp' si tienes esa pantalla
               }
             }
           ]
@@ -267,9 +263,9 @@ const RegisterScreen2 = ({ navigation, route }) => {
       }
     } catch (error) {
       console.error('❌ Error completo:', error);
-      
+
       let errorMessage = 'Hubo un problema al crear tu cuenta. Intenta nuevamente.';
-      
+
       if (error.message.includes('fetch')) {
         errorMessage = 'No se pudo conectar al servidor. Verifica tu conexión a internet.';
       } else if (error.message.includes('ya existe')) {
@@ -277,7 +273,7 @@ const RegisterScreen2 = ({ navigation, route }) => {
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       Alert.alert('Error', errorMessage);
     } finally {
       setIsLoading(false);
@@ -286,11 +282,11 @@ const RegisterScreen2 = ({ navigation, route }) => {
 
   // 👈 TODO EL RESTO DEL COMPONENTE SIN CAMBIOS, SOLO AGREGAMOS isLoading DONDE SEA NECESARIO
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
+    <KeyboardAvoidingView
+      style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView 
+      <ScrollView
         style={[styles.scrollContainer, { backgroundColor: 'black' }]}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -318,15 +314,15 @@ const RegisterScreen2 = ({ navigation, route }) => {
           <Text style={[styles.sectionTitle, { color: 'white', textAlign: 'center' }]}>
             Foto de perfil (opcional)
           </Text>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={styles.imageSelector}
             onPress={selectImage}
             disabled={isLoading} // 👈 Deshabilitar mientras carga
           >
             {profileImage ? (
-              <Image 
-                source={{ uri: profileImage.uri }} 
+              <Image
+                source={{ uri: profileImage.uri }}
                 style={styles.profileImagePreview}
               />
             ) : (
@@ -338,7 +334,7 @@ const RegisterScreen2 = ({ navigation, route }) => {
           </TouchableOpacity>
 
           {profileImage && (
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.removeImageButton}
               onPress={removeImage}
               disabled={isLoading} // 👈 Deshabilitar mientras carga
@@ -464,8 +460,8 @@ const RegisterScreen2 = ({ navigation, route }) => {
         {/* 👈 BOTÓN CON LOADING */}
         <TouchableOpacity
           style={[
-            styles.button, 
-            { 
+            styles.button,
+            {
               backgroundColor: 'red',
               opacity: (nombre && apellido && codigoEstudiante && telefono && selectedGender && password && confirmPassword && !isLoading) ? 1 : 0.6
             }
@@ -494,7 +490,6 @@ const RegisterScreen2 = ({ navigation, route }) => {
     </KeyboardAvoidingView>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {
