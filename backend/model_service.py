@@ -62,3 +62,15 @@ def predict_category(text: str) -> str:
     pad = pad_sequences(seq, maxlen=MAX_LEN)
     probs = _model.predict(pad, verbose=0)[0]
     return _encoder.inverse_transform([np.argmax(probs)])[0]
+
+# model_service.py
+def predict_category(text: str) -> str:
+    t = text.lower()
+    if any(p in t for p in ["robo", "cartera", "asaltaron", "me robaron"]):
+        return "robo"
+    elif any(p in t for p in ["acoso", "acosaron", "hostigamiento", "molestar"]):
+        return "acoso"
+    elif any(p in t for p in ["vandalismo", "grafiti", "rayaron", "pared"]):
+        return "vandalismo"
+    else:
+        return "otro"

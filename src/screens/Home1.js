@@ -44,9 +44,13 @@ const Home1 = ({ navigation }) => {
         <View style={{ height: 30 }} />
         <Text style={styles.separator}>ó</Text>
 
-        <Pressable onPress={() => navigation.navigate('Report')} style={styles.reportButton}>
-          <Text style={styles.reportButtonText}>Reportar un incidente</Text>
-        </Pressable>
+
+        <Pressable 
+          onPress={() => navigation.navigate("Inicio", { screen: "Report" })}
+          style={styles.reportButton}
+        >
+        <Text style={styles.reportButtonText}>Reportar un incidente</Text>
+      </Pressable>
 
         <Text style={styles.noteText}>
           Nota, una vez que se toque o se reporte, se enviará de inmediato un SMS a los contactos cercanos y de emergencia. Puedes cancelarlo si la situación se resuelve.
