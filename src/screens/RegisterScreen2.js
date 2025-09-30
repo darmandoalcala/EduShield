@@ -19,36 +19,7 @@ import { useTheme } from '../theme/ThemeContext';
 
 // 👈 AGREGAR ESTE SERVICIO API
 // Backend en GitHub Codespaces
-const API_BASE_URL = 'https://symmetrical-acorn-45pj6px5rr9hqvwv-3001.app.github.dev';
-
-const ApiService = {
-  async registerUser(userData) {
-    try {
-      console.log('🚀 Enviando datos de registro:', userData);
-
-      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify(userData),
-      });
-
-      const data = await response.json();
-      console.log('📥 Respuesta del servidor:', data);
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Error en el registro');
-      }
-
-      return data;
-    } catch (error) {
-      console.error('❌ Error en registerUser:', error);
-      throw error;
-    }
-  }
-};
+import { API_BASE_URL, ApiService } from '../config/api';
 
 const RegisterScreen2 = ({ navigation, route }) => {
   const { colors } = useTheme();
@@ -254,8 +225,11 @@ const RegisterScreen2 = ({ navigation, route }) => {
             {
               text: 'Continuar',
               onPress: () => {
-                // Por ahora navegar de vuelta al login
-                navigation.navigate('Login'); // o 'MainApp' si tienes esa pantalla
+                // Resetea la navegación y va directo a MainApp
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'MainApp' }],
+                });
               }
             }
           ]
