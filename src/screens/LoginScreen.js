@@ -1,38 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, Image, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
-
-// URL del backend en Codespaces
-const API_BASE_URL = 'https://symmetrical-acorn-45pj6px5rr9hqvwv-3001.app.github.dev';
-
-const ApiService = {
-  async loginUser(credentials) {
-    try {
-      console.log('🚀 Enviando credenciales de login:', { email: credentials.email });
-
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify(credentials),
-      });
-
-      const data = await response.json();
-      console.log('📥 Respuesta del servidor:', data);
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Error en el login');
-      }
-
-      return data;
-    } catch (error) {
-      console.error('❌ Error en loginUser:', error);
-      throw error;
-    }
-  }
-};
+import { API_BASE_URL, ApiService } from '../config/api';
 
 const LoginScreen = ({ navigation }) => {
   const { colors } = useTheme();
@@ -57,7 +26,6 @@ const LoginScreen = ({ navigation }) => {
       return;
     }
 
-    // Preparar credenciales
     const credentials = {
       email: email.trim().toLowerCase(),
       password: password,
@@ -68,12 +36,21 @@ const LoginScreen = ({ navigation }) => {
     try {
       const response = await ApiService.loginUser(credentials);
 
-      if (response.success) {
+      if (response.success && response.data) {
         console.log('✅ Login exitoso:', response.data);
 
-        // Si pasa validación del backend, navega a MainApp
-        navigation.replace("MainApp", {
-          user: response.data
+        // Pasamos userId por navigation params (sin AsyncStorage)
+        navigation.reset({
+          index: 0,
+          routes: [
+            {
+              name: 'MainApp',
+              params: { 
+                user: response.data,
+                userId: response.data.id
+              }
+            }
+          ],
         });
       }
     } catch (error) {
@@ -81,9 +58,9 @@ const LoginScreen = ({ navigation }) => {
 
       let errorMessage = 'Hubo un problema al iniciar sesión. Intenta nuevamente.';
 
-      if (error.message.includes('fetch')) {
+      if (error.message.includes('fetch') || error.message.includes('Network request failed')) {
         errorMessage = 'No se pudo conectar al servidor. Verifica tu conexión a internet.';
-      } else if (error.message.includes('Credenciales inválidas')) {
+      } else if (error.message.includes('Credenciales inválidas') || error.message.includes('credenciales')) {
         errorMessage = 'Email o contraseña incorrectos. Por favor verifica tus datos.';
       } else if (error.message) {
         errorMessage = error.message;
@@ -106,7 +83,7 @@ const LoginScreen = ({ navigation }) => {
         />
       </View>
 
-      <View style={[styles.textContainer]}>
+      <View style={styles.textContainer}>
         <Text style={[styles.welcome, { color: 'white' }]}>¡BIENVENIDO DE VUELTA!</Text>
         <Text style={[styles.subtext, { color: 'white' }]}>Inicia sesión con tu correo UDG</Text>
       </View>
@@ -154,15 +131,15 @@ const LoginScreen = ({ navigation }) => {
             <Text style={[styles.buttonText, { color: 'white' }]}>Iniciando...</Text>
           </View>
         ) : (
-            <Text style={[styles.buttonText, { color: colors.buttonText || 'white' }]}>Ingresar</Text>
+          <Text style={[styles.buttonText, { color: 'white' }]}>Ingresar</Text>
         )}
       </TouchableOpacity>
 
       <TouchableOpacity
-        onPress={() => navigation.goBack()}
+        onPress={() => Alert.alert('Próximamente', 'Función en desarrollo')}
         disabled={isLoading}
       >
-        <Text style={[styles.backText, { color: 'white' }]}>Olvide mi contraseña</Text>
+        <Text style={[styles.backText, { color: 'white' }]}>Olvidé mi contraseña</Text>
       </TouchableOpacity>
     </View>
   );
@@ -190,20 +167,20 @@ const styles = StyleSheet.create({
     fontSize: 36,
     fontWeight: 'bold',
   },
-textContainer: {
-  marginBottom: 30,
-  alignItems: 'center',
-},
-welcome: {
-  fontSize: 20,
-  fontWeight: 'bold',
-  textAlign: 'center',
-  marginBottom: 5,
-},
-subtext: {
-  fontSize: 16,
-  textAlign: 'center',
-},
+  textContainer: {
+    marginBottom: 30,
+    alignItems: 'center',
+  },
+  welcome: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 5,
+  },
+  subtext: {
+    fontSize: 16,
+    textAlign: 'center',
+  },
   input: {
     height: 50,
     borderWidth: 1,
