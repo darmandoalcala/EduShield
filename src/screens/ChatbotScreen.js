@@ -29,23 +29,37 @@ export default function ChatbotScreen() {
     setMessages(prev => [userMsg, ...prev]);
     setInput("");
 
-    try {
-      const data = await classifyByBackend(trimmed); // llama al backend
-      const botMsg = { 
-        id: `b-${Date.now()}`, 
-        role: "bot", 
-        text: `${data.reply}\n\n(Detectado: ${data.category})` 
-      };
-      setMessages(prev => [botMsg, ...prev]);
-    } catch (err) {
-      const errorMsg = { 
-        id: `b-${Date.now()}`, 
-        role: "bot", 
-        text: "⚠️ No pude conectar con el servidor. Intenta de nuevo." 
-      };
-      setMessages(prev => [errorMsg, ...prev]);
-    }
+try {
+    const data = await classifyByBackend(trimmed); // llama al backend
 
+    // Mostrar mensaje del bot
+    const botMsg = { 
+      id: `b-${Date.now()}`, 
+      role: "bot", 
+      text: data.text || data.reply || "🤖 ..." // soporta ambas claves
+    };
+    setMessages(prev => [botMsg, ...prev]);
+
+    // 👇 NUEVO: si el backend manda acción → navegar
+    if (data.action === "Report") {
+      navigation.navigate("MainApp", { 
+        screen: "Inicio", 
+        params: { screen: "Report" }
+      });
+    } else if (data.action === "Contacts") {
+      navigation.navigate("MainApp", { 
+        screen: "Contactos",   // 👈 el tab
+        params: { screen: "Contacts" }  // 👈 la screen dentro del stack
+      });
+}
+  } catch (err) {
+    const errorMsg = { 
+      id: `b-${Date.now()}`, 
+      role: "bot", 
+      text: "⚠️ No pude conectar con el servidor. Intenta de nuevo." 
+    };
+    setMessages(prev => [errorMsg, ...prev]);
+  }
     setTimeout(() => {
       flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
     }, 100);
