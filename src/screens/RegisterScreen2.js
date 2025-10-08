@@ -16,10 +16,12 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
+import { useUser } from '../context/UserContext';
 import { API_BASE_URL, ApiService } from '../config/api';
 
 const RegisterScreen2 = ({ navigation, route }) => {
   const { colors } = useTheme();
+  const { loginUser } = useUser();
   const { userData } = route.params || {};
 
   const [nombre, setNombre] = useState('');
@@ -33,6 +35,17 @@ const RegisterScreen2 = ({ navigation, route }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState({ 
+    email: '', 
+    codigoEstudiante: '', 
+    telefono: '', 
+    password: '', 
+    confirmPassword: '' 
+  });
+
+  const limpiarError = (campo) => {
+    setErrors(prev => ({ ...prev, [campo]: '' }));
+  };
 
   const genderOptions = [
     { label: 'Masculino', value: 'MASCULINO' },
@@ -207,6 +220,9 @@ const RegisterScreen2 = ({ navigation, route }) => {
       const response = await ApiService.registerUser(completeUserData);
 
       if (response.success) {
+        // Guardar usuario en el contexto global
+        loginUser(response.data);
+
         Alert.alert(
           '🎉 ¡Registro exitoso!',
           `¡Bienvenido ${nombre}! Tu cuenta ha sido creada correctamente.`,
@@ -225,18 +241,53 @@ const RegisterScreen2 = ({ navigation, route }) => {
       }
     } catch (error) {
       console.error('❌ Error completo:', error);
+      console.error('❌ Error message:', error.message);
 
       let errorMessage = 'Hubo un problema al crear tu cuenta. Intenta nuevamente.';
+      let errorTitle = 'Error en el registro';
 
-      if (error.message.includes('fetch')) {
+      // Detectar errores específicos del backend
+      if (error.message.includes('JSON válido') || error.message.includes('JSON')) {
+        errorTitle = 'Error del servidor';
+        errorMessage = 'El servidor no respondió correctamente. Por favor intenta nuevamente.';
+      } else if (error.message.includes('fetch') || error.message.includes('Network') || error.message.includes('network')) {
+        errorTitle = 'Sin conexión';
         errorMessage = 'No se pudo conectar al servidor. Verifica tu conexión a internet.';
-      } else if (error.message.includes('ya existe')) {
-        errorMessage = 'Ya existe una cuenta con este email o código estudiantil.';
+      } else if (error.message.toLowerCase().includes('correo') && error.message.toLowerCase().includes('existe')) {
+        errorTitle = 'Correo ya registrado';
+        errorMessage = 'Este correo ya está registrado. Por favor inicia sesión o usa otro correo.';
+        setErrors(prev => ({ ...prev, email: 'Este correo ya está en uso' }));
+      } else if (error.message.toLowerCase().includes('email') && error.message.toLowerCase().includes('existe')) {
+        errorTitle = 'Correo ya registrado';
+        errorMessage = 'Este correo ya está registrado. Por favor inicia sesión o usa otro correo.';
+        setErrors(prev => ({ ...prev, email: 'Este correo ya está en uso' }));
+      } else if (error.message.toLowerCase().includes('código') && error.message.toLowerCase().includes('existe')) {
+        errorTitle = 'Código de estudiante ya registrado';
+        errorMessage = 'Este código de estudiante ya está registrado. Si ya tienes una cuenta, inicia sesión.';
+        setErrors(prev => ({ ...prev, codigoEstudiante: 'Este código ya está en uso' }));
+      } else if (error.message.toLowerCase().includes('codigo') && error.message.toLowerCase().includes('existe')) {
+        errorTitle = 'Código de estudiante ya registrado';
+        errorMessage = 'Este código de estudiante ya está registrado. Si ya tienes una cuenta, inicia sesión.';
+        setErrors(prev => ({ ...prev, codigoEstudiante: 'Este código ya está en uso' }));
+      } else if (error.message.toLowerCase().includes('ya existe') || error.message.toLowerCase().includes('duplicate')) {
+        // Error genérico de duplicado - mostrar ambos posibles conflictos
+        errorTitle = 'Datos duplicados';
+        errorMessage = 'El correo o código de estudiante ya están registrados. Verifica tus datos o inicia sesión si ya tienes cuenta.';
       } else if (error.message) {
         errorMessage = error.message;
       }
 
-      Alert.alert('Error', errorMessage);
+      Alert.alert(errorTitle, errorMessage, [
+        {
+          text: 'Intentar de nuevo',
+          style: 'default'
+        },
+        {
+          text: 'Ir a Login',
+          style: 'cancel',
+          onPress: () => navigation.navigate('Login')
+        }
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -327,16 +378,26 @@ const RegisterScreen2 = ({ navigation, route }) => {
         />
 
         <TextInput
-          style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]}
+          style={[styles.input, { 
+            backgroundColor: colors.card, 
+            color: colors.text, 
+            borderColor: errors.codigoEstudiante ? 'red' : colors.border 
+          }]}
           placeholder="Código de estudiante (9 dígitos)"
           placeholderTextColor={colors.textSecondary}
           value={codigoEstudiante}
-          onChangeText={setCodigoEstudiante}
+          onChangeText={(text) => {
+            setCodigoEstudiante(text);
+            limpiarError('codigoEstudiante');
+          }}
           maxLength={9}
           keyboardType="numeric"
           returnKeyType="next"
           editable={!isLoading}
         />
+        {errors.codigoEstudiante ? (
+          <Text style={styles.errorText}>{errors.codigoEstudiante}</Text>
+        ) : null}
 
         <TextInput
           style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]}
@@ -626,6 +687,13 @@ const styles = StyleSheet.create({
     color: 'red',
     fontSize: 14,
     fontWeight: '600',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginTop: -15,
+    marginBottom: 15,
+    marginLeft: 5,
   },
 });
 

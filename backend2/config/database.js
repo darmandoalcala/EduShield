@@ -61,8 +61,8 @@ class Database {
       userData.telefono || null,
       userData.sexo || null,
       userData.foto_perfil || null,
-      userData.rol_id || 1, // 1 = estudiante por defecto
-      userData.centro_id || 1 // 1 = CUCEI por defecto
+      userData.rol_id || 1,
+      userData.centro_id || 1
     ]);
   }
 
@@ -73,18 +73,51 @@ class Database {
     return result.length > 0 ? result[0] : null;
   }
 
-  //Método para buscar usuario por código de estudiante
+  // Método para buscar usuario por código de estudiante
   static async findUserByCodigoEstudiante(codigoEstudiante) {
     try {
-      const query = `
-        SELECT * FROM USUARIOS 
-        WHERE CODIGO_ESTUDIANTE = ?
-      `;
-      
-      const result = await this.executeQuery(query, [codigoEstudiante]);
+      const sql = `SELECT * FROM usuario WHERE codigo_estudiante = ?`; // 👈 CAMBIO: query en lugar de executeQuery
+      const result = await this.query(sql, [codigoEstudiante]); // 👈 CAMBIO
       return result && result.length > 0 ? result[0] : null;
     } catch (error) {
       console.error('Error buscando usuario por código:', error);
+      throw error;
+    }
+  }
+
+  // Método para buscar usuario por ID (código estudiante)
+  static async findUserById(userId) {
+    try {
+      const sql = `SELECT * FROM usuario WHERE codigo_estudiante = ?`; // 👈 CAMBIO
+      const result = await this.query(sql, [userId]); // 👈 CAMBIO
+      return result && result.length > 0 ? result[0] : null;
+    } catch (error) {
+      console.error('Error buscando usuario por ID:', error);
+      throw error;
+    }
+  }
+
+  // Método para actualizar usuario
+  static async updateUser(userId, userData) {
+    try {
+      const sql = `
+        UPDATE usuario 
+        SET nombre = ?, apellido = ?, telefono = ?, sexo = ?
+        WHERE codigo_estudiante = ?
+      `; // 👈 CAMBIO: minúsculas
+      
+      const params = [
+        userData.nombre,
+        userData.apellido,
+        userData.telefono,
+        userData.sexo,
+        userId
+      ];
+      
+      await this.query(sql, params); // 👈 CAMBIO
+      return { success: true };
+    } catch (error) {
+      console.error('Error actualizando usuario:', error);
       throw error;
     }
   }

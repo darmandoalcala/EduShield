@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, Image, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
+import { useUser } from '../context/UserContext';
 import { API_BASE_URL, ApiService } from '../config/api';
 
-const LoginScreen = ({ navigation, route }) => {
+const LoginScreen = ({ navigation }) => {
   const { colors } = useTheme();
+  const { loginUser } = useUser();
 
-  // Recibir el email prefilled desde la navegación
-  const { prefilledEmail } = route.params || {};
-
-  const [email, setEmail] = useState(prefilledEmail || '');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -68,14 +67,27 @@ const LoginScreen = ({ navigation, route }) => {
       if (response.success && response.data) {
         console.log('✅ Login exitoso:', response.data);
 
+        // Agregar un id temporal si no viene del backend
+        const userData = {
+          ...response.data,
+          id: response.data.id || response.data.codigo_estudiante
+        };
+
+        console.log('🔄 Llamando loginUser con:', userData); // 👈 NUEVO LOG
+
+        // Guardar usuario en el contexto global
+        loginUser(userData);
+
+        console.log('✅ loginUser ejecutado'); // 👈 NUEVO LOG
+
         navigation.reset({
           index: 0,
           routes: [
             {
               name: 'MainApp',
               params: { 
-                user: response.data,
-                userId: response.data.id
+                user: userData,
+                userId: userData.id
               }
             }
           ],

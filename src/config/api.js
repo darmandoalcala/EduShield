@@ -147,7 +147,7 @@ export const ApiService = {
 
       return {
         success: true,
-        data: data.user || data.data || data,
+        data: data.user || data.data || data, // 👈 PRIORIZAR data.user
         token: data.token,
       };
     } catch (error) {

@@ -132,11 +132,13 @@ class AuthController {
         success: true,
         message: 'Usuario registrado exitosamente',
         user: {
-          id: result.insertId || result.id,
+          id: codigo_estudiante,
           codigo_estudiante: codigo_estudiante,
           nombre: nombre,
           apellido: apellido,
           email: email,
+          telefono: telefono,
+          sexo: sexo,
           nombre_completo: `${nombre} ${apellido}`
         }
       });
@@ -173,6 +175,7 @@ class AuthController {
 
       // Buscar usuario
       const user = await Database.findUserByEmail(email);
+      
       if (!user) {
         return res.status(401).json({
           success: false,
@@ -189,15 +192,24 @@ class AuthController {
         });
       }
 
+      console.log('✅ Enviando respuesta al frontend:', {
+        id: user.CODIGO_ESTUDIANTE,
+        nombre: user.NOMBRE,
+        apellido: user.APELLIDO
+      }); 
+
       res.json({
         success: true,
         message: 'Login exitoso',
         user: {
-          id: user.ID,
+          id: user.CODIGO_ESTUDIANTE, // 👈 CAMBIAR AQUÍ: usar CODIGO_ESTUDIANTE
           codigo_estudiante: user.CODIGO_ESTUDIANTE,
           nombre: user.NOMBRE,
           apellido: user.APELLIDO,
           email: user.EMAIL,
+          telefono: user.TELEFONO,
+          sexo: user.SEXO,
+          foto_perfil: user.FOTO_PERFIL,
           nombre_completo: `${user.NOMBRE} ${user.APELLIDO}`
         }
       });
