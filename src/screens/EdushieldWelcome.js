@@ -28,7 +28,7 @@ const EdushieldWelcome = ({ navigation }) => {
       <View style={styles.signInContainer}>
         <Text style={[styles.signInText]}>¿Ya tienes una cuenta? </Text>
         <Pressable onPress={() => navigation.navigate('Login')}>
-          <Text style={[styles.signInLink]}>Sign In</Text>
+          <Text style={[styles.signInLink]}>Inicia Sesión</Text>
         </Pressable>
       </View>
     </View>

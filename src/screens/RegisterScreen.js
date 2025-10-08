@@ -1,14 +1,17 @@
 // RegisterScreen 
 
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TextInput, Image, TouchableOpacity, Alert, ToastAndroid, Platform } from "react-native";
+import { View, Text, StyleSheet, TextInput, Image, TouchableOpacity, Alert, ToastAndroid, Platform, ActivityIndicator } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { useTheme } from "../theme/ThemeContext";
+import { ApiService } from "../config/api";
 
 export default function RegisterScreen({ navigation }) {
   const { colors } = useTheme();
   const [email, setEmail] = useState("");
-  const [centro, setCentro] = useState("CUCEI"); // valor por defecto
+  const [centro, setCentro] = useState("CUCEI");
+  const [isLoading, setIsLoading] = useState(false);
+  const [emailError, setEmailError] = useState("");
 
   // Función para mostrar toast multiplataforma
   const showToast = (message) => {
@@ -30,8 +33,16 @@ export default function RegisterScreen({ navigation }) {
     return udqEmailRegex.test(email.toLowerCase());
   };
 
-  const handleContinue = () => {
-    // Validaciones
+  // Limpiar error cuando el usuario escribe
+  const handleEmailChange = (text) => {
+    setEmail(text);
+    if (emailError) {
+      setEmailError("");
+    }
+  };
+
+  const handleContinue = async () => {
+    // Validaciones locales
     if (!email.trim()) {
       Alert.alert("Error", "El correo electrónico es obligatorio.");
       return;
@@ -47,13 +58,69 @@ export default function RegisterScreen({ navigation }) {
       return;
     }
 
-    // Si pasa validación, enviamos datos a Register2
-    const userData = {
-      email: email.trim().toLowerCase(),
-      centro: centro.toUpperCase(),
-    };
+    // Verificar si el email ya existe en la base de datos
+    setIsLoading(true);
 
-    navigation.navigate("Register2", { userData });
+    try {
+      const emailCheck = await ApiService.checkEmailExists(email.trim().toLowerCase());
+      
+      console.log('📧 Verificación de email:', emailCheck);
+
+      if (emailCheck.exists) {
+        // Email ya registrado
+        setEmailError("Este correo ya está registrado");
+        Alert.alert(
+          "Correo ya registrado",
+          "Ya existe una cuenta con este correo electrónico. ¿Deseas iniciar sesión?",
+          [
+            {
+              text: "Intentar con otro correo",
+              style: "cancel"
+            },
+            {
+              text: "Ir a Iniciar Sesión",
+              onPress: () => navigation.navigate("Login")
+            }
+          ]
+        );
+        return;
+      }
+
+      // Email disponible - continuar al siguiente paso
+      const userData = {
+        email: email.trim().toLowerCase(),
+        centro: centro.toUpperCase(),
+      };
+
+      navigation.navigate("Register2", { userData });
+
+    } catch (error) {
+      console.error('❌ Error verificando email:', error);
+      
+      // Mostrar error pero permitir continuar (por si hay problemas de conexión)
+      Alert.alert(
+        "Error de conexión",
+        "No se pudo verificar el correo. ¿Deseas continuar de todas formas?",
+        [
+          {
+            text: "Cancelar",
+            style: "cancel"
+          },
+          {
+            text: "Continuar",
+            onPress: () => {
+              const userData = {
+                email: email.trim().toLowerCase(),
+                centro: centro.toUpperCase(),
+              };
+              navigation.navigate("Register2", { userData });
+            }
+          }
+        ]
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -84,19 +151,23 @@ export default function RegisterScreen({ navigation }) {
           {
             backgroundColor: colors.card,
             color: colors.text,
-            borderColor: colors.border,
+            borderColor: emailError ? 'red' : colors.border,
           },
         ]}
         placeholder="usuario@alumnos.udg.mx"
         placeholderTextColor={colors.textSecondary}
         value={email}
-        onChangeText={setEmail}
+        onChangeText={handleEmailChange}
         maxLength={100}
         keyboardType="email-address"
         autoCapitalize="none"
         autoCorrect={false}
         returnKeyType="next"
+        editable={!isLoading}
       />
+      {emailError ? (
+        <Text style={styles.errorText}>{emailError}</Text>
+      ) : null}
 
       {/* PICKER CENTRO */}
       <Text style={[styles.fieldLabel, { color: "white" }]}>Centro universitario</Text>
@@ -111,6 +182,7 @@ export default function RegisterScreen({ navigation }) {
         ]}
         onPress={handlePickerTouch}
         activeOpacity={0.7}
+        disabled={isLoading}
       >
         <View pointerEvents="none">
           <Picker
@@ -138,15 +210,22 @@ export default function RegisterScreen({ navigation }) {
           styles.button, 
           { 
             backgroundColor: "red",
-            opacity: email.trim() && validateUDGEmail(email) ? 1 : 0.6 // Visual feedback
+            opacity: (email.trim() && validateUDGEmail(email) && !isLoading) ? 1 : 0.6
           }
         ]}
         onPress={handleContinue}
-        disabled={!email.trim() || !validateUDGEmail(email)}
+        disabled={!email.trim() || !validateUDGEmail(email) || isLoading}
       >
-        <Text style={[styles.buttonText, { color: colors.buttonText || "white" }]}>
-          Continuar
-        </Text>
+        {isLoading ? (
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <ActivityIndicator size="small" color="white" style={{ marginRight: 8 }} />
+            <Text style={[styles.buttonText, { color: "white" }]}>Verificando...</Text>
+          </View>
+        ) : (
+          <Text style={[styles.buttonText, { color: colors.buttonText || "white" }]}>
+            Continuar
+          </Text>
+        )}
       </TouchableOpacity>
 
       {/* INDICADOR DE PROGRESO */}
@@ -160,7 +239,10 @@ export default function RegisterScreen({ navigation }) {
       </View>
 
       {/* ENLACE A LOGIN */}
-      <TouchableOpacity onPress={() => navigation.goBack()}>
+      <TouchableOpacity 
+        onPress={() => navigation.goBack()}
+        disabled={isLoading}
+      >
         <Text style={[styles.backText, { color: "white" }]}>
           ¿Ya tienes cuenta? <Text style={{ color: "red", fontWeight: "bold" }}>Inicia sesión</Text>
         </Text>
@@ -220,6 +302,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     fontSize: 17,
     justifyContent: "center",
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginTop: -15,
+    marginBottom: 15,
+    marginLeft: 5,
   },
   infoContainer: {
     backgroundColor: "rgba(255, 255, 255, 0.1)",

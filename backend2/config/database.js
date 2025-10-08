@@ -72,6 +72,22 @@ class Database {
     const result = await this.query(sql, [email]);
     return result.length > 0 ? result[0] : null;
   }
+
+  //Método para buscar usuario por código de estudiante
+  static async findUserByCodigoEstudiante(codigoEstudiante) {
+    try {
+      const query = `
+        SELECT * FROM USUARIOS 
+        WHERE CODIGO_ESTUDIANTE = ?
+      `;
+      
+      const result = await this.executeQuery(query, [codigoEstudiante]);
+      return result && result.length > 0 ? result[0] : null;
+    } catch (error) {
+      console.error('Error buscando usuario por código:', error);
+      throw error;
+    }
+  }
 }
 
 module.exports = Database;
