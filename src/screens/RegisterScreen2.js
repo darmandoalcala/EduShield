@@ -1,4 +1,4 @@
-// RegisterScreen2.js - SOLO CAMBIOS DE LÓGICA API
+// RegisterScreen2.js - Con iconos PNG para mostrar/ocultar contraseña
 
 import React, { useState, useEffect } from 'react';
 import {
@@ -13,19 +13,15 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActionSheetIOS,
-  ActivityIndicator, // 👈 AGREGAR ESTO
+  ActivityIndicator,
 } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
-
-// 👈 AGREGAR ESTE SERVICIO API
-// Backend en GitHub Codespaces
 import { API_BASE_URL, ApiService } from '../config/api';
 
 const RegisterScreen2 = ({ navigation, route }) => {
   const { colors } = useTheme();
   const { userData } = route.params || {};
 
-  // Estados existentes (sin cambios)
   const [nombre, setNombre] = useState('');
   const [apellido, setApellido] = useState('');
   const [codigoEstudiante, setCodigoEstudiante] = useState('');
@@ -36,9 +32,8 @@ const RegisterScreen2 = ({ navigation, route }) => {
   const [profileImage, setProfileImage] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false); // 👈 NUEVO estado
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Opciones de género (sin cambios)
   const genderOptions = [
     { label: 'Masculino', value: 'MASCULINO' },
     { label: 'Femenino', value: 'FEMENINO' },
@@ -46,7 +41,6 @@ const RegisterScreen2 = ({ navigation, route }) => {
     { label: 'Prefiero no decir', value: 'PREFIERO_NO_DECIR' }
   ];
 
-  // Validaciones (sin cambios)
   const validateCodigoEstudiante = (codigo) => {
     const codigoRegex = /^[0-9]{9}$/;
     return codigoRegex.test(codigo);
@@ -62,7 +56,6 @@ const RegisterScreen2 = ({ navigation, route }) => {
     return passwordRegex.test(password);
   };
 
-  // Funciones de imagen (sin cambios)
   const selectImage = () => {
     const options = ['Tomar foto', 'Elegir de galería', 'Cancelar'];
 
@@ -136,9 +129,7 @@ const RegisterScreen2 = ({ navigation, route }) => {
     </TouchableOpacity>
   );
 
-  // 👈 FUNCIÓN PRINCIPAL MODIFICADA PARA API
   const handleRegister = async () => {
-    // Validaciones locales (sin cambios)
     if (!nombre.trim()) {
       Alert.alert('Error', 'El nombre es obligatorio.');
       return;
@@ -199,10 +190,9 @@ const RegisterScreen2 = ({ navigation, route }) => {
       return;
     }
 
-    // 👈 PREPARAR DATOS SEGÚN EL FORMATO QUE ESPERA EL BACKEND
     const completeUserData = {
       codigo_estudiante: codigoEstudiante.trim(),
-      nombre_completo: `${nombre.trim()} ${apellido.trim()}`, // ¡IMPORTANTE! El backend espera esto
+      nombre_completo: `${nombre.trim()} ${apellido.trim()}`,
       email: userData?.email || '',
       password: password,
       sexo: selectedGender,
@@ -211,7 +201,6 @@ const RegisterScreen2 = ({ navigation, route }) => {
 
     console.log('📤 Datos para enviar:', completeUserData);
 
-    // 👈 LLAMADA A LA API
     setIsLoading(true);
 
     try {
@@ -225,7 +214,6 @@ const RegisterScreen2 = ({ navigation, route }) => {
             {
               text: 'Continuar',
               onPress: () => {
-                // Resetea la navegación y va directo a MainApp
                 navigation.reset({
                   index: 0,
                   routes: [{ name: 'MainApp' }],
@@ -254,7 +242,6 @@ const RegisterScreen2 = ({ navigation, route }) => {
     }
   };
 
-  // 👈 TODO EL RESTO DEL COMPONENTE SIN CAMBIOS, SOLO AGREGAMOS isLoading DONDE SEA NECESARIO
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -265,7 +252,6 @@ const RegisterScreen2 = ({ navigation, route }) => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* HEADER */}
         <View style={styles.headerContainer}>
           <Text style={[styles.title, { color: 'white' }]}>EDUSHIELD</Text>
           <Image
@@ -275,7 +261,6 @@ const RegisterScreen2 = ({ navigation, route }) => {
           />
         </View>
 
-        {/* TEXTO DE BIENVENIDA */}
         <View style={styles.textContainer}>
           <Text style={[styles.welcome, { color: 'white' }]}>¡COMPLETA TU PERFIL!</Text>
           <Text style={[styles.subtext, { color: 'white' }]}>
@@ -283,7 +268,6 @@ const RegisterScreen2 = ({ navigation, route }) => {
           </Text>
         </View>
 
-        {/* FOTO DE PERFIL */}
         <View style={styles.profileImageContainer}>
           <Text style={[styles.sectionTitle, { color: 'white', textAlign: 'center' }]}>
             Foto de perfil (opcional)
@@ -292,7 +276,7 @@ const RegisterScreen2 = ({ navigation, route }) => {
           <TouchableOpacity
             style={styles.imageSelector}
             onPress={selectImage}
-            disabled={isLoading} // 👈 Deshabilitar mientras carga
+            disabled={isLoading}
           >
             {profileImage ? (
               <Image
@@ -311,14 +295,13 @@ const RegisterScreen2 = ({ navigation, route }) => {
             <TouchableOpacity
               style={styles.removeImageButton}
               onPress={removeImage}
-              disabled={isLoading} // 👈 Deshabilitar mientras carga
+              disabled={isLoading}
             >
               <Text style={styles.removeImageText}>❌ Remover foto</Text>
             </TouchableOpacity>
           )}
         </View>
 
-        {/* INPUTS - Solo agregar editable={!isLoading} */}
         <TextInput
           style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]}
           placeholder="Nombre completo"
@@ -328,7 +311,7 @@ const RegisterScreen2 = ({ navigation, route }) => {
           maxLength={100}
           autoCapitalize="words"
           returnKeyType="next"
-          editable={!isLoading} // 👈
+          editable={!isLoading}
         />
 
         <TextInput
@@ -340,7 +323,7 @@ const RegisterScreen2 = ({ navigation, route }) => {
           maxLength={100}
           autoCapitalize="words"
           returnKeyType="next"
-          editable={!isLoading} // 👈
+          editable={!isLoading}
         />
 
         <TextInput
@@ -352,7 +335,7 @@ const RegisterScreen2 = ({ navigation, route }) => {
           maxLength={9}
           keyboardType="numeric"
           returnKeyType="next"
-          editable={!isLoading} // 👈
+          editable={!isLoading}
         />
 
         <TextInput
@@ -364,16 +347,15 @@ const RegisterScreen2 = ({ navigation, route }) => {
           maxLength={10}
           keyboardType="phone-pad"
           returnKeyType="next"
-          editable={!isLoading} // 👈
+          editable={!isLoading}
         />
 
-        {/* SELECTOR DE GÉNERO */}
         <Text style={[styles.sectionTitle, { color: 'white' }]}>Género</Text>
         <View style={styles.genderContainer}>
           {genderOptions.map(renderGenderOption)}
         </View>
 
-        {/* CONTRASEÑA */}
+        {/* CONTRASEÑA CON ICONO PNG */}
         <View style={styles.passwordContainer}>
           <TextInput
             style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border, paddingRight: 50 }]}
@@ -384,20 +366,24 @@ const RegisterScreen2 = ({ navigation, route }) => {
             maxLength={255}
             secureTextEntry={!showPassword}
             returnKeyType="next"
-            editable={!isLoading} // 👈
+            editable={!isLoading}
           />
           <TouchableOpacity
             style={styles.eyeButton}
             onPress={() => setShowPassword(!showPassword)}
-            disabled={isLoading} // 👈
+            disabled={isLoading}
           >
-            <Text style={[styles.eyeText, { color: colors.text }]}>
-              {showPassword ? '🙈' : '👁️'}
-            </Text>
+            <Image
+              source={showPassword 
+                ? require('../../assets/eye-off.png') 
+                : require('../../assets/eye.png')
+              }
+              style={styles.eyeIconImage}
+            />
           </TouchableOpacity>
         </View>
 
-        {/* CONFIRMAR CONTRASEÑA */}
+        {/* CONFIRMAR CONTRASEÑA CON ICONO PNG */}
         <View style={styles.passwordContainer}>
           <TextInput
             style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border, paddingRight: 50 }]}
@@ -408,20 +394,23 @@ const RegisterScreen2 = ({ navigation, route }) => {
             maxLength={255}
             secureTextEntry={!showConfirmPassword}
             returnKeyType="done"
-            editable={!isLoading} // 👈
+            editable={!isLoading}
           />
           <TouchableOpacity
             style={styles.eyeButton}
             onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-            disabled={isLoading} // 👈
+            disabled={isLoading}
           >
-            <Text style={[styles.eyeText, { color: colors.text }]}>
-              {showConfirmPassword ? '🙈' : '👁️'}
-            </Text>
+            <Image
+              source={showConfirmPassword 
+                ? require('../../assets/eye-off.png') 
+                : require('../../assets/eye.png')
+              }
+              style={styles.eyeIconImage}
+            />
           </TouchableOpacity>
         </View>
 
-        {/* INDICADORES DE CONTRASEÑA */}
         <View style={styles.passwordHints}>
           <Text style={[styles.hintText, { color: 'white', opacity: 0.7 }]}>
             La contraseña debe contener:
@@ -431,7 +420,6 @@ const RegisterScreen2 = ({ navigation, route }) => {
           </Text>
         </View>
 
-        {/* 👈 BOTÓN CON LOADING */}
         <TouchableOpacity
           style={[
             styles.button,
@@ -453,7 +441,6 @@ const RegisterScreen2 = ({ navigation, route }) => {
           )}
         </TouchableOpacity>
 
-        {/* INDICADOR DE PROGRESO */}
         <View style={styles.progressContainer}>
           <View style={styles.progressBar}>
             <View style={[styles.progressFill, { width: '66%' }]} />
@@ -548,13 +535,15 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 15,
     top: 15,
-    width: 20,
-    height: 20,
+    width: 24,
+    height: 24,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  eyeText: {
-    fontSize: 16,
+  eyeIconImage: {
+    width: 24,
+    height: 24,
+    tintColor: '#999',
   },
   passwordHints: {
     marginBottom: 20,

@@ -4,6 +4,62 @@ const bcrypt = require('bcryptjs');
 const Database = require('../config/database');
 
 class AuthController {
+  // Verificar si un email ya existe
+  static async checkEmail(req, res) {
+    try {
+      console.log('📧 Request body recibido:', req.body);
+      const { email } = req.body;
+
+      if (!email) {
+        console.log('❌ Email vacío');
+        return res.status(400).json({ 
+          exists: false,
+          message: 'Email es requerido' 
+        });
+      }
+
+      console.log('🔍 Validando formato del email:', email);
+      
+      // Validar formato de email UDG
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@alumnos\.udg\.mx$/;
+      if (!emailRegex.test(email)) {
+        console.log('❌ Formato inválido');
+        return res.status(400).json({ 
+          exists: false,
+          message: 'Debe ser un correo institucional (@alumnos.udg.mx)' 
+        });
+      }
+
+      console.log('✅ Formato válido, buscando en BD...');
+      
+      // Buscar usuario en la base de datos
+      const existingUser = await Database.findUserByEmail(email.toLowerCase().trim());
+      
+      console.log('📊 Resultado de búsqueda:', existingUser);
+
+      if (existingUser) {
+        console.log('✅ Email encontrado en BD');
+        return res.status(200).json({ 
+          exists: true,
+          message: 'Este correo ya está registrado' 
+        });
+      }
+
+      console.log('✅ Email disponible');
+      return res.status(200).json({ 
+        exists: false,
+        message: 'Correo disponible' 
+      });
+
+    } catch (error) {
+      console.error('❌ Error verificando email:', error);
+      return res.status(500).json({ 
+        exists: false,
+        message: 'Error al verificar el correo' 
+      });
+    }
+  }
+
   // Registrar nuevo usuario
   static async register(req, res) {
     try {
@@ -11,7 +67,7 @@ class AuthController {
       
       const {
         codigo_estudiante,
-        nombre_completo, // viene del formulario
+        nombre_completo,
         email,
         password,
         sexo,
@@ -31,12 +87,21 @@ class AuthController {
       const nombre = nombreCompleto[0];
       const apellido = nombreCompleto.slice(1).join(' ') || nombreCompleto[0];
 
-      // Verificar si el usuario ya existe
-      const existingUser = await Database.findUserByEmail(email);
-      if (existingUser) {
-        return res.status(400).json({
+      // Verificar si el email ya existe
+      const existingUserByEmail = await Database.findUserByEmail(email);
+      if (existingUserByEmail) {
+        return res.status(409).json({
           success: false,
-          message: 'Ya existe un usuario con este email'
+          message: 'El correo ya existe'
+        });
+      }
+
+      // Verificar si el código de estudiante ya existe
+      const existingUserByCode = await Database.findUserByCodigoEstudiante(codigo_estudiante);
+      if (existingUserByCode) {
+        return res.status(409).json({
+          success: false,
+          message: 'El código de estudiante ya existe'
         });
       }
 
@@ -54,32 +119,33 @@ class AuthController {
         telefono: telefono,
         sexo: sexo,
         foto_perfil: null,
-        rol_id: 1, // 1 = estudiante por defecto
-        centro_id: 1 // 1 = CUCEI por defecto
+        rol_id: 1,
+        centro_id: 1
       };
 
       // Insertar en la base de datos
-      await Database.insertUser(userData);
+      const result = await Database.insertUser(userData);
 
       console.log('Usuario registrado exitosamente:', email);
 
       res.status(201).json({
         success: true,
         message: 'Usuario registrado exitosamente',
-        data: {
+        user: {
+          id: result.insertId || result.id,
           codigo_estudiante: codigo_estudiante,
           nombre: nombre,
           apellido: apellido,
-          email: email
+          email: email,
+          nombre_completo: `${nombre} ${apellido}`
         }
       });
 
     } catch (error) {
       console.error('Error en registro:', error);
       
-      // Error específico de DB2
       if (error.message && error.message.includes('DUPLICATE')) {
-        return res.status(400).json({
+        return res.status(409).json({
           success: false,
           message: 'El código estudiantil o email ya está registrado'
         });
@@ -93,7 +159,7 @@ class AuthController {
     }
   }
 
-  // Login de usuario (para después)
+  // Login de usuario
   static async login(req, res) {
     try {
       const { email, password } = req.body;
@@ -126,11 +192,13 @@ class AuthController {
       res.json({
         success: true,
         message: 'Login exitoso',
-        data: {
+        user: {
+          id: user.ID,
           codigo_estudiante: user.CODIGO_ESTUDIANTE,
           nombre: user.NOMBRE,
           apellido: user.APELLIDO,
-          email: user.EMAIL
+          email: user.EMAIL,
+          nombre_completo: `${user.NOMBRE} ${user.APELLIDO}`
         }
       });
 

@@ -3,6 +3,9 @@ const AuthController = require('../controllers/authController');
 
 const router = express.Router();
 
+// Verificar si un email ya existe (NUEVA RUTA)
+router.post('/check-email', AuthController.checkEmail);
+
 // POST /api/auth/register - Registrar usuario
 router.post('/register', AuthController.register);
 
