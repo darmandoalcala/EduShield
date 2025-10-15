@@ -1,21 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  ScrollView,
-  Alert,
-} from 'react-native';
-// import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
+import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import * as Location from 'expo-location';
+import MapView, { Marker } from 'react-native-maps';
+import { io } from "socket.io-client";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import HeaderBar from '../components/HeaderBar';
+import { StyleSheet } from 'react-native';
+
+
 
 const AlertScreen = ({ navigation }) => {
   const [location, setLocation] = useState(null);
+  const [usuariosAlerta, setUsuariosAlerta] = useState([]);
+  const [alertaActiva, setAlertaActiva] = useState(false);
 
+  // Conexión al backend
+  const socket = io("http://localhost:3000"); // Cambia al URL de tu servidor
+
+  // Obtener ubicación inicial
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -23,47 +25,101 @@ const AlertScreen = ({ navigation }) => {
         Alert.alert('Permiso denegado', 'No se puede acceder a la ubicación.');
         return;
       }
-
       let currentLocation = await Location.getCurrentPositionAsync({});
       setLocation(currentLocation.coords);
     })();
   }, []);
 
-  const handleProfilePress = () => {
-    console.log('Botón de perfil presionado');
+  // Recibir actualizaciones del servidor
+  useEffect(() => {
+    socket.on("actualizarMapa", (usuarios) => {
+      setUsuariosAlerta(usuarios);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
+  // Activar alerta: envía tu ubicación al backend
+  const handleActivarAlerta = () => {
+    if (!location) return;
+    setAlertaActiva(true);
+    socket.emit("ubicacion", {
+      userId: socket.id,
+      lat: location.latitude,
+      lng: location.longitude,
+      alerta: true
+    });
   };
 
-  const handleCancelAlert = () => {
-    console.log('Cancelar Alerta');
+  // Mostrar zonas de alerta: solo ver usuarios y tu ubicación (sin tu alerta si no activaste)
+  const handleMostrarZonas = () => {
+    Alert.alert("Zonas de alerta", 
+      usuariosAlerta.map(u => `Usuario: ${u.userId}, Lat: ${u.lat.toFixed(4)}, Lng: ${u.lng.toFixed(4)}`).join('\n')
+    );
+  };
+
+  // Cancelar alerta
+  const handleCancelarAlerta = () => {
+    setAlertaActiva(false);
+    socket.emit("desconectarUbicacion");
   };
 
   return (
     <View style={styles.container}>
       <HeaderBar navigation={navigation} showBackButton={true} />
-
       <ScrollView contentContainerStyle={styles.scrollContainer}>
+        
+        {/* Mapa */}
         <View style={styles.mapSection}>
-          <View style={[styles.map, { backgroundColor: '#333', justifyContent: 'center', alignItems: 'center' }]}>
-            <Text style={{ color: 'white', fontSize: 16 }}>Mapa temporal</Text>
-            <Text style={{ color: '#666', fontSize: 12, marginTop: 5 }}>
-              {location ? `${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}` : 'Obteniendo ubicación...'}
-            </Text>
-          </View>
+          {location && (
+            <MapView
+              style={styles.map}
+              initialRegion={{
+                latitude: location.latitude,
+                longitude: location.longitude,
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+              }}
+            >
+              {/* Tu marcador */}
+              <Marker
+                coordinate={{ latitude: location.latitude, longitude: location.longitude }}
+                title="Tú"
+                pinColor={alertaActiva ? "red" : "blue"}
+              />
+
+              {/* Marcadores de otros usuarios */}
+              {usuariosAlerta
+                .filter(u => u.userId !== socket.id)
+                .map(u => (
+                  <Marker
+                    key={u.userId}
+                    coordinate={{ latitude: u.lat, longitude: u.lng }}
+                    title={`Usuario ${u.userId}`}
+                    pinColor="red"
+                  />
+                ))
+              }
+            </MapView>
+          )}
         </View>
 
+        {/* Botones */}
         <View style={styles.buttonRow}>
-          <TouchableOpacity style={styles.evidenceButton} onPress={() => console.log('Localización')}>
+          <TouchableOpacity style={styles.evidenceButton} onPress={handleActivarAlerta}>
             <Icon name="crosshairs-gps" size={20} color="#FFF" style={styles.iconLeft} />
-            <Text style={styles.evidenceText}>Localización</Text>
+            <Text style={styles.evidenceText}>Activar mi alerta</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.evidenceButton} onPress={() => console.log('Zonas de riesgo')}>
-            <Icon name="alert-outline" size={20} color="#FFF" style={styles.iconLeft} />
-            <Text style={styles.evidenceText}>Zonas de riesgo</Text>
+          <TouchableOpacity style={styles.evidenceButton} onPress={handleMostrarZonas}>
+            <Icon name="alert-outline" size={20} color="#ff0000ff" style={styles.iconLeft} />
+            <Text style={styles.evidenceText}>Mostrar zonas de alerta</Text>
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.sendButton} onPress={handleCancelAlert}>
+        <TouchableOpacity style={styles.sendButton} onPress={handleCancelarAlerta}>
           <Icon name="close-circle-outline" size={20} color="#FFF" style={styles.iconLeft} />
           <Text style={styles.sendButtonText}>Cancelar Alerta</Text>
         </TouchableOpacity>
@@ -72,8 +128,7 @@ const AlertScreen = ({ navigation }) => {
   );
 };
 
-
-// ... tus estilos siguen igual ...
+// ... tus estilos 
 
 
 const styles = StyleSheet.create({
