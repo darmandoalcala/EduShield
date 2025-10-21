@@ -4,7 +4,7 @@ const isDevelopment = __DEV__;
 
 const API_URLS = {
   // CODESPACE ⚠️CAMBIEN SEGUN SU CODESPACE (revisar en puertos, el 3001 y cambiar a público)⚠️
-  development: 'https://stunning-doodle-977qwp457pgq3xp44-3001.app.github.dev',
+  development: 'https://literate-cod-4jj5vrppq4x43w97-3001.app.github.dev',
   
   // PRODUCCIÓN
   production: 'https://tu-api-produccion.com',
