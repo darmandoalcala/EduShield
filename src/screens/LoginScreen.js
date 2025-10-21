@@ -49,36 +49,40 @@ const LoginScreen = ({ navigation }) => {
     setErrors(prev => ({ ...prev, [campo]: '' }));
   };
 
-  const manejarIngreso = async () => {
-    if (!validarFormulario()) {
-      return;
-    }
+const manejarIngreso = async () => {
+  if (!validarCorreoUDG(email)) {
+    Alert.alert('Correo inválido', 'Debes usar un correo institucional (@alumnos.udg.mx)');
+    return;
+  }
 
-    const credentials = {
-      email: email.trim().toLowerCase(),
-      password: password,
-    };
+  if (!password) {
+    Alert.alert('Contraseña requerida', 'Por favor ingresa tu contraseña');
+    return;
+  }
 
-    setIsLoading(true);
+  const credentials = {
+    email: email.trim().toLowerCase(),
+    password: password,
+  };
+
+  setIsLoading(true);
 
     try {
       const response = await ApiService.loginUser(credentials);
 
+      console.log('🔍 Respuesta completa:', response);
+
       if (response.success && response.data) {
         console.log('✅ Login exitoso:', response.data);
 
-        // Agregar un id temporal si no viene del backend
         const userData = {
           ...response.data,
-          id: response.data.id || response.data.codigo_estudiante
         };
 
-        console.log('🔄 Llamando loginUser con:', userData); // 👈 NUEVO LOG
+        console.log('📝 Código estudiante a usar:', userData.codigo_estudiante);
 
         // Guardar usuario en el contexto global
         loginUser(userData);
-
-        console.log('✅ loginUser ejecutado'); // 👈 NUEVO LOG
 
         navigation.reset({
           index: 0,
@@ -87,45 +91,30 @@ const LoginScreen = ({ navigation }) => {
               name: 'MainApp',
               params: { 
                 user: userData,
-                userId: userData.id
+                userId: userData.codigo_estudiante // 👈 Pasar el código estudiante
               }
             }
           ],
         });
       }
     } catch (error) {
-      console.error('❌ Error en login:', error);
-      console.error('❌ Error message:', error.message);
-      console.error('❌ Error response:', error.response);
+    console.error('❌ Error en login:', error);
 
-      let errorMessage = 'Hubo un problema al iniciar sesión. Intenta nuevamente.';
-      let errorTitle = 'Error de inicio de sesión';
+    let errorMessage = 'Hubo un problema al iniciar sesión. Intenta nuevamente.';
 
-      // Detectar tipo de error
-      if (error.message.includes('JSON válido') || error.message.includes('JSON')) {
-        errorTitle = 'Error del servidor';
-        errorMessage = 'El servidor no respondió correctamente. Por favor intenta nuevamente o contacta al administrador.';
-      } else if (error.message.includes('fetch') || error.message.includes('Network') || error.message.includes('network')) {
-        errorTitle = 'Sin conexión';
-        errorMessage = 'No se pudo conectar al servidor. Verifica tu conexión a internet.';
-      } else if (error.message.toLowerCase().includes('credenciales') || error.message.toLowerCase().includes('credentials') || error.message.includes('401')) {
-        errorTitle = 'Credenciales incorrectas';
-        errorMessage = 'El correo o la contraseña son incorrectos. Por favor verifica tus datos.';
-        // Limpiar campos
-        setPassword('');
-        setErrors({ email: '', password: 'Email o contraseña incorrectos' });
-      } else if (error.message.toLowerCase().includes('usuario no encontrado') || error.message.includes('404')) {
-        errorTitle = 'Usuario no encontrado';
-        errorMessage = 'No existe una cuenta con este correo. ¿Deseas registrarte?';
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-
-      Alert.alert(errorTitle, errorMessage);
-    } finally {
-      setIsLoading(false);
+    if (error.message.includes('fetch') || error.message.includes('Network request failed')) {
+      errorMessage = 'No se pudo conectar al servidor. Verifica tu conexión a internet.';
+    } else if (error.message.includes('Credenciales inválidas') || error.message.includes('credenciales')) {
+      errorMessage = 'Email o contraseña incorrectos. Por favor verifica tus datos.';
+    } else if (error.message) {
+      errorMessage = error.message;
     }
-  };
+
+    Alert.alert('Error de inicio de sesión', errorMessage);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const manejarOlvidePassword = () => {
     Alert.alert('Próximamente', 'Función en desarrollo');
