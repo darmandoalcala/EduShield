@@ -4,11 +4,7 @@ const isDevelopment = __DEV__;
 
 const API_URLS = {
   // CODESPACE ⚠️CAMBIEN SEGUN SU CODESPACE (revisar en puertos, el 3001 y cambiar a público)⚠️
-<<<<<<< HEAD
-  development: 'https://stunning-spoon-4jjg6x9vjpvrfqqx6-3001.app.github.dev', //NO LLEVA BARRA FINAL
-=======
-  development: 'https://symmetrical-acorn-45pj6px5rr9hqvwv-3001.app.github.dev',
->>>>>>> e19c311 (Ok)
+  development: 'https://stunning-doodle-977qwp457pgq3xp44-3001.app.github.dev',
   
   // PRODUCCIÓN
   production: 'https://tu-api-produccion.com',
@@ -128,8 +124,8 @@ export const ApiService = {
       });
 
       const textResponse = await response.text();
-      console.log('📥 Respuesta raw del login:', textResponse);
-      console.log('📊 Status del login:', response.status);
+      console.log('📥 Respuesta raw del servidor:', textResponse);
+      console.log('📊 Status code:', response.status);
 
       let data;
       try {
@@ -139,28 +135,15 @@ export const ApiService = {
         throw new Error('El servidor no devolvió un JSON válido');
       }
 
+      console.log('✅ Datos parseados completos:', JSON.stringify(data, null, 2)); // 👈 VER TODO
+
       if (!response.ok) {
-        // Manejar errores específicos de login
-        if (response.status === 401) {
-          throw new Error('Credenciales inválidas');
-        } else if (response.status === 404) {
-          throw new Error('Usuario no encontrado');
-        }
-        throw new Error(data.message || 'Error en el inicio de sesión');
+        throw new Error(data.message || 'Credenciales inválidas');
       }
 
-      return {
-        success: true,
-        data: data.user || data.data || data, // 👈 PRIORIZAR data.user
-        token: data.token,
-      };
+      return data;
     } catch (error) {
       console.error('❌ Error en loginUser:', error);
-      
-      if (error.message.includes('Network request failed') || error.message.includes('fetch')) {
-        throw new Error('No se pudo conectar al servidor. Verifica que el backend esté corriendo.');
-      }
-      
       throw error;
     }
   },
@@ -237,6 +220,139 @@ export const ApiService = {
       };
     } catch (error) {
       console.error('❌ Error en updateUserProfile:', error);
+      throw error;
+    }
+  },
+
+  // FUNCIONES DE CONTACTOS PERSONALES
+  async getPersonalContacts(userId) {
+    try {
+      console.log('📋 Obteniendo contactos personales del usuario:', userId);
+
+      const response = await fetch(`${API_BASE_URL}/api/contacts/${userId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      const textResponse = await response.text();
+      console.log('📥 Respuesta contactos:', textResponse);
+
+      let data;
+      try {
+        data = textResponse ? JSON.parse(textResponse) : {};
+      } catch (parseError) {
+        console.error('❌ Error parseando JSON:', parseError);
+        throw new Error('Error al obtener los contactos');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al cargar contactos');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('❌ Error en getPersonalContacts:', error);
+      throw error;
+    }
+  },
+
+  async addPersonalContact(userId, contactData) {
+    try {
+      console.log('➕ Agregando contacto:', contactData);
+
+      const response = await fetch(`${API_BASE_URL}/api/contacts/${userId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(contactData),
+      });
+
+      const textResponse = await response.text();
+      let data;
+      
+      try {
+        data = textResponse ? JSON.parse(textResponse) : {};
+      } catch (parseError) {
+        throw new Error('Error al procesar la respuesta');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al agregar contacto');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('❌ Error en addPersonalContact:', error);
+      throw error;
+    }
+  },
+
+  async updatePersonalContact(contactId, contactData) {
+    try {
+      console.log('✏️ Actualizando contacto:', contactId);
+
+      const response = await fetch(`${API_BASE_URL}/api/contacts/contact/${contactId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(contactData),
+      });
+
+      const textResponse = await response.text();
+      let data;
+      
+      try {
+        data = textResponse ? JSON.parse(textResponse) : {};
+      } catch (parseError) {
+        throw new Error('Error al procesar la respuesta');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al actualizar contacto');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('❌ Error en updatePersonalContact:', error);
+      throw error;
+    }
+  },
+
+  async deletePersonalContact(contactId) {
+    try {
+      console.log('🗑️ Eliminando contacto:', contactId);
+
+      const response = await fetch(`${API_BASE_URL}/api/contacts/contact/${contactId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      const textResponse = await response.text();
+      let data;
+      
+      try {
+        data = textResponse ? JSON.parse(textResponse) : {};
+      } catch (parseError) {
+        throw new Error('Error al procesar la respuesta');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al eliminar contacto');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('❌ Error en deletePersonalContact:', error);
       throw error;
     }
   }

@@ -173,7 +173,6 @@ class AuthController {
         });
       }
 
-      // Buscar usuario
       const user = await Database.findUserByEmail(email);
       
       if (!user) {
@@ -183,7 +182,6 @@ class AuthController {
         });
       }
 
-      // Verificar contraseña
       const isValidPassword = await bcrypt.compare(password, user.PASSWORD);
       if (!isValidPassword) {
         return res.status(401).json({
@@ -192,30 +190,31 @@ class AuthController {
         });
       }
 
-      console.log('✅ Enviando respuesta al frontend:', {
-        id: user.CODIGO_ESTUDIANTE,
+      console.log('✅ Login exitoso - Datos completos del usuario:', {
+        codigo_estudiante: user.CODIGO_ESTUDIANTE,
         nombre: user.NOMBRE,
-        apellido: user.APELLIDO
-      }); 
+        centro_id: user.CENTRO_ID
+      });
 
       res.json({
         success: true,
         message: 'Login exitoso',
-        user: {
-          id: user.CODIGO_ESTUDIANTE, // 👈 CAMBIAR AQUÍ: usar CODIGO_ESTUDIANTE
+        data: { // 👈 CAMBIAR de "user" a "data"
+          id: user.CODIGO_ESTUDIANTE,
           codigo_estudiante: user.CODIGO_ESTUDIANTE,
           nombre: user.NOMBRE,
           apellido: user.APELLIDO,
           email: user.EMAIL,
           telefono: user.TELEFONO,
           sexo: user.SEXO,
+          centro_id: user.CENTRO_ID,
           foto_perfil: user.FOTO_PERFIL,
           nombre_completo: `${user.NOMBRE} ${user.APELLIDO}`
         }
       });
 
     } catch (error) {
-      console.error('Error en login:', error);
+      console.error('❌ Error en login:', error);
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'

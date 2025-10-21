@@ -13,8 +13,10 @@ app.use(express.urlencoded({ extended: true }));
 // AÑADIR ESTAS LÍNEAS:
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
+const contactsRoutes = require('./routes/contacts');
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/contacts', contactsRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {
