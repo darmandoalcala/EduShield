@@ -8,7 +8,6 @@ import HeaderBar from '../components/HeaderBar';
 import { StyleSheet } from 'react-native';
 
 
-
 const AlertScreen = ({ navigation }) => {
   const [location, setLocation] = useState(null);
   const [usuariosAlerta, setUsuariosAlerta] = useState([]);
@@ -44,26 +43,56 @@ const AlertScreen = ({ navigation }) => {
   // Activar alerta: envía tu ubicación al backend
   const handleActivarAlerta = () => {
     if (!location) return;
-    setAlertaActiva(true);
-    socket.emit("ubicacion", {
-      userId: socket.id,
-      lat: location.latitude,
-      lng: location.longitude,
-      alerta: true
-    });
+
+    Alert.alert(
+      'Confirmación de alerta',
+      '¿Estás seguro de mostrar una alerta? Se enviará un mensaje SMS a tus contactos personales.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Sí, activar',
+          onPress: () => {
+            setAlertaActiva(true);
+            socket.emit("ubicacion", {
+              userId: socket.id,
+              lat: location.latitude,
+              lng: location.longitude,
+              alerta: true
+            });
+          }
+        }
+      ]
+    );
   };
 
   // Mostrar zonas de alerta: solo ver usuarios y tu ubicación (sin tu alerta si no activaste)
   const handleMostrarZonas = () => {
-    Alert.alert("Zonas de alerta", 
-      usuariosAlerta.map(u => `Usuario: ${u.userId}, Lat: ${u.lat.toFixed(4)}, Lng: ${u.lng.toFixed(4)}`).join('\n')
+    Alert.alert(
+      'Zonas de alerta',
+      usuariosAlerta.length > 0
+        ? usuariosAlerta
+            .map(u => `Usuario: ${u.userId}, Lat: ${u.lat.toFixed(4)}, Lng: ${u.lng.toFixed(4)}`)
+            .join('\n')
+        : 'No hay alertas activas en este momento.'
     );
   };
 
   // Cancelar alerta
   const handleCancelarAlerta = () => {
-    setAlertaActiva(false);
-    socket.emit("desconectarUbicacion");
+    Alert.alert(
+      'Cancelar alerta',
+      '¿Estás seguro de cancelar la alerta?',
+      [
+        { text: 'No', style: 'cancel' },
+        {
+          text: 'Sí, cancelar',
+          onPress: () => {
+            setAlertaActiva(false);
+            socket.emit("desconectarUbicacion");
+          }
+        }
+      ]
+    );
   };
 
   return (
@@ -87,7 +116,7 @@ const AlertScreen = ({ navigation }) => {
               <Marker
                 coordinate={{ latitude: location.latitude, longitude: location.longitude }}
                 title="Tú"
-                pinColor={alertaActiva ? "red" : "blue"}
+                pinColor={alertaActiva ? "red" : "#3ca33cff"}
               />
 
               {/* Marcadores de otros usuarios */}
@@ -105,22 +134,50 @@ const AlertScreen = ({ navigation }) => {
             </MapView>
           )}
         </View>
-
-        {/* Botones */}
+      {/* Botones */}
         <View style={styles.buttonRow}>
-          <TouchableOpacity style={styles.evidenceButton} onPress={handleActivarAlerta}>
-            <Icon name="crosshairs-gps" size={20} color="#FFF" style={styles.iconLeft} />
-            <Text style={styles.evidenceText}>Activar mi alerta</Text>
+          {/* Botón de activar alerta */}
+          <TouchableOpacity
+            style={[
+              styles.evidenceButton,
+              { backgroundColor: alertaActiva ? '#fc0000ff' : '#999' } // Rojo o gris
+            ]}
+            onPress={handleActivarAlerta}
+            disabled={alertaActiva} // evita tocarlo si ya está activa
+          >
+            <Icon
+              name={alertaActiva ? 'alert-outline' : 'crosshairs-gps'}
+              size={20}
+              color="#ffffffff"
+              style={styles.iconLeft}
+            />
+            <Text style={styles.evidenceText}>
+              {alertaActiva ? 'Alerta activa' : 'Activar mi alerta'}
+            </Text>
           </TouchableOpacity>
 
+          {/* Botón de mostrar zonas */}
           <TouchableOpacity style={styles.evidenceButton} onPress={handleMostrarZonas}>
-            <Icon name="alert-outline" size={20} color="#ff0000ff" style={styles.iconLeft} />
+            <Icon name="map-marker-alert" size={20} color="#ff0000ff" style={styles.iconLeft} />
             <Text style={styles.evidenceText}>Mostrar zonas de alerta</Text>
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.sendButton} onPress={handleCancelarAlerta}>
-          <Icon name="close-circle-outline" size={20} color="#FFF" style={styles.iconLeft} />
+        {/* Botón de cancelar alerta */}
+        <TouchableOpacity
+          style={[
+            styles.sendButton,
+            { backgroundColor: alertaActiva ? '#ff0000ff' : '#999' } // Solo rojo si hay alerta
+          ]}
+          onPress={handleCancelarAlerta}
+          disabled={!alertaActiva} // deshabilitado si no hay alerta
+        >
+          <Icon
+            name="close-circle-outline"
+            size={20}
+            color="#FFF"
+            style={styles.iconLeft}
+          />
           <Text style={styles.sendButtonText}>Cancelar Alerta</Text>
         </TouchableOpacity>
       </ScrollView>

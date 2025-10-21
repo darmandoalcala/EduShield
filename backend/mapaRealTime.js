@@ -36,5 +36,5 @@ io.on("connection", (socket) => {
 
 const PORT = 3000;
 httpServer.listen(PORT, () => {
-  console.log(`🚀 Servidor de mapa en tiempo real corriendo en http://localhost:${PORT}`);
+  console.log(`Servidor de mapa en tiempo real corriendo ${PORT}`);
 });

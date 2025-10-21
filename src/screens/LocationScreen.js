@@ -14,7 +14,8 @@ export default function Location() {
   const navigation = useNavigation();
   const [locationEnabled, setLocationEnabled] = useState(true);
   const [highPrecision, setHighPrecision] = useState(false);
-  const [historyEnabled, setHistoryEnabled] = useState(true);
+  const [historyEnabled, setHistoryEnabled] = useState(true); 
+  const [shareLocation, setShareLocation] = useState(false);
 
   const renderToggle = (label, value, onToggle) => (
     <View style={styles.settingRow}>
@@ -53,6 +54,7 @@ export default function Location() {
         {renderToggle('Activar localización', locationEnabled, setLocationEnabled)}
         {renderToggle('Precisión GPS ALTA', highPrecision, setHighPrecision)}
         {renderToggle('Historial de ubicaciones ACTIVO', historyEnabled, setHistoryEnabled)}
+        {renderToggle('Compartir ubicación con mis contactos', shareLocation, setShareLocation)}
 
         <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
           <Text style={styles.saveButtonText}>Guardar</Text>
@@ -136,7 +138,7 @@ const styles = StyleSheet.create({
     height: 50,
     marginLeft:70,
     alignItems: 'center',
-    marginTop: 150,
+    marginTop: 100,
   },
   saveButtonText: {
     color: '#fff',
