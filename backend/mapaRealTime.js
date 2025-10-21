@@ -15,7 +15,7 @@ const usuariosActivos = {};
 io.on("connection", (socket) => {
   console.log("Usuario conectado:", socket.id);
 
-  // Cuando un usuario activa alerta o envía ubicación
+  // Cuando un usuario activa alerta o envía ubicaciónes
   socket.on("ubicacion", (data) => {
     usuariosActivos[socket.id] = data;
     io.emit("actualizarMapa", Object.values(usuariosActivos));
@@ -36,5 +36,5 @@ io.on("connection", (socket) => {
 
 const PORT = 3000;
 httpServer.listen(PORT, () => {
-  console.log(`🚀 Servidor de mapa en tiempo real corriendo en http://localhost:${PORT}`);
+  console.log(`Servidor de mapa en tiempo real corriendo ${PORT}`);
 });
