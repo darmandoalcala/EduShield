@@ -1,13 +1,136 @@
-import React from 'react';
-import { ScrollView, View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { 
+  ScrollView, 
+  View, 
+  Text, 
+  Image, 
+  StyleSheet, 
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert 
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import HeaderBar from '../components/HeaderBar';
-import { reportesMock } from '../data/mockReportes';
+import { ApiService } from '../config/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function DetalleReporteScreen({ route }) {
   const navigation = useNavigation();
   const { id } = route.params;
-  const reporte = reportesMock.find(r => r.id === id);
+  
+  const [reporte, setReporte] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    loadUserDataAndReport();
+  }, [id]);
+
+  const loadUserDataAndReport = async () => {
+    try {
+      setLoading(true);
+      
+      // Cargar datos del usuario
+      const userJson = await AsyncStorage.getItem('userData');
+      if (userJson) {
+        const user = JSON.parse(userJson);
+        setUserData(user);
+        console.log('👤 Usuario cargado:', user);
+      }
+
+      // Cargar el reporte específico
+      const reporteData = await ApiService.getReportById(id);
+      console.log('📋 Reporte cargado:', reporteData);
+      setReporte(reporteData);
+      
+    } catch (error) {
+      console.error('❌ Error cargando reporte:', error);
+      Alert.alert('Error', 'No se pudo cargar el reporte');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteReport = () => {
+    Alert.alert(
+      'Confirmar Eliminación',
+      '¿Estás seguro de que deseas eliminar este reporte? Esta acción no se puede deshacer.',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setLoading(true);
+              await ApiService.deleteReport(id);
+              
+              Alert.alert(
+                'Reporte Eliminado',
+                'El reporte ha sido eliminado exitosamente',
+                [
+                  {
+                    text: 'OK',
+                    onPress: () => navigation.goBack(),
+                  },
+                ]
+              );
+            } catch (error) {
+              console.error('❌ Error eliminando reporte:', error);
+              Alert.alert('Error', 'No se pudo eliminar el reporte');
+              setLoading(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Fecha no disponible';
+    
+    // La fecha viene en formato: "2025-10-22 02:54:49.018552"
+    const date = new Date(dateString.replace(' ', 'T'));
+    
+    // Validar que la fecha es válida
+    if (isNaN(date.getTime())) {
+      return 'Fecha inválida';
+    }
+    
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  const formatTime = (dateString) => {
+    if (!dateString) return 'Hora no disponible';
+    
+    const date = new Date(dateString.replace(' ', 'T'));
+    
+    if (isNaN(date.getTime())) {
+      return 'Hora inválida';
+    }
+    
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <HeaderBar navigation={navigation} showBackButton={true} />
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color="#4A90E2" />
+          <Text style={{ color: 'white', marginTop: 10 }}>Cargando reporte...</Text>
+        </View>
+      </View>
+    );
+  }
 
   if (!reporte) {
     return (
@@ -20,26 +143,40 @@ export default function DetalleReporteScreen({ route }) {
     );
   }
 
+  // Normalizar los campos (soportar mayúsculas y minúsculas)
+  const fecha = reporte.FECHA || reporte.fecha;
+  const descripcion = reporte.DESCRIPCION || reporte.descripcion;
+  const foto_evidencia = reporte.FOTO_EVIDENCIA || reporte.foto_evidencia;
+
   return (
     <View style={styles.container}>
       <HeaderBar navigation={navigation} showBackButton={true} />
 
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.label}>Fecha reporte: {reporte.fecha}</Text>
-        <Text style={styles.label}>Hora: {reporte.hora}</Text>
+        <Text style={styles.label}>Fecha reporte: {formatDate(fecha)}</Text>
+        <Text style={styles.label}>Hora: {formatTime(fecha)}</Text>
         <Text style={styles.label}>Descripción:</Text>
         <View style={styles.descripcion}>
-          <Text style={styles.text}>{reporte.descripcion}</Text>
+          <Text style={styles.text}>{descripcion}</Text>
         </View>
 
-        <Text style={styles.label}>Evidencias:</Text>
-        <View style={styles.imageContainer}>
-          {reporte.evidencias.map((img, index) => (
-            <Image key={index} source={{ uri: img }} style={styles.image} />
-          ))}
-        </View>
+        {foto_evidencia && (
+          <>
+            <Text style={styles.label}>Evidencias:</Text>
+            <View style={styles.imageContainer}>
+              <Image 
+                source={{ uri: foto_evidencia }} 
+                style={styles.image}
+              />
+            </View>
+          </>
+        )}
 
-        <TouchableOpacity style={styles.deleteButton} onPress={() => {}}>
+        <TouchableOpacity 
+          style={styles.deleteButton} 
+          onPress={handleDeleteReport}
+          disabled={loading}
+        >
           <Text style={styles.deleteText}>Eliminar Reporte</Text>
         </TouchableOpacity>
 
@@ -48,7 +185,6 @@ export default function DetalleReporteScreen({ route }) {
     </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   container: {
