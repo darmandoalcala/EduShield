@@ -15,7 +15,7 @@ export default function PrivacySettings() {
 
   const [cameraAccess, setCameraAccess] = useState(false);
   const [galleryAccess, setGalleryAccess] = useState(false);
-  const [shareLocation, setShareLocation] = useState(false);
+
 
   const handleClearHistory = () => {
     console.log('Historial eliminado');
@@ -50,10 +50,10 @@ export default function PrivacySettings() {
 
           {renderToggle('Acceso a cámara', cameraAccess, setCameraAccess)}
           {renderToggle('Acceso a galería', galleryAccess, setGalleryAccess)}
-          {renderToggle('Compartir ubicación con mis contactos', shareLocation, setShareLocation)}
+
 
           <View style={styles.settingRow}>
-            <Text style={styles.settingLabel}>Eliminar todo historial de mis incidentes</Text>
+            <Text style={styles.settingLabel}>Eliminar todo historial de mis incidentes.</Text>
             <TouchableOpacity style={styles.clearButton} onPress={handleClearHistory}>
               <Text style={styles.clearButtonText}>Eliminar</Text>
             </TouchableOpacity>
@@ -161,3 +161,4 @@ const styles = StyleSheet.create({
       marginBottom:15,
   },
 });
+
