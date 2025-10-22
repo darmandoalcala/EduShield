@@ -10,18 +10,24 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// AÑADIR ESTAS LÍNEAS:
+// Rutas
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
+const reportRoutes = require('./routes/reportRoutes');
 app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
+app.use('/api/users', userRoutes)
+app.use('/api', reportRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {
   res.json({ 
     message: 'EduShield Backend API funcionando',
     version: '1.0.0',
-    endpoints: ['/api/auth/register', '/api/auth/login']
+    endpoints: [
+      '/api/auth/register', 
+      '/api/auth/login',
+      '/api/reports' // Agregado al listado
+    ]
   });
 });
 

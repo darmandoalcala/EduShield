@@ -1,17 +1,105 @@
-import React from 'react';
-import { ScrollView, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
+import { 
+  ScrollView, 
+  View, 
+  Text, 
+  TouchableOpacity, 
+  StyleSheet,
+  ActivityIndicator,
+  RefreshControl 
+} from 'react-native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import HeaderBar from '../components/HeaderBar';
-import { misreportesMock } from '../data/mockMisReportes';
+import { ApiService } from '../config/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function MisReporteScreen() {
   const navigation = useNavigation();
+  const [reportes, setReportes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [userData, setUserData] = useState(null);
+
+  // Cargar reportes cuando la pantalla se enfoca
+  useFocusEffect(
+    React.useCallback(() => {
+      loadUserReports();
+    }, [])
+  );
+
+  const loadUserReports = async () => {
+    try {
+      setLoading(true);
+      
+      // Cargar datos del usuario
+      const userJson = await AsyncStorage.getItem('userData');
+      if (userJson) {
+        const user = JSON.parse(userJson);
+        setUserData(user);
+        console.log('👤 Usuario cargado:', user);
+
+        // Cargar reportes del usuario
+        const response = await ApiService.getUserReports(user.codigo_estudiante);
+        console.log('📋 Reportes cargados:', response.data);
+        setReportes(response.data || []);
+      }
+    } catch (error) {
+      console.error('❌ Error cargando reportes:', error);
+      setReportes([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadUserReports();
+    setRefreshing(false);
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Fecha no disponible';
+    
+    // La fecha viene en formato: "2025-10-22 02:54:49.018552"
+    const date = new Date(dateString.replace(' ', 'T'));
+    
+    // Validar que la fecha es válida
+    if (isNaN(date.getTime())) {
+      return 'Fecha inválida';
+    }
+    
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <HeaderBar navigation={navigation} showBackButton={false} />
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color="#4A90E2" />
+          <Text style={{ color: 'white', marginTop: 10 }}>Cargando tus reportes...</Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <HeaderBar navigation={navigation} showBackButton={false} />
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView 
+        contentContainerStyle={styles.content}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#4A90E2"
+          />
+        }
+      >
         <Text style={styles.title}>
           Aquí podrás consultar tus últimos reportes en EDUSHIELD
         </Text>
@@ -20,22 +108,32 @@ export default function MisReporteScreen() {
           Selecciona el reporte que quieras ver
         </Text>
 
-        {misreportesMock.map(reporte => (
-          <TouchableOpacity
-            key={reporte.id}
-            style={styles.item}
-            onPress={() => navigation.navigate('DetalleMisReporte', { id: reporte.id })}
-          >
-            <Text style={styles.text}>{reporte.fecha}</Text>
-          </TouchableOpacity>
-        ))}
+        {reportes.length === 0 ? (
+          <View style={{ alignItems: 'center', paddingVertical: 40 }}>
+            <Text style={{ color: '#fff', fontSize: 18, marginBottom: 10 }}>
+              No tienes reportes aún
+            </Text>
+            <Text style={{ color: '#aaa', fontSize: 14 }}>
+              Crea tu primer reporte para que aparezca aquí
+            </Text>
+          </View>
+        ) : (
+          reportes.map(reporte => (
+            <TouchableOpacity
+              key={reporte.ID || reporte.id}
+              style={styles.item}
+              onPress={() => navigation.navigate('DetalleMisReporte', { id: reporte.ID || reporte.id })}
+            >
+              <Text style={styles.text}>{formatDate(reporte.FECHA || reporte.fecha)}</Text>
+            </TouchableOpacity>
+          ))
+        )}
 
         <Text style={styles.smallText}>All Rights reserved @EDUSHIELD2025</Text>
       </ScrollView>
     </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   container: {

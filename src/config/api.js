@@ -4,11 +4,7 @@ const isDevelopment = __DEV__;
 
 const API_URLS = {
   // CODESPACE ⚠️CAMBIEN SEGUN SU CODESPACE (revisar en puertos, el 3001 y cambiar a público)⚠️
-<<<<<<< HEAD
-  development: 'https://stunning-spoon-4jjg6x9vjpvrfqqx6-3001.app.github.dev', //NO LLEVA BARRA FINAL
-=======
-  development: 'https://symmetrical-acorn-45pj6px5rr9hqvwv-3001.app.github.dev',
->>>>>>> e19c311 (Ok)
+  development: 'https://symmetrical-acorn-45pj6px5rr9hqvwv-3001.app.github.dev', //NO LLEVA BARRA FINAL
   
   // PRODUCCIÓN
   production: 'https://tu-api-produccion.com',
@@ -151,7 +147,7 @@ export const ApiService = {
 
       return {
         success: true,
-        data: data.user || data.data || data, // 👈 PRIORIZAR data.user
+        data: data.user || data.data || data,
         token: data.token,
       };
     } catch (error) {
@@ -239,5 +235,308 @@ export const ApiService = {
       console.error('❌ Error en updateUserProfile:', error);
       throw error;
     }
-  }
+  },
+
+  // ==========================================
+  // MÉTODOS DE REPORTES
+  // ==========================================
+
+async createReport(reportData) {
+    try {
+      console.log('🚀 Enviando reporte:', reportData);
+      console.log('🌐 URL del servidor:', API_BASE_URL);
+
+      const response = await fetch(`${API_BASE_URL}/api/reports`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(reportData),
+      });
+
+      const textResponse = await response.text();
+      console.log('📥 Respuesta raw del reporte:', textResponse);
+      console.log('📊 Status del reporte:', response.status);
+
+      let data;
+      try {
+        data = textResponse ? JSON.parse(textResponse) : {};
+      } catch (parseError) {
+        console.error('❌ Error parseando JSON:', parseError);
+        throw new Error('El servidor no devolvió un JSON válido');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al crear el reporte');
+      }
+
+      return {
+        success: true,
+        data: data.data || data,
+        message: data.message,
+      };
+    } catch (error) {
+      console.error('❌ Error en createReport:', error);
+      
+      if (error.message.includes('Network request failed') || error.message.includes('fetch')) {
+        throw new Error('No se pudo conectar al servidor. Verifica que el backend esté corriendo.');
+      }
+      
+      throw error;
+    }
+  },
+
+  async getUserReports(codigoEstudiante) {
+    try {
+      console.log('🔍 Obteniendo reportes del usuario:', codigoEstudiante);
+
+      const response = await fetch(`${API_BASE_URL}/api/reports/user/${codigoEstudiante}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      const textResponse = await response.text();
+      console.log('📥 Respuesta reportes usuario:', textResponse);
+
+      let data;
+      try {
+        data = textResponse ? JSON.parse(textResponse) : {};
+      } catch (parseError) {
+        console.error('❌ Error parseando JSON:', parseError);
+        throw new Error('Error al obtener los reportes');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al cargar los reportes');
+      }
+
+      return {
+        success: true,
+        data: data.data || [],
+      };
+    } catch (error) {
+      console.error('❌ Error en getUserReports:', error);
+      throw error;
+    }
+  },
+
+  async getAllReports() {
+    try {
+      console.log('🔍 Obteniendo todos los reportes');
+
+      const response = await fetch(`${API_BASE_URL}/api/reports`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      const textResponse = await response.text();
+      console.log('📥 Respuesta todos los reportes:', textResponse);
+
+      let data;
+      try {
+        data = textResponse ? JSON.parse(textResponse) : {};
+      } catch (parseError) {
+        throw new Error('Error al obtener los reportes');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al cargar los reportes');
+      }
+
+      return {
+        success: true,
+        data: data.data || [],
+      };
+    } catch (error) {
+      console.error('❌ Error en getAllReports:', error);
+      throw error;
+    }
+  },
+
+  async getReportById(reportId) {
+    try {
+      console.log('🔍 Obteniendo reporte con ID:', reportId);
+      console.log('🌐 URL:', `${API_BASE_URL}/api/reports/${reportId}`);
+
+      const response = await fetch(`${API_BASE_URL}/api/reports/${reportId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      const textResponse = await response.text();
+      console.log('📥 Respuesta reporte:', textResponse);
+
+      let data;
+      try {
+        data = textResponse ? JSON.parse(textResponse) : {};
+      } catch (parseError) {
+        throw new Error('Error al obtener el reporte');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al cargar el reporte');
+      }
+
+      return data.data || data;
+    } catch (error) {
+      console.error('❌ Error en getReportById:', error);
+      throw error;
+    }
+  },
+
+  async updateReportStatus(reportId, estado) {
+    try {
+      console.log('💾 Actualizando estado del reporte:', reportId, estado);
+
+      const response = await fetch(`${API_BASE_URL}/api/reports/${reportId}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({ estado }),
+      });
+
+      const textResponse = await response.text();
+      console.log('📥 Respuesta actualización estado:', textResponse);
+
+      let data;
+      try {
+        data = textResponse ? JSON.parse(textResponse) : {};
+      } catch (parseError) {
+        throw new Error('Error al procesar la respuesta');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al actualizar el estado');
+      }
+
+      return {
+        success: true,
+        message: data.message,
+      };
+    } catch (error) {
+      console.error('❌ Error en updateReportStatus:', error);
+      throw error;
+    }
+  },
+
+  async deleteReport(reportId) {
+    try {
+      console.log('🗑️ Eliminando reporte:', reportId);
+      console.log('🌐 URL:', `${API_BASE_URL}/api/reports/${reportId}`);
+
+      const response = await fetch(`${API_BASE_URL}/api/reports/${reportId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      const textResponse = await response.text();
+      console.log('📥 Respuesta eliminación:', textResponse);
+
+      let data;
+      try {
+        data = textResponse ? JSON.parse(textResponse) : {};
+      } catch (parseError) {
+        throw new Error('Error al procesar la respuesta');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al eliminar el reporte');
+      }
+
+      return {
+        success: true,
+        message: data.message,
+      };
+    } catch (error) {
+      console.error('❌ Error en deleteReport:', error);
+      throw error;
+    }
+  },
+
+  async getReportsByCenter(centroId) {
+    try {
+      console.log('🔍 Obteniendo reportes del centro:', centroId);
+
+      const response = await fetch(`${API_BASE_URL}/api/reports/center/${centroId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      const textResponse = await response.text();
+      console.log('📥 Respuesta reportes centro:', textResponse);
+
+      let data;
+      try {
+        data = textResponse ? JSON.parse(textResponse) : {};
+      } catch (parseError) {
+        throw new Error('Error al obtener los reportes');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al cargar los reportes');
+      }
+
+      return {
+        success: true,
+        data: data.data || [],
+      };
+    } catch (error) {
+      console.error('❌ Error en getReportsByCenter:', error);
+      throw error;
+    }
+  },
+
+  async getReportStats() {
+    try {
+      console.log('📊 Obteniendo estadísticas de reportes');
+
+      const response = await fetch(`${API_BASE_URL}/api/reports/stats`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      const textResponse = await response.text();
+      console.log('📥 Respuesta estadísticas:', textResponse);
+
+      let data;
+      try {
+        data = textResponse ? JSON.parse(textResponse) : {};
+      } catch (parseError) {
+        throw new Error('Error al obtener las estadísticas');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al cargar las estadísticas');
+      }
+
+      return {
+        success: true,
+        data: data.data || data,
+      };
+    } catch (error) {
+      console.error('❌ Error en getReportStats:', error);
+      throw error;
+    }
+  },
 };

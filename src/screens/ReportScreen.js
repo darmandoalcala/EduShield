@@ -7,19 +7,47 @@ import {
   ScrollView,
   TextInput,
   StyleSheet,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 
 import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import HeaderBar from '../components/HeaderBar';
+import { ApiService } from '../config/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const centers = ['CUCEI', 'CUAAD', 'CUCEV', 'CUCS'];
 
 const ReportScreen = ({ navigation }) => {
+  // Estados
   const [selectedCenter, setSelectedCenter] = useState(centers[0]);
+  const [descripcion, setDescripcion] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [userData, setUserData] = useState(null);
+  const [fecha, setFecha] = useState(new Date());
+
+  // Cargar datos del usuario al montar el componente
+  useEffect(() => {
+    loadUserData();
+  }, []);
+
+  const loadUserData = async () => {
+    try {
+      const userJson = await AsyncStorage.getItem('userData');
+      if (userJson) {
+        const user = JSON.parse(userJson);
+        setUserData(user);
+        console.log('👤 Usuario cargado:', user);
+      }
+    } catch (error) {
+      console.error('❌ Error cargando datos del usuario:', error);
+    }
+  };
 
   const handleEditCenter = () => {
     console.log('Editar selección de centro universitario');
+    // Aquí podrías abrir un modal o navegación para cambiar el centro
   };
 
   const handleProfilePress = () => {
@@ -34,8 +62,138 @@ const ReportScreen = ({ navigation }) => {
     console.log('Editar descripción');
   };
 
-  const handleSendReport = () => {
-    console.log('Reporte enviado');
+  const handleVideoEvidence = () => {
+    console.log('Evidencia en video');
+    Alert.alert(
+      'Evidencia en Video',
+      '¿Deseas grabar un video o seleccionar uno existente?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Grabar', onPress: () => console.log('Grabar video') },
+        { text: 'Seleccionar', onPress: () => console.log('Seleccionar video') },
+      ]
+    );
+  };
+
+  const handlePhotoEvidence = () => {
+    console.log('Evidencia en foto');
+    Alert.alert(
+      'Evidencia en Foto',
+      '¿Deseas tomar una foto o seleccionar una existente?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Tomar foto', onPress: () => console.log('Tomar foto') },
+        { text: 'Seleccionar', onPress: () => console.log('Seleccionar foto') },
+      ]
+    );
+  };
+
+  const validateReport = () => {
+    if (!descripcion || descripcion.trim() === '') {
+      Alert.alert('Error', 'Por favor, describe los hechos del incidente');
+      return false;
+    }
+
+    if (descripcion.trim().length < 10) {
+      Alert.alert('Error', 'La descripción debe tener al menos 10 caracteres');
+      return false;
+    }
+
+    if (!userData || !userData.codigo_estudiante) {
+      Alert.alert('Error', 'No se encontraron los datos del usuario. Por favor, inicia sesión nuevamente.');
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSendReport = async () => {
+    // Validar el reporte
+    if (!validateReport()) {
+      return;
+    }
+
+    Alert.alert(
+      'Confirmar Envío',
+      '¿Estás seguro de que deseas enviar este reporte de incidente?',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Enviar',
+          onPress: async () => {
+            try {
+              setLoading(true);
+
+              // Mapear el centro seleccionado a su ID
+              const centerMap = {
+                'CUCEI': 1,
+                'CUAAD': 2,
+                'CUCEV': 3,
+                'CUCS': 4,
+              };
+
+              // Preparar los datos del reporte
+              const reportData = {
+                titulo: `Reporte de incidente - ${selectedCenter}`,
+                descripcion: descripcion.trim(),
+                coordenada_lat: null, // Aquí puedes agregar geolocalización
+                coordenada_lng: null,
+                categoria_id: 1, // Puedes hacer esto dinámico
+                nivel_riesgo: 'medio', // Puedes hacer esto dinámico
+                foto_evidencia: null, // Aquí irá la evidencia cuando la implementes
+                codigo_estudiante: userData.codigo_estudiante,
+                centro_id: centerMap[selectedCenter] || 1,
+              };
+
+              console.log('📤 Enviando reporte:', reportData);
+
+              // Llamar al servicio de API
+              const response = await ApiService.createReport(reportData);
+
+              console.log('✅ Respuesta del servidor:', response);
+
+              // Mostrar mensaje de éxito
+              Alert.alert(
+                '¡Éxito!',
+                'Tu reporte ha sido enviado exitosamente. Las autoridades universitarias revisarán tu caso.',
+                [
+                  {
+                    text: 'OK',
+                    onPress: () => {
+                      // Limpiar el formulario
+                      setDescripcion('');
+                      setFecha(new Date());
+                      // Navegar a otra pantalla si es necesario
+                      // navigation.goBack();
+                    },
+                  },
+                ]
+              );
+            } catch (error) {
+              console.error('❌ Error enviando reporte:', error);
+              Alert.alert(
+                'Error',
+                error.message || 'No se pudo enviar el reporte. Por favor, intenta de nuevo.'
+              );
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const formatDate = (date) => {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${day}/${month}/${year}, ${hours}:${minutes}`;
   };
 
   return (
@@ -43,13 +201,13 @@ const ReportScreen = ({ navigation }) => {
       <HeaderBar navigation={navigation} showBackButton={true} />
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* 1) Centro Universitario fijo */}
+        {/* 1) Centro Universitario */}
         <Text style={styles.instructionAText}>Centro Universitario asignado:</Text>
         <View style={styles.sectionBox}>
           <View style={styles.row}>
             <Text style={styles.iconLeft}>🎓</Text>
             <View style={styles.pickerPlaceholder}>
-              <Text style={styles.pickerText}>CUCEI</Text>
+              <Text style={styles.pickerText}>{selectedCenter}</Text>
             </View>
             <TouchableOpacity onPress={handleEditCenter} style={styles.iconSide}>
               <Icon
@@ -67,7 +225,7 @@ const ReportScreen = ({ navigation }) => {
         <View style={styles.sectionBox}>
           <View style={styles.row}>
             <Icon name="calendar-outline" size={20} color="#FFF" style={styles.iconLeft} />
-            <Text style={styles.textInfo}>02/11/2024, 07:30 PM</Text>
+            <Text style={styles.textInfo}>{formatDate(fecha)}</Text>
           </View>
         </View>
   
@@ -82,11 +240,13 @@ const ReportScreen = ({ navigation }) => {
                 style={styles.textInputFlex}
                 placeholder="Escribe aquí..."
                 placeholderTextColor="#888"
-                placeholderTextFontSize={20}
                 multiline
+                value={descripcion}
+                onChangeText={setDescripcion}
+                editable={!loading}
               />
             </View>
-            <TouchableOpacity onPress={() => console.log('Editar descripción')}>
+            <TouchableOpacity onPress={handleEditDescription}>
               <Icon name="pencil-outline" size={20} color="#FFF" marginTop={-25} style={styles.iconRight} />
             </TouchableOpacity>
           </View>
@@ -97,7 +257,8 @@ const ReportScreen = ({ navigation }) => {
           <View style={[styles.row, { justifyContent: 'space-between' }]}>
             <TouchableOpacity
               style={styles.evidenceButtonPlaceholder}
-              onPress={() => console.log('Evidencia en video')}
+              onPress={handleVideoEvidence}
+              disabled={loading}
             >
               <Text style={styles.evidenceText}>Evidencia en video</Text>
               <Text style={styles.iconRight}>🎥</Text>
@@ -105,7 +266,8 @@ const ReportScreen = ({ navigation }) => {
 
             <TouchableOpacity
               style={styles.evidenceButtonPlaceholder}
-              onPress={() => console.log('Evidencia en foto')}
+              onPress={handlePhotoEvidence}
+              disabled={loading}
             >
               <Text style={styles.evidenceText}>Evidencia en foto</Text>
               <Text style={styles.iconRight}>📸</Text>
@@ -119,11 +281,21 @@ const ReportScreen = ({ navigation }) => {
 
         {/* 5) Botón final */}
         <TouchableOpacity
-          style={styles.sendButtonPlaceholder}
-          onPress={() => console.log('Reporte enviado')}
+          style={[
+            styles.sendButtonPlaceholder,
+            loading && { opacity: 0.5 }
+          ]}
+          onPress={handleSendReport}
+          disabled={loading}
         >
-          <Text style={styles.sendButtonText}>Reporte de incidente</Text>
-          <Text style={styles.iconRight}>⚠️</Text>
+          {loading ? (
+            <ActivityIndicator size="small" color="#FFF" />
+          ) : (
+            <>
+              <Text style={styles.sendButtonText}>Reporte de incidente</Text>
+              <Text style={styles.iconRight}>⚠️</Text>
+            </>
+          )}
         </TouchableOpacity>
       </ScrollView>
     </View>
