@@ -124,8 +124,8 @@ export const ApiService = {
       });
 
       const textResponse = await response.text();
-      console.log('📥 Respuesta raw del servidor:', textResponse);
-      console.log('📊 Status code:', response.status);
+      console.log('📥 Respuesta raw del login:', textResponse);
+      console.log('📊 Status del login:', response.status);
 
       let data;
       try {
@@ -135,23 +135,28 @@ export const ApiService = {
         throw new Error('El servidor no devolvió un JSON válido');
       }
 
-      console.log('✅ Datos parseados completos:', JSON.stringify(data, null, 2)); // 👈 VER TODO
-
       if (!response.ok) {
-        throw new Error(data.message || 'Credenciales inválidas');
+        // Manejar errores específicos de login
+        if (response.status === 401) {
+          throw new Error('Credenciales inválidas');
+        } else if (response.status === 404) {
+          throw new Error('Usuario no encontrado');
+        }
+        throw new Error(data.message || 'Error en el inicio de sesión');
       }
 
-<<<<<<< HEAD
       return {
         success: true,
         data: data.user || data.data || data,
         token: data.token,
       };
-=======
-      return data;
->>>>>>> 7a669fb322f00c78599410db7613fd9cfd5787b7
     } catch (error) {
       console.error('❌ Error en loginUser:', error);
+      
+      if (error.message.includes('Network request failed') || error.message.includes('fetch')) {
+        throw new Error('No se pudo conectar al servidor. Verifica que el backend esté corriendo.');
+      }
+      
       throw error;
     }
   },
@@ -232,7 +237,6 @@ export const ApiService = {
     }
   },
 
-<<<<<<< HEAD
   // ==========================================
   // MÉTODOS DE REPORTES
   // ==========================================
@@ -243,54 +247,11 @@ async createReport(reportData) {
       console.log('🌐 URL del servidor:', API_BASE_URL);
 
       const response = await fetch(`${API_BASE_URL}/api/reports`, {
-=======
-  // FUNCIONES DE CONTACTOS PERSONALES
-  async getPersonalContacts(userId) {
-    try {
-      console.log('📋 Obteniendo contactos personales del usuario:', userId);
-
-      const response = await fetch(`${API_BASE_URL}/api/contacts/${userId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      });
-
-      const textResponse = await response.text();
-      console.log('📥 Respuesta contactos:', textResponse);
-
-      let data;
-      try {
-        data = textResponse ? JSON.parse(textResponse) : {};
-      } catch (parseError) {
-        console.error('❌ Error parseando JSON:', parseError);
-        throw new Error('Error al obtener los contactos');
-      }
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Error al cargar contactos');
-      }
-
-      return data;
-    } catch (error) {
-      console.error('❌ Error en getPersonalContacts:', error);
-      throw error;
-    }
-  },
-
-  async addPersonalContact(userId, contactData) {
-    try {
-      console.log('➕ Agregando contacto:', contactData);
-
-      const response = await fetch(`${API_BASE_URL}/api/contacts/${userId}`, {
->>>>>>> 7a669fb322f00c78599410db7613fd9cfd5787b7
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-<<<<<<< HEAD
         body: JSON.stringify(reportData),
       });
 
@@ -450,14 +411,6 @@ async createReport(reportData) {
       console.log('📥 Respuesta actualización estado:', textResponse);
 
       let data;
-=======
-        body: JSON.stringify(contactData),
-      });
-
-      const textResponse = await response.text();
-      let data;
-      
->>>>>>> 7a669fb322f00c78599410db7613fd9cfd5787b7
       try {
         data = textResponse ? JSON.parse(textResponse) : {};
       } catch (parseError) {
@@ -465,7 +418,6 @@ async createReport(reportData) {
       }
 
       if (!response.ok) {
-<<<<<<< HEAD
         throw new Error(data.message || 'Error al actualizar el estado');
       }
 
@@ -475,65 +427,16 @@ async createReport(reportData) {
       };
     } catch (error) {
       console.error('❌ Error en updateReportStatus:', error);
-=======
-        throw new Error(data.message || 'Error al agregar contacto');
-      }
-
-      return data;
-    } catch (error) {
-      console.error('❌ Error en addPersonalContact:', error);
->>>>>>> 7a669fb322f00c78599410db7613fd9cfd5787b7
       throw error;
     }
   },
 
-<<<<<<< HEAD
   async deleteReport(reportId) {
     try {
       console.log('🗑️ Eliminando reporte:', reportId);
       console.log('🌐 URL:', `${API_BASE_URL}/api/reports/${reportId}`);
 
       const response = await fetch(`${API_BASE_URL}/api/reports/${reportId}`, {
-=======
-  async updatePersonalContact(contactId, contactData) {
-    try {
-      console.log('✏️ Actualizando contacto:', contactId);
-
-      const response = await fetch(`${API_BASE_URL}/api/contacts/contact/${contactId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify(contactData),
-      });
-
-      const textResponse = await response.text();
-      let data;
-      
-      try {
-        data = textResponse ? JSON.parse(textResponse) : {};
-      } catch (parseError) {
-        throw new Error('Error al procesar la respuesta');
-      }
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Error al actualizar contacto');
-      }
-
-      return data;
-    } catch (error) {
-      console.error('❌ Error en updatePersonalContact:', error);
-      throw error;
-    }
-  },
-
-  async deletePersonalContact(contactId) {
-    try {
-      console.log('🗑️ Eliminando contacto:', contactId);
-
-      const response = await fetch(`${API_BASE_URL}/api/contacts/contact/${contactId}`, {
->>>>>>> 7a669fb322f00c78599410db7613fd9cfd5787b7
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -542,14 +445,9 @@ async createReport(reportData) {
       });
 
       const textResponse = await response.text();
-<<<<<<< HEAD
       console.log('📥 Respuesta eliminación:', textResponse);
 
       let data;
-=======
-      let data;
-      
->>>>>>> 7a669fb322f00c78599410db7613fd9cfd5787b7
       try {
         data = textResponse ? JSON.parse(textResponse) : {};
       } catch (parseError) {
@@ -557,7 +455,6 @@ async createReport(reportData) {
       }
 
       if (!response.ok) {
-<<<<<<< HEAD
         throw new Error(data.message || 'Error al eliminar el reporte');
       }
 
@@ -642,15 +539,4 @@ async createReport(reportData) {
       throw error;
     }
   },
-=======
-        throw new Error(data.message || 'Error al eliminar contacto');
-      }
-
-      return data;
-    } catch (error) {
-      console.error('❌ Error en deletePersonalContact:', error);
-      throw error;
-    }
-  }
->>>>>>> 7a669fb322f00c78599410db7613fd9cfd5787b7
 };
