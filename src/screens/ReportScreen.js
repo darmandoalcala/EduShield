@@ -10,44 +10,34 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-
 import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import HeaderBar from '../components/HeaderBar';
 import { ApiService } from '../config/api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useUser } from '../context/UserContext'; // 👈 AGREGAR
 
 const centers = ['CUCEI', 'CUAAD', 'CUCEV', 'CUCS'];
 
 const ReportScreen = ({ navigation }) => {
+  const { user } = useUser(); // 👈 OBTENER USUARIO DEL CONTEXTO
+  
   // Estados
   const [selectedCenter, setSelectedCenter] = useState(centers[0]);
   const [descripcion, setDescripcion] = useState('');
   const [loading, setLoading] = useState(false);
-  const [userData, setUserData] = useState(null);
   const [fecha, setFecha] = useState(new Date());
 
-  // Cargar datos del usuario al montar el componente
+  // useEffect para verificar usuario
   useEffect(() => {
-    loadUserData();
-  }, []);
-
-  const loadUserData = async () => {
-    try {
-      const userJson = await AsyncStorage.getItem('userData');
-      if (userJson) {
-        const user = JSON.parse(userJson);
-        setUserData(user);
-        console.log('👤 Usuario cargado:', user);
-      }
-    } catch (error) {
-      console.error('❌ Error cargando datos del usuario:', error);
+    if (user) {
+      console.log('👤 Usuario del contexto:', user);
+    } else {
+      console.warn('⚠️ No hay usuario en el contexto');
     }
-  };
+  }, [user]);
 
   const handleEditCenter = () => {
     console.log('Editar selección de centro universitario');
-    // Aquí podrías abrir un modal o navegación para cambiar el centro
   };
 
   const handleProfilePress = () => {
@@ -99,7 +89,8 @@ const ReportScreen = ({ navigation }) => {
       return false;
     }
 
-    if (!userData || !userData.codigo_estudiante) {
+    // user DEL CONTEXTO
+    if (!user || !user.codigo_estudiante) {
       Alert.alert('Error', 'No se encontraron los datos del usuario. Por favor, inicia sesión nuevamente.');
       return false;
     }
@@ -108,7 +99,6 @@ const ReportScreen = ({ navigation }) => {
   };
 
   const handleSendReport = async () => {
-    // Validar el reporte
     if (!validateReport()) {
       return;
     }
@@ -127,7 +117,6 @@ const ReportScreen = ({ navigation }) => {
             try {
               setLoading(true);
 
-              // Mapear el centro seleccionado a su ID
               const centerMap = {
                 'CUCEI': 1,
                 'CUAAD': 2,
@@ -135,27 +124,24 @@ const ReportScreen = ({ navigation }) => {
                 'CUCS': 4,
               };
 
-              // Preparar los datos del reporte
+              // USAR user DEL CONTEXTO
               const reportData = {
                 titulo: `Reporte de incidente - ${selectedCenter}`,
                 descripcion: descripcion.trim(),
-                coordenada_lat: null, // Aquí puedes agregar geolocalización
+                coordenada_lat: null,
                 coordenada_lng: null,
-                categoria_id: 1, // Puedes hacer esto dinámico
-                nivel_riesgo: 'medio', // Puedes hacer esto dinámico
-                foto_evidencia: null, // Aquí irá la evidencia cuando la implementes
-                codigo_estudiante: userData.codigo_estudiante,
+                categoria_id: 1,
+                nivel_riesgo: 'medio',
+                foto_evidencia: null,
+                codigo_estudiante: user.codigo_estudiante, // 👈 DEL CONTEXTO
                 centro_id: centerMap[selectedCenter] || 1,
               };
 
               console.log('📤 Enviando reporte:', reportData);
 
-              // Llamar al servicio de API
               const response = await ApiService.createReport(reportData);
-
               console.log('✅ Respuesta del servidor:', response);
 
-              // Mostrar mensaje de éxito
               Alert.alert(
                 '¡Éxito!',
                 'Tu reporte ha sido enviado exitosamente. Las autoridades universitarias revisarán tu caso.',
@@ -163,11 +149,8 @@ const ReportScreen = ({ navigation }) => {
                   {
                     text: 'OK',
                     onPress: () => {
-                      // Limpiar el formulario
                       setDescripcion('');
                       setFecha(new Date());
-                      // Navegar a otra pantalla si es necesario
-                      // navigation.goBack();
                     },
                   },
                 ]
@@ -228,7 +211,7 @@ const ReportScreen = ({ navigation }) => {
             <Text style={styles.textInfo}>{formatDate(fecha)}</Text>
           </View>
         </View>
-  
+
         {/* 3) Descripción de los hechos */}
         <Text style={styles.instructionAText}>Da un breve resumen de los hechos.</Text>
         <View style={styles.sectionBoxes}>
@@ -302,22 +285,17 @@ const ReportScreen = ({ navigation }) => {
   );
 };
 
-
+// ... (todos tus estilos se quedan igual)
 const styles = StyleSheet.create({
-  // Contenedor principal con fondo negro
   container: {
     flex: 1,
     backgroundColor: 'black',
   },
-
-  // ScrollView container como en Home1
   scrollContainer: {
-  paddingHorizontal: 16,
-  paddingTop: 40,
-  paddingBottom: 100,
+    paddingHorizontal: 16,
+    paddingTop: 40,
+    paddingBottom: 100,
   },
-
-  // Header fijo en la parte superior
   header: {
     width: '100%',
     marginTop: 50,
@@ -348,8 +326,6 @@ const styles = StyleSheet.create({
     height: '100%',
     tintColor: 'white',
   },
-
-  // Contenido dentro del scroll
   content: {
     justifyContent: 'center',
     alignItems: 'center',
@@ -361,8 +337,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     textAlign: 'center',
   },
-
-  // Barra de navegación inferior
   navBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -386,113 +360,82 @@ const styles = StyleSheet.create({
     tintColor: 'gray',
   },
   sectionBox: {
-    backgroundColor: '#1A1A1A',   // Gris muy oscuro
+    backgroundColor: '#1A1A1A',
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
     marginBottom: 15,
     width: '100%',
-    height:55,
+    height: 55,
   },
   sectionBoxes: {
-    backgroundColor: '#1A1A1A',   // Gris muy oscuro
+    backgroundColor: '#1A1A1A',
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
     marginBottom: 15,
     width: '100%',
-    height:150,
+    height: 150,
   },
-
   instructionAText: {
     color: '#aaa',
     fontSize: 18,
     marginBottom: 10,
-    textAlign: 'left', 
+    textAlign: 'left',
   },
-  // ----------------------------
-  // Fila horizontal alineada en eje vertical al centro
-  // ----------------------------
   row: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-
-  // ----------------------------
-  // Ícono o texto que va a la izquierda de cada sección
-  // ----------------------------
   iconLeft: {
     fontSize: 18,
     color: '#FFF',
     marginRight: 8,
   },
-
-  // ----------------------------
-  // Placeholder del Picker (combobox):
-  // fondo transparente, ocupa todo el espacio disponible
-  // ----------------------------
-
-  iconSide:{
-    zIndex:1,
+  iconSide: {
+    zIndex: 1,
     position: 'absolute',
-
   },
-
   pickerPlaceholder: {
     flex: 1,
     justifyContent: 'center',
-    marginTop:10,
+    marginTop: 10,
   },
   pickerText: {
     color: '#FFF',
     fontSize: 17,
   },
-
-    pickerContainer: {
+  pickerContainer: {
     flex: 1,
     height: 40,
     borderWidth: 1,
-    borderColor: '#555',    // color de borde para resaltar el dropdown
+    borderColor: '#555',
     borderRadius: 4,
-    justifyContent: 'center', 
+    justifyContent: 'center',
     backgroundColor: 'transparent',
   },
-
-  // ----------------------------
-  // Texto para mostrar fecha/hora
-  // ----------------------------
   textInfo: {
     flex: 1,
     color: '#FFF',
     fontSize: 17,
   },
-
-
-  // ----------------------------
-  // TextInput placeholder para descripción de los hechos
-  // ----------------------------
-
-  // TextInput editable
   instructionText: {
-  color: '#aaa',
-  fontSize: 14,
-  fontStyle: 'italic',
-  marginBottom: 4,
-  marginTop: 40,
-},
+    color: '#aaa',
+    fontSize: 14,
+    fontStyle: 'italic',
+    marginBottom: 4,
+    marginTop: 40,
+  },
   textInputFlex: {
     flex: 1,
     color: '#FFF',
     fontSize: 15,
-    minHeight:  50,
-    textAlignVertical: 'center',  // Android
-    textAlign: 'center',          // horizontal
-
+    minHeight: 90,
+    textAlignVertical: 'top',
+    padding: 0,
+    marginHorizontal: 8,
+    marginTop: 55,
   },
-
-  // ----------------------------
-  // Botones de evidencia (video/foto) – color de fondo, padding y alineación
-  // ----------------------------
   evidenceButtonPlaceholder: {
     flex: 1,
     flexDirection: 'row',
@@ -508,47 +451,21 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 14.5,
   },
-
-  // ----------------------------
-  // Ícono o texto que va a la derecha en los botones de evidencia
-  // y también en el botón final “Reporte de incidente”
-  // ----------------------------
   iconRight: {
     fontSize: 18,
     color: '#FFF',
     marginLeft: 8,
   },
   rowWithSpace: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-},
-  iconLeft: {
-    marginRight: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
-  textInputFlex: {
-    flex: 1,
-    color: '#FFF',
-    fontSize: 15,
-    minHeight: 90,
-    textAlignVertical: 'Top',
-    padding: 0,
-    marginHorizontal: 8,
-    marginTop:55,
-
-  },
-  iconRight: {
-    marginLeft: 8,
-  },
-
-  // ----------------------------
-  // Botón rojo “Reporte de incidente” (solo estilo para el botón nuevo)
-  // ----------------------------
   sendButtonPlaceholder: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'red',   // Rojo brillante
+    backgroundColor: 'red',
     borderRadius: 6,
     paddingVertical: 14,
     paddingHorizontal: 16,
@@ -565,4 +482,3 @@ const styles = StyleSheet.create({
 });
 
 export default ReportScreen;
-

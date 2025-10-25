@@ -6,43 +6,57 @@ import {
   TouchableOpacity, 
   StyleSheet,
   ActivityIndicator,
-  RefreshControl 
+  RefreshControl,
+  Alert
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import HeaderBar from '../components/HeaderBar';
 import { ApiService } from '../config/api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useUser } from '../context/UserContext'; 
 
 export default function MisReporteScreen() {
   const navigation = useNavigation();
+  const { user } = useUser();
+  
   const [reportes, setReportes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [userData, setUserData] = useState(null);
 
   // Cargar reportes cuando la pantalla se enfoca
   useFocusEffect(
     React.useCallback(() => {
       loadUserReports();
-    }, [])
+    }, [user]) 
   );
 
   const loadUserReports = async () => {
     try {
       setLoading(true);
       
-      // Cargar datos del usuario
-      const userJson = await AsyncStorage.getItem('userData');
-      if (userJson) {
-        const user = JSON.parse(userJson);
-        setUserData(user);
-        console.log('👤 Usuario cargado:', user);
-
-        // Cargar reportes del usuario
-        const response = await ApiService.getUserReports(user.codigo_estudiante);
-        console.log('📋 Reportes cargados:', response.data);
-        setReportes(response.data || []);
+      // 👇 USAR user DEL CONTEXTO
+      if (!user || !user.codigo_estudiante) {
+        console.warn('⚠️ No hay usuario en el contexto');
+        Alert.alert(
+          'Sesión requerida',
+          'Por favor inicia sesión para ver tus reportes',
+          [
+            { 
+              text: 'OK', 
+              onPress: () => navigation.navigate('Login') 
+            }
+          ]
+        );
+        setReportes([]);
+        setLoading(false);
+        return;
       }
+
+      console.log('👤 Usuario del contexto:', user);
+
+      // Cargar reportes del usuario
+      const response = await ApiService.getUserReports(user.codigo_estudiante);
+      console.log('📋 Reportes cargados:', response.data);
+      setReportes(response.data || []);
     } catch (error) {
       console.error('❌ Error cargando reportes:', error);
       setReportes([]);
@@ -141,7 +155,7 @@ const styles = StyleSheet.create({
     paddingTop: 1,
     backgroundColor: '#000',
     flexGrow: 1,
-    paddingBottom:150,
+    paddingBottom: 150,
   },
   title: {
     color: '#fff',
@@ -176,4 +190,3 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 });
-

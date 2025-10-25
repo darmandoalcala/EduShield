@@ -12,31 +12,42 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import HeaderBar from '../components/HeaderBar';
 import { ApiService } from '../config/api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useUser } from '../context/UserContext'; // 👈 AGREGAR
 
 export default function DetalleReporteScreen({ route }) {
   const navigation = useNavigation();
+  const { user } = useUser(); // 👈 OBTENER USUARIO DEL CONTEXTO
   const { id } = route.params;
   
   const [reporte, setReporte] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [userData, setUserData] = useState(null);
 
   useEffect(() => {
-    loadUserDataAndReport();
+    loadReport();
   }, [id]);
 
-  const loadUserDataAndReport = async () => {
+  // 👇 SIMPLIFICAR - ya no necesitamos cargar userData
+  const loadReport = async () => {
     try {
       setLoading(true);
       
-      // Cargar datos del usuario
-      const userJson = await AsyncStorage.getItem('userData');
-      if (userJson) {
-        const user = JSON.parse(userJson);
-        setUserData(user);
-        console.log('👤 Usuario cargado:', user);
+      // Verificar que hay usuario
+      if (!user) {
+        console.warn('⚠️ No hay usuario en el contexto');
+        Alert.alert(
+          'Sesión requerida',
+          'Por favor inicia sesión para ver el reporte',
+          [
+            { 
+              text: 'OK', 
+              onPress: () => navigation.navigate('Login') 
+            }
+          ]
+        );
+        return;
       }
+
+      console.log('👤 Usuario del contexto:', user);
 
       // Cargar el reporte específico
       const reporteData = await ApiService.getReportById(id);
@@ -207,9 +218,8 @@ const styles = StyleSheet.create({
   },
   text: {
     color: '#000',
-    fontSize:18,
+    fontSize: 18,
     marginTop: 1,
-
   },
   imageContainer: {
     flexDirection: 'row',
@@ -247,4 +257,3 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-

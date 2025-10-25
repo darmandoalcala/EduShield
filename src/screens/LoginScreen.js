@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, TextInput, Image, TouchableOpacity, Alert, Acti
 import { useTheme } from '../theme/ThemeContext';
 import { useUser } from '../context/UserContext';
 import { API_BASE_URL, ApiService } from '../config/api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen = ({ navigation }) => {
   const { colors } = useTheme();
@@ -81,13 +80,6 @@ const manejarIngreso = async () => {
         };
 
         console.log('📝 Código estudiante a usar:', userData.codigo_estudiante);
-
-        try {
-          await AsyncStorage.setItem('userData', JSON.stringify(userData));
-          console.log('✅ Datos guardados en AsyncStorage:', userData);
-        } catch (storageError) {
-          console.error('❌ Error guardando en AsyncStorage:', storageError);
-        }
 
         // Guardar usuario en el contexto global
         loginUser(userData);
