@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import * as Location from 'expo-location';
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Alert, StyleSheet, Linking } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
-import { io } from "socket.io-client";
+import * as Location from 'expo-location';
+import io from 'socket.io-client';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import HeaderBar from '../components/HeaderBar';
-import { StyleSheet } from 'react-native';
 
 
 const AlertScreen = ({ navigation }) => {
@@ -13,40 +12,37 @@ const AlertScreen = ({ navigation }) => {
   const [usuariosAlerta, setUsuariosAlerta] = useState([]);
   const [alertaActiva, setAlertaActiva] = useState(false);
 
-  // Conexión al backend
-  const socket = io("http://localhost:3000"); // Cambia al URL de tu servidor
+  // Conexión al backend cambiar al url de cada servidor al iniciar cd backend node mapaRealTime.js--
+  const socket = io("https://literate-cod-4jj5vrppq4x43w97-3001.app.github.dev"); // Cambia al URL de tu servidor
 
   // Obtener ubicación inicial
   useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permiso denegado', 'No se puede acceder a la ubicación.');
-        return;
-      }
-      let currentLocation = await Location.getCurrentPositionAsync({});
-      setLocation(currentLocation.coords);
-    })();
-  }, []);
+      (async () => {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert('Permiso denegado', 'No se puede acceder a la ubicación.');
+          return;
+        }
+        let currentLocation = await Location.getCurrentPositionAsync({});
+        setLocation(currentLocation.coords);
+      })();
+    }, []);
 
   // Recibir actualizaciones del servidor
   useEffect(() => {
-    socket.on("actualizarMapa", (usuarios) => {
-      setUsuariosAlerta(usuarios);
-    });
+      socket.on("actualizarMapa", (usuarios) => {
+        setUsuariosAlerta(usuarios);
+      });
 
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
-
+      return () => socket.disconnect();
+    }, []);
   // Activar alerta: envía tu ubicación al backend
   const handleActivarAlerta = () => {
     if (!location) return;
 
     Alert.alert(
       'Confirmación de alerta',
-      '¿Estás seguro de mostrar una alerta? Se enviará un mensaje SMS a tus contactos personales.',
+      '¿Estás segura de activar la alerta?',
       [
         { text: 'Cancelar', style: 'cancel' },
         {
@@ -64,7 +60,7 @@ const AlertScreen = ({ navigation }) => {
       ]
     );
   };
-
+   // Función para abrir la app de llamadas nativa
   // Mostrar zonas de alerta: solo ver usuarios y tu ubicación (sin tu alerta si no activaste)
   const handleMostrarZonas = () => {
     Alert.alert(
@@ -95,6 +91,7 @@ const AlertScreen = ({ navigation }) => {
     );
   };
 
+
   return (
     <View style={styles.container}>
       <HeaderBar navigation={navigation} showBackButton={true} />
@@ -105,6 +102,7 @@ const AlertScreen = ({ navigation }) => {
           {location && (
             <MapView
               style={styles.map}
+              provider={MapView.PROVIDER_GOOGLE} // compatible con Expo
               initialRegion={{
                 latitude: location.latitude,
                 longitude: location.longitude,
@@ -186,7 +184,6 @@ const AlertScreen = ({ navigation }) => {
 };
 
 // ... tus estilos 
-
 
 const styles = StyleSheet.create({
   container: {
