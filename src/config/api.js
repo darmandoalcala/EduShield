@@ -4,11 +4,7 @@ const isDevelopment = __DEV__;
 
 const API_URLS = {
   // CODESPACE ⚠️CAMBIEN SEGUN SU CODESPACE (revisar en puertos, el 3001 y cambiar a público)⚠️
-<<<<<<< HEAD
-  development: 'https://symmetrical-acorn-45pj6px5rr9hqvwv-3001.app.github.dev', //NO LLEVA BARRA FINAL
-=======
-  development: 'https://literate-cod-4jj5vrppq4x43w97-3001.app.github.dev',
->>>>>>> 7a669fb322f00c78599410db7613fd9cfd5787b7
+  development: 'https://noxious-cauldron-7vvrwg45v6gjhpjq7-3001.app.github.dev', //NO LLEVA BARRA FINAL
   
   // PRODUCCIÓN
   production: 'https://tu-api-produccion.com',
