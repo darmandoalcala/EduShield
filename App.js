@@ -1,16 +1,22 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { ThemeProvider } from './src/theme/ThemeContext';
 import { UserProvider } from './src/context/UserContext'; 
+import { ConfigProvider } from './src/context/ConfigContext'; 
+import { LocationProvider } from './src/context/LocationContext'; 
 import AppNavigator from './src/navigation/AppNavigator';
 
 export default function App() {
   return (
     <ThemeProvider>
-      <UserProvider> 
-        <NavigationContainer>
-          <AppNavigator />
-        </NavigationContainer>
-      </UserProvider> 
+      <UserProvider>
+        <ConfigProvider> 
+          <LocationProvider> 
+            <NavigationContainer>
+              <AppNavigator />
+            </NavigationContainer>
+          </LocationProvider>
+        </ConfigProvider>
+      </UserProvider>
     </ThemeProvider>
   );
 }

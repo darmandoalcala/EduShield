@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext } from 'react'; // 🔹 agrega useContext
 import {
   View,
   Text,
@@ -9,13 +9,21 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
 import HeaderBar from '../components/HeaderBar';
+import { LocationContext } from '../context/LocationContext';
 
 export default function Location() {
   const navigation = useNavigation();
-  const [locationEnabled, setLocationEnabled] = useState(true);
-  const [highPrecision, setHighPrecision] = useState(false);
-  const [historyEnabled, setHistoryEnabled] = useState(true); 
-  const [shareLocation, setShareLocation] = useState(false);
+  const {
+    locationEnabled,
+    setLocationEnabled,
+    highPrecision,
+    setHighPrecision,
+    historyEnabled,
+    setHistoryEnabled,
+    shareLocation,
+    setShareLocation,
+    updateLocationSettings,
+  } = useContext(LocationContext);
 
   const renderToggle = (label, value, onToggle) => (
     <View style={styles.settingRow}>
@@ -37,8 +45,15 @@ export default function Location() {
     </View>
   );
 
-  const handleSave = () => {
-    // Lógica para guardar configuracións
+  const handleSave = async () => {
+    const settings = {
+      locationEnabled,
+      highPrecision,
+      historyEnabled,
+      shareLocation,
+    };
+    await updateLocationSettings(settings);
+    alert('Configuraciones guardadas con éxito');
   };
 
   return (
@@ -47,8 +62,8 @@ export default function Location() {
 
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.title}>Configuración localización</Text>
-            <Icon name="cog" size={30} color="#fff" style={{ marginTop: 20 }} />
+          <Text style={styles.title}>Configuración de localización</Text>
+          <Icon name="cog" size={30} color="#fff" style={{ marginTop: 20 }} />
         </View>
 
         {renderToggle('Activar localización', locationEnabled, setLocationEnabled)}
@@ -65,7 +80,6 @@ export default function Location() {
     </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   container: {

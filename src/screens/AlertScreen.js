@@ -1,66 +1,105 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert, StyleSheet, Linking } from 'react-native';
+import React, { useState, useEffect, useContext } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Alert, StyleSheet,ActivityIndicator } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import io from 'socket.io-client';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import HeaderBar from '../components/HeaderBar';
+import { LocationContext } from '../context/LocationContext';
 
 
 const AlertScreen = ({ navigation }) => {
   const [location, setLocation] = useState(null);
   const [usuariosAlerta, setUsuariosAlerta] = useState([]);
   const [alertaActiva, setAlertaActiva] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const { locationEnabled, setLocationEnabled } = useContext(LocationContext);
 
-  // Conexión al backend cambiar al url de cada servidor al iniciar cd backend node mapaRealTime.js--
-  const socket = io("https://literate-cod-4jj5vrppq4x43w97-3001.app.github.dev"); // Cambia al URL de tu servidor
+  // Conexión al backend
+  const socket = io("https://literate-cod-4jj5vrppq4x43w97-3001.app.github.dev"); 
 
   // Obtener ubicación inicial
   useEffect(() => {
-      (async () => {
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          Alert.alert('Permiso denegado', 'No se puede acceder a la ubicación.');
-          return;
-        }
-        let currentLocation = await Location.getCurrentPositionAsync({});
+    const solicitarPermiso = async () => {
+      try {
+          let { status } = await Location.getForegroundPermissionsAsync();
+
+          if (status !== 'granted') {
+            const { status: newStatus } = await Location.requestForegroundPermissionsAsync();
+            status = newStatus;
+          }
+
+          if (status !== 'granted') {
+            setLocationEnabled(false);
+            setIsLoading(false);
+            Alert.alert(
+              "Permiso de ubicación denegado",
+              "No podemos acceder a tu ubicación. Ve a Configuración > Permisos > Activa ubicación para esta app."
+            );
+            return;
+          }
+
+        setLocationEnabled(true);
+
+        const currentLocation = await Location.getCurrentPositionAsync({});
         setLocation(currentLocation.coords);
-      })();
-    }, []);
+      } catch (error) {
+        console.error("Error al obtener ubicación:", error);
+        Alert.alert("Error", "Hubo un problema al acceder a la ubicación.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    solicitarPermiso();
+  }, []);
 
   // Recibir actualizaciones del servidor
   useEffect(() => {
-      socket.on("actualizarMapa", (usuarios) => {
-        setUsuariosAlerta(usuarios);
-      });
+    socket.on("actualizarMapa", (usuarios) => {
+      setUsuariosAlerta(usuarios);
+    });
 
-      return () => socket.disconnect();
-    }, []);
+    return () => socket.disconnect();
+  }, []);
+
   // Activar alerta: envía tu ubicación al backend
   const handleActivarAlerta = () => {
-    if (!location) return;
+    if (!locationEnabled) {
+      Alert.alert(
+        "Localización desactivada",
+        "Actívala en Configuración para enviar alertas."
+      );
+      return;
+    }
 
-    Alert.alert(
-      'Confirmación de alerta',
-      '¿Estás segura de activar la alerta?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Sí, activar',
-          onPress: () => {
-            setAlertaActiva(true);
-            socket.emit("ubicacion", {
-              userId: socket.id,
-              lat: location.latitude,
-              lng: location.longitude,
-              alerta: true
-            });
-          }
-        }
-      ]
-    );
-  };
-   // Función para abrir la app de llamadas nativa
+    if (!location) {
+      Alert.alert(
+        "Ubicación no disponible",
+        "Aún no se ha obtenido tu ubicación actual."
+      );
+      return;
+    }
+
+    Alert.alert("Confirmar", "¿Deseas activar la alerta?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Sí, activar",
+        onPress: () => {
+          setAlertaActiva(true);
+          socket.emit("ubicacion", {
+            userId: socket.id,
+            lat: location.latitude,
+            lng: location.longitude,
+            alerta: true,
+          });
+        },
+      },
+    ]);
+  }
+
+ 
+
   // Mostrar zonas de alerta: solo ver usuarios y tu ubicación (sin tu alerta si no activaste)
   const handleMostrarZonas = () => {
     Alert.alert(
@@ -90,7 +129,47 @@ const AlertScreen = ({ navigation }) => {
       ]
     );
   };
+  if (isLoading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#ff0000" />
+        <Text style={{ color: '#fff', marginTop: 10 }}>Obteniendo permisos de ubicación...</Text>
+      </View>
+    );
+  }
 
+  if (!locationEnabled) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text style={{ color: '#fff', textAlign: 'center', marginBottom: 15 }}>
+          La localización está desactivada. Actívala en Configuración para usar alertas.
+        </Text>
+        <TouchableOpacity
+          style={{
+            backgroundColor: '#E53935',
+            paddingVertical: 10,
+            paddingHorizontal: 20,
+            borderRadius: 10,
+          }}
+          onPress={() => Alert.alert(
+            "Abrir configuración",
+            "Ve a la configuración de tu dispositivo y otorga permisos de ubicación."
+          )}
+        >
+          <Text style={{ color: '#fff', fontWeight: 'bold' }}>Abrir configuración</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  if (!location) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#ff0000" />
+        <Text style={{ color: '#fff', marginTop: 10 }}>Obteniendo tu ubicación actual...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -99,49 +178,44 @@ const AlertScreen = ({ navigation }) => {
         
         {/* Mapa */}
         <View style={styles.mapSection}>
-          {location && (
-            <MapView
-              style={styles.map}
-              provider={MapView.PROVIDER_GOOGLE} // compatible con Expo
-              initialRegion={{
-                latitude: location.latitude,
-                longitude: location.longitude,
-                latitudeDelta: 0.01,
-                longitudeDelta: 0.01,
-              }}
-            >
-              {/* Tu marcador */}
-              <Marker
-                coordinate={{ latitude: location.latitude, longitude: location.longitude }}
-                title="Tú"
-                pinColor={alertaActiva ? "red" : "#3ca33cff"}
-              />
+          <MapView
+            style={styles.map}
+            provider={MapView.PROVIDER_GOOGLE}
+            initialRegion={{
+              latitude: location.latitude,
+              longitude: location.longitude,
+              latitudeDelta: 0.01,
+              longitudeDelta: 0.01,
+            }}
+          >
+            <Marker
+              coordinate={{ latitude: location.latitude, longitude: location.longitude }}
+              title="Tú"
+              pinColor={alertaActiva ? "red" : "#3ca33cff"}
+            />
 
-              {/* Marcadores de otros usuarios */}
-              {usuariosAlerta
-                .filter(u => u.userId !== socket.id)
-                .map(u => (
-                  <Marker
-                    key={u.userId}
-                    coordinate={{ latitude: u.lat, longitude: u.lng }}
-                    title={`Usuario ${u.userId}`}
-                    pinColor="red"
-                  />
-                ))
-              }
-            </MapView>
-          )}
+            {usuariosAlerta
+              .filter(u => u.userId !== socket.id)
+              .map(u => (
+                <Marker
+                  key={u.userId}
+                  coordinate={{ latitude: u.lat, longitude: u.lng }}
+                  title={`Usuario ${u.userId}`}
+                  pinColor="red"
+                />
+              ))}
+          </MapView>
         </View>
-      {/* Botones */}
+
+        {/* Botones */}
         <View style={styles.buttonRow}>
-          {/* Botón de activar alerta */}
           <TouchableOpacity
             style={[
               styles.evidenceButton,
-              { backgroundColor: alertaActiva ? '#fc0000ff' : '#999' } // Rojo o gris
+              { backgroundColor: alertaActiva ? '#fc0000ff' : '#999' },
             ]}
             onPress={handleActivarAlerta}
-            disabled={alertaActiva} // evita tocarlo si ya está activa
+            disabled={alertaActiva}
           >
             <Icon
               name={alertaActiva ? 'alert-outline' : 'crosshairs-gps'}
@@ -154,34 +228,29 @@ const AlertScreen = ({ navigation }) => {
             </Text>
           </TouchableOpacity>
 
-          {/* Botón de mostrar zonas */}
           <TouchableOpacity style={styles.evidenceButton} onPress={handleMostrarZonas}>
             <Icon name="map-marker-alert" size={20} color="#ff0000ff" style={styles.iconLeft} />
             <Text style={styles.evidenceText}>Mostrar zonas de alerta</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Botón de cancelar alerta */}
+        {/* Cancelar alerta */}
         <TouchableOpacity
           style={[
             styles.sendButton,
-            { backgroundColor: alertaActiva ? '#ff0000ff' : '#999' } // Solo rojo si hay alerta
+            { backgroundColor: alertaActiva ? '#ff0000ff' : '#999' },
           ]}
           onPress={handleCancelarAlerta}
-          disabled={!alertaActiva} // deshabilitado si no hay alerta
+          disabled={!alertaActiva}
         >
-          <Icon
-            name="close-circle-outline"
-            size={20}
-            color="#FFF"
-            style={styles.iconLeft}
-          />
+          <Icon name="close-circle-outline" size={20} color="#FFF" style={styles.iconLeft} />
           <Text style={styles.sendButtonText}>Cancelar Alerta</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>
   );
 };
+
 
 // ... tus estilos 
 
