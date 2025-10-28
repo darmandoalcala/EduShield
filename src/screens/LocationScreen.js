@@ -52,8 +52,17 @@ export default function Location() {
       historyEnabled,
       shareLocation,
     };
-    await updateLocationSettings(settings);
-    alert('Configuraciones guardadas con éxito');
+
+    try {
+      await updateLocationSettings(settings);
+      alert('Configuraciones guardadas con éxito');
+      navigation.goBack(); // <-- Esto te regresa a la pantalla anterior
+      // O si quieres asegurarte de ir a Settings:
+      // navigation.navigate('Settings');
+    } catch (error) {
+      console.error(error);
+      alert('Ocurrió un error al guardar las configuraciones');
+    }
   };
 
   return (
