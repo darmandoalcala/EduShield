@@ -13,17 +13,14 @@ app.use(express.urlencoded({ extended: true }));
 // Rutas
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
-<<<<<<< HEAD
 const reportRoutes = require('./routes/reportRoutes');
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes)
 app.use('/api', reportRoutes);
-=======
 const contactsRoutes = require('./routes/contacts');
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/contacts', contactsRoutes);
->>>>>>> 7a669fb322f00c78599410db7613fd9cfd5787b7
 
 // Ruta de prueba
 app.get('/', (req, res) => {

@@ -39,7 +39,7 @@ export default function CentroU() {
 
   return (
     <View style={styles.container}>
-      <HeaderBar navigation={navigation} showBackButton={false} />
+      <HeaderBar navigation={navigation} showBackButton={true} />
 
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>
