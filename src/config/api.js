@@ -4,7 +4,7 @@ const isDevelopment = __DEV__;
 
 const API_URLS = {
   // CODESPACE ⚠️CAMBIEN SEGUN SU CODESPACE (revisar en puertos, el 3001 y cambiar a público)⚠️
-  development: 'https://noxious-cauldron-7vvrwg45v6gjhpjq7-3001.app.github.dev', //NO LLEVA BARRA FINAL
+  development: 'https://filthy-corpse-jjj49xw7jx49f5q5q-3001.app.github.dev', //NO LLEVA BARRA FINAL
   
   // PRODUCCIÓN
   production: 'https://tu-api-produccion.com',
@@ -18,6 +18,11 @@ export const API_BASE_URL = API_URLS.development; // CAMBIAR SEGUN DONDE SE PRUE
 
 // Exportar objeto para pruebas
 export const ApiService = {
+
+  // ==========================================
+  // FUNCIONES DE REGISTRO DE USUARIO
+  // ==========================================
+
   // VERIFICAR SI EMAIL YA EXISTE
   async checkEmailExists(email) {
     try {
@@ -53,7 +58,7 @@ export const ApiService = {
     }
   },
 
-  // REGISTRO DE USUARIO
+  // Registro de usuario
   async registerUser(userData) {
     try {
       console.log('🚀 Enviando datos de registro:', userData);
@@ -108,7 +113,10 @@ export const ApiService = {
     }
   },
 
+  // ==========================================
   // LOGIN DE USUARIO
+  // ==========================================
+
   async loginUser(credentials) {
     try {
       console.log('🚀 Enviando credenciales de login:', { email: credentials.email });
@@ -239,7 +247,7 @@ export const ApiService = {
 
   // ==========================================
   // MÉTODOS DE REPORTES
-  // ==========================================
+   // ==========================================
 
 async createReport(reportData) {
     try {
@@ -539,4 +547,141 @@ async createReport(reportData) {
       throw error;
     }
   },
+
+  // ==========================================
+  // FUNCIONES DE CONTACTOS PERSONALES
+  // ==========================================
+
+  async getPersonalContacts(userId) {
+    try {
+      console.log('📋 Obteniendo contactos personales del usuario:', userId);
+
+      const response = await fetch(`${API_BASE_URL}/api/contacts/${userId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      const textResponse = await response.text();
+      console.log('📥 Respuesta contactos:', textResponse);
+
+      let data;
+      try {
+        data = textResponse ? JSON.parse(textResponse) : {};
+      } catch (parseError) {
+        console.error('❌ Error parseando JSON:', parseError);
+        throw new Error('Error al obtener los contactos');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al cargar contactos');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('❌ Error en getPersonalContacts:', error);
+      throw error;
+    }
+  },
+
+  async addPersonalContact(userId, contactData) {
+    try {
+      console.log('➕ Agregando contacto:', contactData);
+
+      const response = await fetch(`${API_BASE_URL}/api/contacts/${userId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(contactData),
+      });
+
+      const textResponse = await response.text();
+      let data;
+      
+      try {
+        data = textResponse ? JSON.parse(textResponse) : {};
+      } catch (parseError) {
+        throw new Error('Error al procesar la respuesta');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al agregar contacto');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('❌ Error en addPersonalContact:', error);
+      throw error;
+    }
+  },
+
+  async updatePersonalContact(contactId, contactData) {
+    try {
+      console.log('✏️ Actualizando contacto:', contactId);
+
+      const response = await fetch(`${API_BASE_URL}/api/contacts/contact/${contactId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(contactData),
+      });
+
+      const textResponse = await response.text();
+      let data;
+      
+      try {
+        data = textResponse ? JSON.parse(textResponse) : {};
+      } catch (parseError) {
+        throw new Error('Error al procesar la respuesta');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al actualizar contacto');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('❌ Error en updatePersonalContact:', error);
+      throw error;
+    }
+  },
+
+  async deletePersonalContact(contactId) {
+    try {
+      console.log('🗑️ Eliminando contacto:', contactId);
+
+      const response = await fetch(`${API_BASE_URL}/api/contacts/contact/${contactId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      const textResponse = await response.text();
+      let data;
+      
+      try {
+        data = textResponse ? JSON.parse(textResponse) : {};
+      } catch (parseError) {
+        throw new Error('Error al procesar la respuesta');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al eliminar contacto');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('❌ Error en deletePersonalContact:', error);
+      throw error;
+    }
+  }
+
 };
