@@ -9,8 +9,11 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  Linking,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import * as ImagePicker from 'expo-image-picker';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import HeaderBar from '../components/HeaderBar';
 import { ApiService } from '../config/api';
 
@@ -18,13 +21,11 @@ export default function EditProfile() {
   const navigation = useNavigation();
   const route = useRoute();
   
-  // Obtener el userId desde los parámetros de navegación
   const { userId } = route.params || {};
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   
-  // Estados del formulario
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [codigoEstudiante, setCodigoEstudiante] = useState('');
@@ -34,10 +35,10 @@ export default function EditProfile() {
   const [profileImage, setProfileImage] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
 
+  // 🔹 Opciones de Campus (solo CUCEI seleccionable)
   const campusOptions = ['CUCEI', 'CUCEA', 'CUCS'];
   const genderOptions = ['MASCULINO', 'FEMENINO', 'OTRO', 'PREFIERO_NO_DECIR'];
 
-  // Cargar datos del usuario al montar el componente
   useEffect(() => {
     loadUserData();
   }, []);
@@ -55,17 +56,12 @@ export default function EditProfile() {
 
       if (response.success && response.data) {
         const user = response.data;
-        
-        // Llenar los campos con los datos del usuario
         setFullName(user.nombre_completo || `${user.nombre} ${user.apellido}` || '');
         setEmail(user.email || '');
         setCodigoEstudiante(user.codigo_estudiante || '');
         setTelefono(user.telefono || '');
         setGender(user.sexo || '');
         setProfileImage(user.foto_perfil || null);
-        // setCampus se mantiene en CUCEI por defecto
-
-        console.log('✅ Datos del usuario cargados:', user);
       }
     } catch (error) {
       console.error('❌ Error cargando perfil:', error);
@@ -75,29 +71,97 @@ export default function EditProfile() {
     }
   };
 
-  const handleAddPhoto = () => {
-    Alert.alert('Próximamente', 'La función de cambiar foto estará disponible pronto');
-    // Aquí irá la lógica para seleccionar/tomar foto
+  const handleAddPhoto = async () => {
+    try {
+      const options = [
+        { text: 'Tomar foto', onPress: async () => pickImage(true) },
+        { text: 'Elegir de galería', onPress: async () => pickImage(false) },
+        { text: 'Cancelar', style: 'cancel' },
+      ];
+
+      Alert.alert('Foto de perfil', 'Selecciona una opción', options);
+    } catch (error) {
+      console.error('Error al seleccionar foto:', error);
+      Alert.alert('Error', 'No se pudo seleccionar la foto');
+    }
+  };
+
+  const pickImage = async (fromCamera = false) => {
+    try {
+      // 📸 Solicitar permisos según la fuente
+      if (fromCamera) {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert(
+            'Permiso denegado',
+            'Se necesita acceso a la cámara para tomar una foto.',
+            [
+              { text: 'Cancelar', style: 'cancel' },
+              { text: 'Abrir configuración', onPress: () => Linking.openSettings() },
+            ]
+          );
+          return;
+        }
+      } else {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert(
+            'Permiso denegado',
+            'Se necesita acceso a la galería para elegir una foto.',
+            [
+              { text: 'Cancelar', style: 'cancel' },
+              { text: 'Abrir configuración', onPress: () => Linking.openSettings() },
+            ]
+          );
+          return;
+        }
+      }
+
+      // 🖼️ Abrir cámara o galería
+      const result = fromCamera
+        ? await ImagePicker.launchCameraAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.8,
+          })
+        : await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.8,
+          });
+
+      // 🚫 Cancelado
+      if (result.canceled) return;
+
+      // ✅ Imagen seleccionada
+      const uri = result.assets[0].uri;
+      setProfileImage(uri);
+
+      // Si luego quieres subirla:
+      // await ApiService.uploadProfileImage(userId, uri);
+
+    } catch (error) {
+      console.error('Error al seleccionar imagen:', error);
+      Alert.alert('Error', 'No se pudo abrir la cámara o galería');
+    }
   };
 
   const handleSave = async () => {
-    // Validaciones
     if (!fullName.trim()) {
       Alert.alert('Error', 'El nombre completo es obligatorio');
       return;
     }
-
     if (!telefono.trim() || telefono.length !== 10) {
       Alert.alert('Error', 'El teléfono debe tener 10 dígitos');
       return;
     }
-
     if (!gender) {
       Alert.alert('Error', 'Debes seleccionar un género');
       return;
     }
 
-    // Dividir nombre completo
     const nombreCompleto = fullName.trim().split(' ');
     const nombre = nombreCompleto[0];
     const apellido = nombreCompleto.slice(1).join(' ') || nombreCompleto[0];
@@ -110,20 +174,13 @@ export default function EditProfile() {
     };
 
     setIsSaving(true);
-
     try {
       const response = await ApiService.updateUserProfile(userId, updatedData);
-
       if (response.success) {
         Alert.alert(
           'Éxito',
           'Perfil actualizado correctamente',
-          [
-            {
-              text: 'OK',
-              onPress: () => navigation.goBack()
-            }
-          ]
+          [{ text: 'OK', onPress: () => navigation.goBack() }]
         );
       }
     } catch (error) {
@@ -164,132 +221,163 @@ export default function EditProfile() {
       <HeaderBar navigation={navigation} showBackButton={true} />
 
       <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+        
+        {/* 1. Sección de Cabecera (Estilo estándar) */}
+        <View style={styles.headerSection}>
+          <Text style={styles.title}>Editar Perfil</Text>
+          <Text style={styles.subtitle}>
+            Mantén tu información actualizada
+          </Text>
+        </View>
+        
+        {/* 2. Avatar */}
         <TouchableOpacity style={styles.avatarContainer} onPress={handleAddPhoto}>
           <Image
             source={
               profileImage 
                 ? { uri: profileImage }
-                : require('/workspaces/EduShield/assets/contact.png')
+                // 🔹 Ruta relativa (más segura)
+                : require('../../assets/contact.png') 
             }
             style={styles.avatar}
           />
+          <View style={styles.editIcon}>
+            <Icon name="camera" size={18} color="#fff" />
+          </View>
           <Text style={styles.editPhotoText}>Editar foto</Text>
         </TouchableOpacity>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Nombre completo</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ingresa tu nombre completo"
-            placeholderTextColor="#aaa"
-            value={fullName}
-            onChangeText={setFullName}
-            editable={!isSaving}
-          />
-        </View>
+        {/* 3. Tarjeta de Formulario: Información Personal */}
+        <Text style={styles.listTitle}>Información Personal</Text>
+        <View style={styles.formCard}>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Nombre completo</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ingresa tu nombre completo"
+              placeholderTextColor="#666"
+              value={fullName}
+              onChangeText={setFullName}
+              editable={!isSaving}
+            />
+          </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Correo institucional</Text>
-          <TextInput
-            style={[styles.input, styles.inputDisabled]}
-            value={email}
-            editable={false}
-          />
-          <Text style={styles.helperText}>El correo no se puede modificar</Text>
-        </View>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Teléfono</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="10 dígitos (ej. 3312345678)"
+              placeholderTextColor="#666"
+              value={telefono}
+              onChangeText={setTelefono}
+              keyboardType="phone-pad"
+              maxLength={10}
+              editable={!isSaving}
+            />
+          </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Código de estudiante</Text>
-          <TextInput
-            style={[styles.input, styles.inputDisabled]}
-            value={codigoEstudiante}
-            editable={false}
-          />
-          <Text style={styles.helperText}>El código no se puede modificar</Text>
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Teléfono</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="10 dígitos"
-            placeholderTextColor="#aaa"
-            value={telefono}
-            onChangeText={setTelefono}
-            keyboardType="phone-pad"
-            maxLength={10}
-            editable={!isSaving}
-          />
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Centro universitario</Text>
-          <TouchableOpacity
-            style={styles.dropdownButton}
-            onPress={() => setShowDropdown(!showDropdown)}
-            disabled={isSaving}
-          >
-            <Text style={styles.dropdownText}>{campus}</Text>
-            <Text style={styles.dropdownArrow}>{showDropdown ? '▲' : '▼'}</Text>
-          </TouchableOpacity>
-          {showDropdown && (
-            <View style={styles.dropdownContainer}>
-              {campusOptions.map(option => (
+          <View style={[styles.inputGroup, { marginBottom: 0 }]}>
+            <Text style={styles.label}>Género</Text>
+            <View style={styles.genderContainer}>
+              {genderOptions.map((option) => (
                 <TouchableOpacity
                   key={option}
-                  style={styles.optionItem}
-                  onPress={() => handleOptionSelect(option)}
+                  style={[
+                    styles.genderButton,
+                    gender === option && styles.genderSelected
+                  ]}
+                  onPress={() => handleGenderSelect(option)}
+                  disabled={isSaving}
                 >
-                  <Text style={styles.optionText}>{option}</Text>
+                  <Text style={[
+                    styles.genderText,
+                    gender === option && styles.genderTextSelected
+                  ]}>
+                    {option === 'PREFIERO_NO_DECIR' ? 'PREFIERO NO DECIR' : option}
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>
-          )}
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Género</Text>
-          <View style={styles.genderContainer}>
-            {genderOptions.map((option) => (
-              <TouchableOpacity
-                key={option}
-                style={[
-                  styles.genderButton,
-                  gender === option && styles.genderSelected
-                ]}
-                onPress={() => handleGenderSelect(option)}
-                disabled={isSaving}
-              >
-                <Text style={[
-                  styles.genderText,
-                  gender === option && styles.genderTextSelected
-                ]}>
-                  {option === 'PREFIERO_NO_DECIR' ? 'PREFIERO NO DECIR' : option}
-                </Text>
-              </TouchableOpacity>
-            ))}
           </View>
         </View>
 
-        <View style={styles.bottomButtonContainer}>
-          <TouchableOpacity 
-            style={[styles.saveButton, isSaving && styles.saveButtonDisabled]} 
-            onPress={handleSave}
-            disabled={isSaving}
-          >
-            {isSaving ? (
-              <ActivityIndicator size="small" color="white" />
-            ) : (
-              <Text style={styles.saveButtonText}>Guardar</Text>
+        {/* 4. Tarjeta de Formulario: Información Académica */}
+        <Text style={styles.listTitle}>Información Académica</Text>
+        <View style={styles.formCard}>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Correo institucional</Text>
+            <TextInput
+              style={[styles.input, styles.inputDisabled]}
+              value={email}
+              editable={false}
+            />
+            <Text style={styles.helperText}>El correo no se puede modificar</Text>
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Código de estudiante</Text>
+            <TextInput
+              style={[styles.input, styles.inputDisabled]}
+              value={codigoEstudiante}
+              editable={false}
+            />
+            <Text style={styles.helperText}>El código no se puede modificar</Text>
+          </View>
+
+          <View style={[styles.inputGroup, { marginBottom: 0 }]}>
+            <Text style={styles.label}>Centro universitario</Text>
+            <TouchableOpacity
+              style={[styles.input, styles.dropdownButton]}
+              onPress={() => setShowDropdown(!showDropdown)}
+              disabled={isSaving}
+            >
+              <Text style={styles.dropdownText}>{campus}</Text>
+              <Icon name={showDropdown ? 'chevron-up' : 'chevron-down'} size={20} color="#888" />
+            </TouchableOpacity>
+            {showDropdown && (
+              <View style={styles.dropdownContainer}>
+                {campusOptions.map(option => (
+                  <TouchableOpacity
+                    key={option}
+                    style={styles.optionItem}
+                    onPress={() => handleOptionSelect(option)}
+                  >
+                    <Text style={styles.optionText}>{option}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             )}
-          </TouchableOpacity>
+          </View>
         </View>
 
-        <Text style={styles.smallText}>All Rights reserved @EDUSHIELD2025</Text>
+        {/* 5. Botón de Guardar (Estilo estándar) */}
+        <TouchableOpacity 
+          style={[styles.saveButton, isSaving && styles.saveButtonDisabled]} 
+          onPress={handleSave}
+          disabled={isSaving}
+        >
+          {isSaving ? (
+            <ActivityIndicator size="small" color="white" />
+          ) : (
+            <>
+              <Icon name="content-save" size={20} color="white" style={{ marginRight: 10 }} />
+              <Text style={styles.saveButtonText}>Guardar Cambios</Text>
+            </>
+          )}
+        </TouchableOpacity>
+
+        {/* 6. Footer (Estilo estándar) */}
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>EDUSHIELD 2025</Text>
+          <Text style={styles.footerSubtext}>Todos los derechos reservados</Text>
+        </View>
       </ScrollView>
     </View>
   );
 }
+
+// --- HOJA DE ESTILOS ---
+// Estilos reformados para el tema oscuro
 
 const styles = StyleSheet.create({
   container: {
@@ -298,95 +386,149 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 20,
-    paddingBottom: 40,
+    paddingBottom: 100,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#000',
   },
   loadingText: {
     color: '#fff',
     marginTop: 10,
     fontSize: 16,
   },
+  
+  // Header Section
+  headerSection: {
+    marginBottom: 24,
+  },
+  title: {
+    color: 'white',
+    fontSize: 32,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  subtitle: {
+    color: '#888',
+    fontSize: 16,
+    lineHeight: 22,
+  },
+
+  // Avatar
   avatarContainer: {
     alignItems: 'center',
-    marginBottom: 35,
-    marginTop: 20,
+    marginBottom: 32,
+    position: 'relative',
   },
   avatar: {
     width: 120,
     height: 120,
     borderRadius: 60,
-    marginBottom: 10,
     backgroundColor: '#333',
+    borderWidth: 2,
+    borderColor: '#444',
+  },
+  editIcon: {
+    position: 'absolute',
+    bottom: 30, // Ajusta para que quede sobre la foto
+    right: '35%', // Ajusta para centrar
+    backgroundColor: 'red',
+    padding: 8,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: '#000',
   },
   editPhotoText: {
-    color: '#fff',
-    fontSize: 16,
+    color: '#888',
+    fontSize: 14,
+    marginTop: 12,
   },
+
+  // Título de lista
+  listTitle: {
+    color: '#888',
+    fontSize: 14,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 12,
+    marginTop: 16,
+  },
+
+  // Tarjeta de Formulario
+  formCard: {
+    backgroundColor: '#1a1a1a',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#222',
+    padding: 20,
+    marginBottom: 20,
+  },
+
+  // Grupo de Inputs
   inputGroup: {
     width: '100%',
     marginBottom: 20,
   },
   label: {
-    color: '#fff',
+    color: '#888',
     marginBottom: 8,
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 14,
   },
   input: {
-    backgroundColor: '#f7f5f5',
+    backgroundColor: '#111',
     borderRadius: 8,
     height: 50,
     paddingHorizontal: 15,
-    color: '#000',
+    color: '#fff',
     fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#333',
   },
   inputDisabled: {
-    backgroundColor: '#d3d3d3',
+    backgroundColor: '#111',
     color: '#666',
+    borderColor: '#222',
   },
   helperText: {
-    color: '#aaa',
+    color: '#888',
     fontSize: 12,
     marginTop: 5,
     marginLeft: 5,
   },
+
+  // Dropdown
   dropdownButton: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#f7f5f5',
-    padding: 15,
-    borderRadius: 8,
-    height: 50,
+    paddingHorizontal: 15,
   },
   dropdownText: {
-    color: '#000',
-    flex: 1,
+    color: '#fff',
     fontSize: 16,
   },
-  dropdownArrow: {
-    color: '#000',
-    marginLeft: 10,
-    fontSize: 12,
-  },
   dropdownContainer: {
-    backgroundColor: '#f7f5f5',
+    backgroundColor: '#1a1a1a',
     borderRadius: 8,
     marginTop: 5,
+    borderWidth: 1,
+    borderColor: '#333',
+    overflow: 'hidden',
   },
   optionItem: {
     padding: 15,
-    borderBottomColor: '#ddd',
+    borderBottomColor: '#333',
     borderBottomWidth: 1,
   },
   optionText: {
-    color: '#000',
+    color: '#fff',
     fontSize: 16,
   },
+
+  // Botones de Género
   genderContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -394,49 +536,73 @@ const styles = StyleSheet.create({
   },
   genderButton: {
     borderWidth: 1,
-    borderColor: '#fff',
+    borderColor: '#333',
+    backgroundColor: 'transparent',
     borderRadius: 8,
     paddingVertical: 12,
     paddingHorizontal: 15,
-    minWidth: '48%',
+    flexGrow: 1,
     alignItems: 'center',
+    minWidth: '48%',
   },
   genderSelected: {
     backgroundColor: 'red',
     borderColor: 'red',
   },
   genderText: {
-    color: '#fff',
+    color: '#888',
     fontSize: 14,
+    fontWeight: '600',
   },
   genderTextSelected: {
     color: '#fff',
     fontWeight: 'bold',
   },
-  bottomButtonContainer: {
-    alignItems: 'center',
-    marginTop: 20,
-  },
+
+  // Botón de Guardar
   saveButton: {
+    flexDirection: 'row',
     backgroundColor: 'red',
+    paddingVertical: 14,
+    paddingHorizontal: 32,
     borderRadius: 25,
-    paddingVertical: 15,
-    width: '60%',
     alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    marginTop: 20,
+    shadowColor: 'red',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
   saveButtonDisabled: {
-    opacity: 0.6,
+    opacity: 0.5,
   },
   saveButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
   },
-  smallText: {
-    color: '#aaa',
+
+  // Footer
+  footer: {
+    alignItems: 'center',
+    paddingTop: 40,
+    paddingBottom: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#222',
+    marginTop: 40,
+  },
+  footerText: {
+    color: '#444',
     fontSize: 12,
-    marginVertical: 10,
-    textAlign: 'center',
-    marginTop: 30,
+    fontWeight: '600',
+    letterSpacing: 2,
+    marginBottom: 4,
+  },
+  footerSubtext: {
+    color: '#333',
+    fontSize: 10,
   },
 });

@@ -1,17 +1,20 @@
-import React, { useContext } from 'react'; // 🔹 agrega useContext
+import React, { useContext } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Alert,
+  Linking,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import * as Location from 'expo-location'; 
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import HeaderBar from '../components/HeaderBar';
 import { LocationContext } from '../context/LocationContext';
 
-export default function Location() {
+export default function LocationScreen() {
   const navigation = useNavigation();
   const {
     locationEnabled,
@@ -25,9 +28,16 @@ export default function Location() {
     updateLocationSettings,
   } = useContext(LocationContext);
 
-  const renderToggle = (label, value, onToggle) => (
-    <View style={styles.settingRow}>
-      <Text style={styles.settingLabel}>{label}</Text>
+  // renderToggle ahora incluye ícono, descripción y un flag "Last"
+  const renderToggle = (icon, title, description, value, onToggle, last = false) => (
+    <View style={[styles.settingRow, last && styles.lastSettingRow]}>
+      <Icon name={icon} size={24} color="red" style={styles.settingIcon} />
+      
+      <View style={styles.settingTextContainer}>
+        <Text style={styles.settingLabel}>{title}</Text>
+        <Text style={styles.settingDescription}>{description}</Text>
+      </View>
+      
       <View style={styles.toggleGroup}>
         <TouchableOpacity
           style={[styles.toggleButton, value && styles.toggleSelected]}
@@ -55,124 +65,243 @@ export default function Location() {
 
     try {
       await updateLocationSettings(settings);
-      alert('Configuraciones guardadas con éxito');
-      navigation.goBack(); // <-- Esto te regresa a la pantalla anterior
-      // O si quieres asegurarte de ir a Settings:
-      // navigation.navigate('Settings');
+      Alert.alert('Guardado', 'Configuraciones guardadas con éxito', [
+        { text: 'OK', onPress: () => navigation.goBack() }
+      ]);
     } catch (error) {
       console.error(error);
-      alert('Ocurrió un error al guardar las configuraciones');
+      Alert.alert('Error', 'Ocurrió un error al guardar las configuraciones');
+    }
+  };
+
+  const handleToggleLocation = async (newValue) => {
+    //Si la apaga
+    if (newValue === false) {
+      setLocationEnabled(false);
+      return;
+    }
+
+    // Si la enciende
+    try {
+      // Revisa el estado actual del permiso
+      let { status } = await Location.getForegroundPermissionsAsync();
+
+      // Si el permiso no se ha preguntado, solicítalo
+      if (status === Location.PermissionStatus.UNDETERMINED) {
+        const { status: newStatus } = await Location.requestForegroundPermissionsAsync();
+        status = newStatus;
+      }
+
+      // 3. Evalúa el resultado
+      if (status === Location.PermissionStatus.GRANTED) {
+        // PERMISO CONCEDIDO
+        setLocationEnabled(true);
+        Alert.alert('Activado', 'La localización se ha activado.');
+      } else if (status === Location.PermissionStatus.DENIED) {
+        // PERMISO DENEGADO
+        Alert.alert(
+          'Permiso Requerido',
+          'Para activar la localización, necesitas otorgar permisos desde la configuración de tu dispositivo.',
+          [
+            { text: 'Cancelar', style: 'cancel', onPress: () => setLocationEnabled(false) },
+            { 
+              text: 'Abrir Configuración', 
+              onPress: () => Linking.openSettings() 
+            }
+          ]
+        );
+        setLocationEnabled(false);
+      }
+    } catch (error) {
+      console.error('Error pidiendo permisos:', error);
+      Alert.alert('Error', 'No se pudo verificar el permiso de localización.');
+      setLocationEnabled(false);
     }
   };
 
   return (
     <View style={styles.container}>
-      <HeaderBar navigation={navigation} showBackButton={false} />
+      <HeaderBar navigation={navigation} showBackButton={true} />
 
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Configuración de localización</Text>
-          <Icon name="cog" size={30} color="#fff" style={{ marginTop: 20 }} />
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        
+        {/* TITULO */}
+        <View style={styles.headerSection}>
+          <Text style={styles.title}>Localización</Text>
+          <Text style={styles.subtitle}>
+            Administra tus permisos y preferencias de ubicación
+          </Text>
         </View>
 
-        {renderToggle('Activar localización', locationEnabled, setLocationEnabled)}
-        {renderToggle('Precisión GPS ALTA', highPrecision, setHighPrecision)}
-        {renderToggle('Historial de ubicaciones ACTIVO', historyEnabled, setHistoryEnabled)}
-        {renderToggle('Compartir ubicación con mis contactos', shareLocation, setShareLocation)}
+        {/* ITEM DE TARJETA */}
+        <View style={styles.settingsCard}>
+          {renderToggle(
+            'map-marker', 
+            'Activar Localización', 
+            'Permite el acceso a tu ubicación', 
+            locationEnabled, 
+            handleToggleLocation
+          )}
+          {renderToggle(
+            'satellite-variant', 
+            'Precisión Alta', 
+            'Usa GPS para máxima exactitud', 
+            highPrecision, 
+            setHighPrecision
+          )}
+          {renderToggle(
+            'history', 
+            'Guardar Historial', 
+            'Almacena tus ubicaciones pasadas', 
+            historyEnabled, 
+            setHistoryEnabled
+          )}
+          {renderToggle(
+            'share-variant', 
+            'Compartir Ubicación', 
+            'Envía tu ubicación a tus contactos', 
+            shareLocation, 
+            setShareLocation,
+            true //ultimo item = true
+          )}
+        </View>
 
+        {/* GUARDAR CAMBIOS */}
         <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveButtonText}>Guardar</Text>
+          <Icon name="content-save" size={20} color="white" style={{ marginRight: 10 }} />
+          <Text style={styles.saveButtonText}>Guardar Cambios</Text>
         </TouchableOpacity>
 
-        <Text style={styles.smallText}>All Rights reserved @EDUSHIELD2025</Text>
+        {/* FOOTER */}
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>EDUSHIELD 2025</Text>
+          <Text style={styles.footerSubtext}>Todos los derechos reservados</Text>
+        </View>
       </ScrollView>
     </View>
   );
 }
 
+
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     backgroundColor: '#000',
-    padding: 10,
-    paddingTop: 2,
-    flexGrow: 1,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 55,
+  scrollContent: {
+    padding: 20,
+    paddingBottom: 100,
+  },
+  headerSection: {
+    marginTop: 20,
+    marginBottom: 24,
   },
   title: {
-    flex: 1,
-    color: '#fff',
-    fontSize: 28,
+    color: 'white',
+    fontSize: 32,
     fontWeight: 'bold',
-    marginTop: 25,
+    marginBottom: 8,
+  },
+  subtitle: {
+    color: '#888',
+    fontSize: 16,
+    lineHeight: 22,
+  },
+  settingsCard: {
+    backgroundColor: '#1a1a1a',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#222',
+    overflow: 'hidden', 
   },
   settingRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 50,
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333', 
+  },
+  lastSettingRow: {
+    borderBottomWidth: 0,
+  },
+  settingIcon: {
+    marginRight: 16,
+  },
+  settingTextContainer: {
+    flex: 1,
+    marginRight: 12,
   },
   settingLabel: {
-    flex: 1,
-    color: '#aaa',
-    fontSize: 21,
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  settingDescription: {
+    color: '#888',
+    fontSize: 13,
+    marginTop: 4,
   },
   toggleGroup: {
     flexDirection: 'row',
-    borderRadius: 5,
+    borderRadius: 8,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#555',
   },
   toggleButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    backgroundColor: '#fff',
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    backgroundColor: '#333', 
   },
   toggleSelected: {
-    backgroundColor: '#D03D3D',
+    backgroundColor: 'red', 
   },
   toggleText: {
-    color: '#000',
-    fontSize: 17,
+    color: '#AAA',
+    fontSize: 14,
     fontWeight: 'bold',
   },
   toggleTextSelected: {
-    color: '#fff',
-    fontSize: 17,
-  },
-  clearButton: {
-    backgroundColor: '#fff',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 5,
-  },
-  clearButtonText: {
-    color: '#000',
-    fontSize: 20,
-    fontWeight: 'bold',
+    color: 'white', 
   },
   saveButton: {
+    flexDirection: 'row',
     backgroundColor: 'red',
-    paddingVertical: 15,
+    paddingVertical: 14,
+    paddingHorizontal: 32,
     borderRadius: 25,
-    width: '60%',
-    height: 50,
-    marginLeft:70,
     alignItems: 'center',
-    marginTop: 100,
+    justifyContent: 'center',
+    alignSelf: 'center', // Centra el botón
+    marginTop: 32,
+    shadowColor: 'red',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
   saveButtonText: {
-    color: '#fff',
-    fontSize: 22,
-
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
   },
-    smallText: {
-    color: '#aaa',
+  footer: {
+    alignItems: 'center',
+    paddingTop: 40,
+    paddingBottom: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#222',
+    marginTop: 40,
+  },
+  footerText: {
+    color: '#444',
     fontSize: 12,
-    marginVertical: 10,
-    textAlign: 'center',
-    marginTop:20,
-  }
-})
+    fontWeight: '600',
+    letterSpacing: 2,
+    marginBottom: 4,
+  },
+  footerSubtext: {
+    color: '#333',
+    fontSize: 10,
+  },
+});
