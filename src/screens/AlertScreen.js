@@ -16,7 +16,7 @@ const AlertScreen = ({ navigation }) => {
   const { locationEnabled, setLocationEnabled } = useContext(LocationContext);
 
   // Conexión al backend
-  const socket = io("https://literate-cod-4jj5vrppq4x43w97-3001.app.github.dev"); 
+  const socket = io("https://filthy-superstition-v669r5jjp7g7fxvqw-3001.app.github.dev"); 
 
   // Obtener ubicación inicial
   useEffect(() => {
@@ -246,6 +246,10 @@ const AlertScreen = ({ navigation }) => {
           <Icon name="close-circle-outline" size={20} color="#FFF" style={styles.iconLeft} />
           <Text style={styles.sendButtonText}>Cancelar Alerta</Text>
         </TouchableOpacity>
+
+          <Text style={styles.notas}>Tu alerta será anónima ante el mapa, solo se compartirá la ubicación si está activada.</Text>
+
+          <Text style={styles.smallText}>All Rights reserved @EDUSHIELD2025</Text>
       </ScrollView>
     </View>
   );
@@ -266,6 +270,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
+    smallText: {
+    color: '#aaa',
+    fontSize: 12,
+    marginVertical: 10,
+    textAlign: 'center',
+    marginTop: 10, 
+    marginBottom: 15,
+  },
+      notas: {
+    color: '#aaa',
+    fontSize: 12,
+    marginVertical: 10,
+    textAlign: 'center',
+    marginTop: 25, 
+    marginBottom: 10,
+  },
 
   header: {
     width: '100%',
@@ -383,7 +403,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     paddingVertical: 14,
     paddingHorizontal: 16,
-    marginTop: 50,
+    marginTop: 40,
     width: '70%',
   },
   sendButtonText: {
