@@ -1,4 +1,6 @@
-const BASE_URL = "https://literate-cod-4jj5vrppq4x43w97-8000.app.github.dev";
+//const BASE_URL = "https://filthy-superstition-v669r5jjp7g7fxvqw-8000.app.github.dev";
+const BASE_URL = "http://edushield.duckdns.org:8000";
+
 
 export async function classifyByBackend(text, userId = "123") {
   const res = await fetch(`${BASE_URL}/chat`, {
