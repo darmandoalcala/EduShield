@@ -16,7 +16,9 @@ const AlertScreen = ({ navigation }) => {
   const { locationEnabled, setLocationEnabled } = useContext(LocationContext);
 
   // Conexión al backend
-  const socket = io("https://filthy-superstition-v669r5jjp7g7fxvqw-3001.app.github.dev"); 
+  //const socket = io("https://filthy-superstition-v669r5jjp7g7fxvqw-3001.app.github.dev"); 
+  const socket = io("http://edushield.duckdns.org:3000"); 
+
 
   // Obtener ubicación inicial
   useEffect(() => {
