@@ -334,6 +334,7 @@ const ContactsScreen = ({ navigation, route }) => {
         ) : (
           personalContacts.map(contact => renderContactCard(contact, true))
         )}
+          <Text style={styles.smallText}>All Rights reserved @EDUSHIELD2025</Text>
       </ScrollView>
 
       {/* Botón flotante */}
@@ -500,6 +501,16 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 150,
   },
+
+      smallText: {
+    color: '#aaa',
+    fontSize: 12,
+    marginVertical: 10,
+    textAlign: 'center',
+    marginTop: 10, 
+    marginBottom: 15,
+  },
+  
   header: {
     color: 'white',
     fontSize: 34,
