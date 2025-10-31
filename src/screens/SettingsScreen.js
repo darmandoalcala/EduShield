@@ -38,10 +38,10 @@ const SettingsScreen = ({ navigation }) => {
       // Activar
       setNotificationsEnabled(true);
       Alert.alert(
-        '✅ Notificaciones activadas',
+        'Notificaciones activadas',
         'Recibirás alertas de emergencia en tiempo real'
       );
-      console.log('🔔 Notificaciones activadas');
+      console.log('Notificaciones activadas');
     }
   };
 
@@ -262,16 +262,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   notificationInfo: {
-    backgroundColor: '#1a3a1a',
+    backgroundColor: '#d43b3bff',
     padding: 12,
     borderRadius: 8,
     marginBottom: 10,
     borderLeftWidth: 4,
-    borderLeftColor: '#00FF00',
+    borderLeftColor: '#ff0000ff',
   },
   notificationInfoText: {
-    color: '#90EE90',
-    fontSize: 14,
+    color: '#ffffffff',
+    fontSize: 16,
   },
   logoutButton: {
     backgroundColor: 'red',
