@@ -30,7 +30,7 @@ const Home1 = ({ navigation }) => {
       <HeaderBar navigation={navigation} showBackButton={false} /> 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Text style={styles.instructionText}>
-          Toca el botón de SOS para alertar a otros usuarios.
+          Toca el botón de SOS para alertar a otros usuarios tu ubicacion del incidente.
         </Text>
 
         <Pressable onPress={() => navigation.navigate('Alert')} style={styles.sosButton}>
@@ -53,13 +53,14 @@ const Home1 = ({ navigation }) => {
       </Pressable>
 
         <Text style={styles.noteText}>
-          Nota, una vez que se toque o se reporte, se enviará de inmediato un SMS a los contactos cercanos y de emergencia. Puedes cancelarlo si la situación se resuelve.
+          Informa tu suceso fácilmente desde la sección Reportar incidente.
         </Text>
 
         <Pressable  onPress={() => navigation.navigate('Chatbot')} style={styles.reportButton}>
             <Text style={styles.reportButtonText}>Chat de ayuda</Text> 
           <Icon name="robot" size={20} marginLeft={51} marginTop={5} color="white" />      
         </Pressable>
+          <Text style={styles.smallText}>All Rights reserved @EDUSHIELD2025</Text>
 
       </ScrollView>
 
@@ -72,6 +73,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'black', // Fondo negro respetado
   },
+      smallText: {
+    color: '#aaa',
+    fontSize: 12,
+    marginVertical: 10,
+    textAlign: 'center',
+    marginTop: 10, 
+    marginBottom: 15,
+  },
+
   scrollContainer: {
     marginTop: 50,
     paddingBottom: 100, // Espacio para el menú inferior
@@ -95,14 +105,14 @@ const styles = StyleSheet.create({
     color: '#aaa',
     fontSize: 30,
     fontWeight: 'bold',
-    marginVertical: 20,
+    marginVertical: 15,
   },
   reportButton: {
     backgroundColor: 'red',
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 10,
-    marginBottom: 30,
+    marginBottom: 16,
   },
   reportButtonText: {
     color: 'white',
