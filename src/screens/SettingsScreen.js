@@ -45,10 +45,10 @@ const SettingsScreen = ({ navigation }) => {
     }
   };
 
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    console.log('🌓 Modo oscuro:', !isDarkMode);
-  };
+  //const toggleDarkMode = () => {
+    //setIsDarkMode(!isDarkMode);
+    //console.log('🌓 Modo oscuro:', !isDarkMode);
+  //};
 
   const handleLogout = () => {
     Alert.alert(
@@ -84,21 +84,23 @@ const SettingsScreen = ({ navigation }) => {
         <Text style={styles.header}>CONFIGURACIÓN</Text>
         
         {/* APARIENCIA */}
-        <Text style={styles.sectionTitle}>Apariencia</Text>
-        
-        <View style={styles.settingItem}>
-          <View style={styles.settingInfo}>
-            <Text style={styles.settingText}>
-              Modo oscuro
-            </Text>
-          </View>
-          <Switch
-            trackColor={{ false: "#767577", true: "red" }}
-            thumbColor="#f4f3f4"
-            onValueChange={toggleDarkMode}
-            value={isDarkMode}
-          />
-        </View>
+          {/* 
+            <Text style={styles.sectionTitle}>Apariencia</Text>
+                  
+            <View style={styles.settingItem}>
+              <View style={styles.settingInfo}>
+                <Text style={styles.settingText}>
+                  Modo oscuro
+                </Text>
+              </View>
+              <Switch
+                trackColor={{ false: "#767577", true: "red" }}
+                thumbColor="#f4f3f4"
+                onValueChange={toggleDarkMode}
+                value={isDarkMode}
+              />
+            </View>
+          */}
 
         {/* NOTIFICACIONES */}
         <Text style={styles.sectionTitle}>Notificaciones</Text>
