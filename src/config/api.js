@@ -3,11 +3,11 @@
 const isDevelopment = __DEV__;
 
 const API_URLS = {
-  // CODESPACE ⚠️CAMBIEN SEGUN SU CODESPACE (revisar en puertos, el 3001 y cambiar a público)⚠️
-  development: 'https://symmetrical-acorn-45pj6px5rr9hqvwv-3001.app.github.dev', //NO LLEVA BARRA FINAL
+    // CODESPACE ⚠️CAMBIEN SEGUN SU CODESPACE (revisar en puertos, el 3001 y cambiar a público)⚠️
+  development: 'https://filthy-corpse-jjj49xw7jx49f5q5q-3001.app.github.dev', //NO LLEVA BARRA FINAL
   
-  // PRODUCCIÓN
-  production: 'https://tu-api-produccion.com',
+    //development: "https://filthy-superstition-v669r5jjp7g7fxvqw-3001.app.github.dev", //NO LLEVA BARRA FINAL
+    development: "http://edushield.duckdns.org:3001", 
   
   // LOCALHOST
   local: 'http://localhost:3001',
@@ -682,6 +682,89 @@ async createReport(reportData) {
       console.error('❌ Error en deletePersonalContact:', error);
       throw error;
     }
-  }
+  },
+
+// Funciones de upload de archivos
+  
+  async uploadEvidence(fileUri, fileType) {
+    try {
+      console.log('📤 Subiendo evidencia:', fileUri);
+
+      const formData = new FormData();
+
+      // Extraer extensión del archivo
+      const uriParts = fileUri.split('.');
+      const fileExtension = uriParts[uriParts.length - 1];
+
+      formData.append('file', {
+        uri: fileUri,
+        type: fileType,
+        name: `evidence-${Date.now()}.${fileExtension}`,
+      });
+
+      // ESTO FALTABA - El fetch
+      const response = await fetch(`${API_BASE_URL}/api/upload/evidence`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
+      const textResponse = await response.text();
+      console.log('Respuesta upload:', textResponse);
+
+      let data;
+      try {
+        data = textResponse ? JSON.parse(textResponse) : {};
+      } catch (parseError) {
+        console.error('Error parseando JSON:', parseError);
+        throw new Error('Error al subir archivo');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al subir archivo');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error en uploadEvidence:', error);
+      throw error;
+    }
+  },
+
+  async deleteEvidence(fileUrl) {
+    try {
+      console.log('Eliminando archivo:', fileUrl);
+      
+      const response = await fetch(`${API_BASE_URL}/api/upload/evidence`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({ fileUrl }),
+      });
+
+      const textResponse = await response.text();
+      console.log('Respuesta eliminacion:', textResponse);
+
+      let data;
+      try {
+        data = textResponse ? JSON.parse(textResponse) : {};
+      } catch (parseError) {
+        throw new Error('Error al procesar respuesta');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al eliminar archivo');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error en deleteEvidence:', error);
+      throw error;
+    }
+  },
 
 };

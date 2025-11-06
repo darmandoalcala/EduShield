@@ -1,3 +1,4 @@
+// src/screens/ReportScreen.js
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -10,29 +11,34 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import HeaderBar from '../components/HeaderBar';
 import { ApiService } from '../config/api';
-import { useUser } from '../context/UserContext'; // 👈 AGREGAR
+import { useUser } from '../context/UserContext';
 
 const centers = ['CUCEI', 'CUAAD', 'CUCEV', 'CUCS'];
 
 const ReportScreen = ({ navigation }) => {
-  const { user } = useUser(); // 👈 OBTENER USUARIO DEL CONTEXTO
+  const { user } = useUser();
   
   // Estados
   const [selectedCenter, setSelectedCenter] = useState(centers[0]);
   const [descripcion, setDescripcion] = useState('');
   const [loading, setLoading] = useState(false);
   const [fecha, setFecha] = useState(new Date());
+  const [photoUri, setPhotoUri] = useState(null);
+  const [videoUri, setVideoUri] = useState(null);
+  const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState(null);
+  const [uploadedVideoUrl, setUploadedVideoUrl] = useState(null);
+  const [uploadingFile, setUploadingFile] = useState(false);
 
-  // useEffect para verificar usuario
   useEffect(() => {
     if (user) {
-      console.log('👤 Usuario del contexto:', user);
+      console.log('Usuario del contexto:', user);
     } else {
-      console.warn('⚠️ No hay usuario en el contexto');
+      console.warn('No hay usuario en el contexto');
     }
   }, [user]);
 
@@ -40,42 +46,203 @@ const ReportScreen = ({ navigation }) => {
     console.log('Editar selección de centro universitario');
   };
 
-  const handleProfilePress = () => {
-    console.log('Botón de perfil presionado');
-  };
-
-  const handleButtonPress = (buttonName) => {
-    console.log(`Botón ${buttonName} presionado`);
-  };
-
   const handleEditDescription = () => {
     console.log('Editar descripción');
   };
 
-  const handleVideoEvidence = () => {
-    console.log('Evidencia en video');
-    Alert.alert(
-      'Evidencia en Video',
-      '¿Deseas grabar un video o seleccionar uno existente?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Grabar', onPress: () => console.log('Grabar video') },
-        { text: 'Seleccionar', onPress: () => console.log('Seleccionar video') },
-      ]
-    );
-  };
-
   const handlePhotoEvidence = () => {
-    console.log('Evidencia en foto');
     Alert.alert(
       'Evidencia en Foto',
       '¿Deseas tomar una foto o seleccionar una existente?',
       [
         { text: 'Cancelar', style: 'cancel' },
-        { text: 'Tomar foto', onPress: () => console.log('Tomar foto') },
-        { text: 'Seleccionar', onPress: () => console.log('Seleccionar foto') },
+        { 
+          text: 'Tomar foto', 
+          onPress: async () => {
+            const options = {
+              mediaType: 'photo',
+              quality: 0.8,
+              maxWidth: 1024,
+              maxHeight: 1024,
+            };
+
+            try {
+              const result = await launchCamera(options);
+              
+              if (result.didCancel) {
+                console.log('Usuario canceló la foto');
+                return;
+              }
+
+              if (result.errorCode) {
+                Alert.alert('Error', 'No se pudo acceder a la cámara');
+                return;
+              }
+
+              if (result.assets && result.assets[0]) {
+                const photo = result.assets[0];
+                setPhotoUri(photo.uri);
+                await uploadPhoto(photo.uri, photo.type);
+              }
+            } catch (error) {
+              console.error('Error al tomar foto:', error);
+              Alert.alert('Error', 'No se pudo tomar la foto');
+            }
+          }
+        },
+        { 
+          text: 'Seleccionar', 
+          onPress: async () => {
+            const options = {
+              mediaType: 'photo',
+              quality: 0.8,
+              maxWidth: 1024,
+              maxHeight: 1024,
+            };
+
+            try {
+              const result = await launchImageLibrary(options);
+              
+              if (result.didCancel) {
+                console.log('Usuario canceló la selección');
+                return;
+              }
+
+              if (result.errorCode) {
+                Alert.alert('Error', 'No se pudo acceder a la galería');
+                return;
+              }
+
+              if (result.assets && result.assets[0]) {
+                const photo = result.assets[0];
+                setPhotoUri(photo.uri);
+                await uploadPhoto(photo.uri, photo.type);
+              }
+            } catch (error) {
+              console.error('Error al seleccionar foto:', error);
+              Alert.alert('Error', 'No se pudo seleccionar la foto');
+            }
+          }
+        },
       ]
     );
+  };
+
+  const handleVideoEvidence = () => {
+    Alert.alert(
+      'Evidencia en Video',
+      '¿Deseas grabar un video o seleccionar uno existente?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { 
+          text: 'Grabar', 
+          onPress: async () => {
+            const options = {
+              mediaType: 'video',
+              videoQuality: 'medium',
+              durationLimit: 60,
+            };
+
+            try {
+              const result = await launchCamera(options);
+              
+              if (result.didCancel) {
+                console.log('Usuario canceló el video');
+                return;
+              }
+
+              if (result.errorCode) {
+                Alert.alert('Error', 'No se pudo acceder a la cámara');
+                return;
+              }
+
+              if (result.assets && result.assets[0]) {
+                const video = result.assets[0];
+                setVideoUri(video.uri);
+                await uploadVideo(video.uri, video.type);
+              }
+            } catch (error) {
+              console.error('Error al grabar video:', error);
+              Alert.alert('Error', 'No se pudo grabar el video');
+            }
+          }
+        },
+        { 
+          text: 'Seleccionar', 
+          onPress: async () => {
+            const options = {
+              mediaType: 'video',
+              videoQuality: 'medium',
+            };
+
+            try {
+              const result = await launchImageLibrary(options);
+              
+              if (result.didCancel) {
+                console.log('Usuario canceló la selección');
+                return;
+              }
+
+              if (result.errorCode) {
+                Alert.alert('Error', 'No se pudo acceder a la galería');
+                return;
+              }
+
+              if (result.assets && result.assets[0]) {
+                const video = result.assets[0];
+                setVideoUri(video.uri);
+                await uploadVideo(video.uri, video.type);
+              }
+            } catch (error) {
+              console.error('Error al seleccionar video:', error);
+              Alert.alert('Error', 'No se pudo seleccionar el video');
+            }
+          }
+        },
+      ]
+    );
+  };
+
+  const uploadPhoto = async (uri, type) => {
+    try {
+      setUploadingFile(true);
+      console.log('Subiendo foto a S3...');
+
+      const result = await ApiService.uploadEvidence(uri, type || 'image/jpeg');
+
+      if (result.success) {
+        setUploadedPhotoUrl(result.fileUrl);
+        Alert.alert('Éxito', 'Foto subida correctamente');
+        console.log('URL de la foto:', result.fileUrl);
+      }
+    } catch (error) {
+      console.error('Error subiendo foto:', error);
+      Alert.alert('Error', 'No se pudo subir la foto. Intenta de nuevo.');
+      setPhotoUri(null);
+    } finally {
+      setUploadingFile(false);
+    }
+  };
+
+  const uploadVideo = async (uri, type) => {
+    try {
+      setUploadingFile(true);
+      console.log('Subiendo video a S3...');
+
+      const result = await ApiService.uploadEvidence(uri, type || 'video/mp4');
+
+      if (result.success) {
+        setUploadedVideoUrl(result.fileUrl);
+        Alert.alert('Éxito', 'Video subido correctamente');
+        console.log('URL del video:', result.fileUrl);
+      }
+    } catch (error) {
+      console.error('Error subiendo video:', error);
+      Alert.alert('Error', 'No se pudo subir el video. Intenta de nuevo.');
+      setVideoUri(null);
+    } finally {
+      setUploadingFile(false);
+    }
   };
 
   const validateReport = () => {
@@ -89,7 +256,6 @@ const ReportScreen = ({ navigation }) => {
       return false;
     }
 
-    // user DEL CONTEXTO
     if (!user || !user.codigo_estudiante) {
       Alert.alert('Error', 'No se encontraron los datos del usuario. Por favor, inicia sesión nuevamente.');
       return false;
@@ -124,7 +290,6 @@ const ReportScreen = ({ navigation }) => {
                 'CUCS': 4,
               };
 
-              // USAR user DEL CONTEXTO
               const reportData = {
                 titulo: `Reporte de incidente - ${selectedCenter}`,
                 descripcion: descripcion.trim(),
@@ -132,15 +297,15 @@ const ReportScreen = ({ navigation }) => {
                 coordenada_lng: null,
                 categoria_id: 1,
                 nivel_riesgo: 'medio',
-                foto_evidencia: null,
-                codigo_estudiante: user.codigo_estudiante, // 👈 DEL CONTEXTO
+                foto_evidencia: uploadedPhotoUrl || uploadedVideoUrl || null,
+                codigo_estudiante: user.codigo_estudiante,
                 centro_id: centerMap[selectedCenter] || 1,
               };
 
-              console.log('📤 Enviando reporte:', reportData);
+              console.log('Enviando reporte:', reportData);
 
               const response = await ApiService.createReport(reportData);
-              console.log('✅ Respuesta del servidor:', response);
+              console.log('Respuesta del servidor:', response);
 
               Alert.alert(
                 '¡Éxito!',
@@ -151,12 +316,16 @@ const ReportScreen = ({ navigation }) => {
                     onPress: () => {
                       setDescripcion('');
                       setFecha(new Date());
+                      setPhotoUri(null);
+                      setVideoUri(null);
+                      setUploadedPhotoUrl(null);
+                      setUploadedVideoUrl(null);
                     },
                   },
                 ]
               );
             } catch (error) {
-              console.error('❌ Error enviando reporte:', error);
+              console.error('Error enviando reporte:', error);
               Alert.alert(
                 'Error',
                 error.message || 'No se pudo enviar el reporte. Por favor, intenta de nuevo.'
@@ -184,7 +353,6 @@ const ReportScreen = ({ navigation }) => {
       <HeaderBar navigation={navigation} showBackButton={true} />
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* 1) Centro Universitario */}
         <Text style={styles.instructionAText}>Centro Universitario asignado:</Text>
         <View style={styles.sectionBox}>
           <View style={styles.row}>
@@ -203,7 +371,6 @@ const ReportScreen = ({ navigation }) => {
           </View>
         </View>
 
-        {/* 2) Fecha y hora del incidente */}
         <Text style={styles.instructionAText}>Fecha y hora exacta del incidente.</Text>
         <View style={styles.sectionBox}>
           <View style={styles.row}>
@@ -212,13 +379,11 @@ const ReportScreen = ({ navigation }) => {
           </View>
         </View>
 
-        {/* 3) Descripción de los hechos */}
         <Text style={styles.instructionAText}>Da un breve resumen de los hechos.</Text>
         <View style={styles.sectionBoxes}>
           <View style={styles.rowWithSpace}>
             <Icon name="alert-circle-outline" size={20} color="#FFF" marginTop={-25} style={styles.iconLeft} />
             <View style={{ flex: 1, justifyContent: 'center' }}>
-              <Text style={styles.instructionText}></Text>
               <TextInput
                 style={styles.textInputFlex}
                 placeholder="Escribe aquí..."
@@ -226,7 +391,7 @@ const ReportScreen = ({ navigation }) => {
                 multiline
                 value={descripcion}
                 onChangeText={setDescripcion}
-                editable={!loading}
+                editable={!loading && !uploadingFile}
               />
             </View>
             <TouchableOpacity onPress={handleEditDescription}>
@@ -235,41 +400,50 @@ const ReportScreen = ({ navigation }) => {
           </View>
         </View>
 
-        {/* 4) Botones de evidencia */}
         <View style={styles.sectionBox}>
           <View style={[styles.row, { justifyContent: 'space-between' }]}>
             <TouchableOpacity
               style={styles.evidenceButtonPlaceholder}
               onPress={handleVideoEvidence}
-              disabled={loading}
+              disabled={loading || uploadingFile}
             >
-              <Text style={styles.evidenceText}>Evidencia en video</Text>
+              <Text style={styles.evidenceText}>
+                {videoUri ? 'Video seleccionado ✓' : 'Evidencia en video'}
+              </Text>
               <Text style={styles.iconRight}>🎥</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.evidenceButtonPlaceholder}
               onPress={handlePhotoEvidence}
-              disabled={loading}
+              disabled={loading || uploadingFile}
             >
-              <Text style={styles.evidenceText}>Evidencia en foto</Text>
+              <Text style={styles.evidenceText}>
+                {photoUri ? 'Foto seleccionada ✓' : 'Evidencia en foto'}
+              </Text>
               <Text style={styles.iconRight}>📸</Text>
             </TouchableOpacity>
           </View>
         </View>
 
+        {uploadingFile && (
+          <View style={{ alignItems: 'center', marginVertical: 10 }}>
+            <ActivityIndicator size="large" color="#007AFF" />
+            <Text style={{ color: '#FFF', marginTop: 10 }}>Subiendo archivo...</Text>
+          </View>
+        )}
+
         <Text style={styles.instructionAText}>
           Cualquier evidencia queda respaldada por la ley de protección de datos.
         </Text>
 
-        {/* 5) Botón final */}
         <TouchableOpacity
           style={[
             styles.sendButtonPlaceholder,
-            loading && { opacity: 0.5 }
+            (loading || uploadingFile) && { opacity: 0.5 }
           ]}
           onPress={handleSendReport}
-          disabled={loading}
+          disabled={loading || uploadingFile}
         >
           {loading ? (
             <ActivityIndicator size="small" color="#FFF" />
@@ -285,7 +459,7 @@ const ReportScreen = ({ navigation }) => {
   );
 };
 
-// ... (todos tus estilos se quedan igual)
+// ... (Aquí empiezan los estilos)
 const styles = StyleSheet.create({
   container: {
     flex: 1,
