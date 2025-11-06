@@ -1,3 +1,4 @@
+// backend2/server.js
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
@@ -10,39 +11,31 @@ const PORT = process.env.PORT || 3001;
 // ============================================
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true })); // ← Necesario para FormData
 
 // ============================================
 // IMPORTACION DE RUTAS
 // ============================================
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
+const uploadRoutes = require('./routes/uploadRoutes'); // 👈 súbela antes
 const reportRoutes = require('./routes/reportRoutes');
 const contactsRoutes = require('./routes/contacts');
-const uploadRoutes = require('./routes/uploadRoutes');
 
 // ============================================
 // CONFIGURACION DE RUTAS
 // ============================================
-// Autenticacion
 app.use('/api/auth', authRoutes);
-
-// Usuarios
 app.use('/api/users', userRoutes);
-
-// Reportes
-app.use('/api', reportRoutes);
-
-// Contactos
+app.use('/api/upload', uploadRoutes); // 👈 aquí arriba del reportRoutes
 app.use('/api/contacts', contactsRoutes);
+app.use('/api', reportRoutes); // 👈 esta SIEMPRE va al final
 
-// Uploads de archivos (fotos y videos)
-app.use('/api/upload', uploadRoutes);
+console.log('Todas las rutas registradas correctamente');
 
 // ============================================
 // RUTAS DE INFORMACION Y SALUD
 // ============================================
-// Ruta principal - informacion de la API
 app.get('/', (req, res) => {
   res.json({ 
     message: 'EduShield Backend API funcionando',
@@ -51,17 +44,13 @@ app.get('/', (req, res) => {
       '/api/auth/register', 
       '/api/auth/login',
       '/api/reports',
-      '/api/upload/evidence'
+      '/api/upload'
     ]
   });
 });
 
-// Ruta de salud del servidor
 app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
-    timestamp: new Date().toISOString() 
-  });
+  res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
 // ============================================

@@ -7,7 +7,7 @@ const API_URLS = {
   development: 'https://filthy-corpse-jjj49xw7jx49f5q5q-3001.app.github.dev', //NO LLEVA BARRA FINAL
   
     //development: "https://filthy-superstition-v669r5jjp7g7fxvqw-3001.app.github.dev", //NO LLEVA BARRA FINAL
-    development: "http://edushield.duckdns.org:3001", 
+  development: "http://edushield.duckdns.org:3001", 
   
   // LOCALHOST
   local: 'http://localhost:3001',
@@ -688,29 +688,26 @@ async createReport(reportData) {
   
   async uploadEvidence(fileUri, fileType) {
     try {
-      console.log('📤 Subiendo evidencia:', fileUri);
+      console.log('Subiendo evidencia:', fileUri);
 
       const formData = new FormData();
 
-      // Extraer extensión del archivo
+      // Extraer extensión
       const uriParts = fileUri.split('.');
-      const fileExtension = uriParts[uriParts.length - 1];
+      const fileExtension = uriParts[uriParts.length - 1] || 'jpg';
 
       formData.append('file', {
         uri: fileUri,
-        type: fileType,
+        type: fileType || 'image/jpeg',
         name: `evidence-${Date.now()}.${fileExtension}`,
       });
 
-      // ESTO FALTABA - El fetch
-      const response = await fetch(`${API_BASE_URL}/api/upload/evidence`, {
+      const response = await fetch(`${API_BASE_URL}/api/upload`, {
         method: 'POST',
         body: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+        // SIN HEADERS → deja que FormData lo maneje
       });
-      
+
       const textResponse = await response.text();
       console.log('Respuesta upload:', textResponse);
 
@@ -719,7 +716,7 @@ async createReport(reportData) {
         data = textResponse ? JSON.parse(textResponse) : {};
       } catch (parseError) {
         console.error('Error parseando JSON:', parseError);
-        throw new Error('Error al subir archivo');
+        throw new Error('Respuesta inválida del servidor');
       }
 
       if (!response.ok) {
@@ -737,7 +734,7 @@ async createReport(reportData) {
     try {
       console.log('Eliminando archivo:', fileUrl);
       
-      const response = await fetch(`${API_BASE_URL}/api/upload/evidence`, {
+      const response = await fetch(`${API_BASE_URL}/api/upload`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

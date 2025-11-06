@@ -11,7 +11,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import * as ImagePicker from 'expo-image-picker';
 import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import HeaderBar from '../components/HeaderBar';
@@ -56,148 +56,101 @@ const ReportScreen = ({ navigation }) => {
       '¿Deseas tomar una foto o seleccionar una existente?',
       [
         { text: 'Cancelar', style: 'cancel' },
-        { 
-          text: 'Tomar foto', 
+        {
+          text: 'Tomar foto',
           onPress: async () => {
-            const options = {
-              mediaType: 'photo',
-              quality: 0.8,
-              maxWidth: 1024,
-              maxHeight: 1024,
-            };
-
-            try {
-              const result = await launchCamera(options);
-              
-              if (result.didCancel) {
-                console.log('Usuario canceló la foto');
-                return;
-              }
-
-              if (result.errorCode) {
-                Alert.alert('Error', 'No se pudo acceder a la cámara');
-                return;
-              }
-
-              if (result.assets && result.assets[0]) {
-                const photo = result.assets[0];
-                setPhotoUri(photo.uri);
-                await uploadPhoto(photo.uri, photo.type);
-              }
-            } catch (error) {
-              console.error('Error al tomar foto:', error);
-              Alert.alert('Error', 'No se pudo tomar la foto');
+            const { status } = await ImagePicker.requestCameraPermissionsAsync();
+            if (status !== 'granted') {
+              Alert.alert('Permiso requerido', 'Necesitamos acceso a la cámara');
+              return;
             }
-          }
+
+            const result = await ImagePicker.launchCameraAsync({
+              mediaTypes: ImagePicker.MediaTypeOptions.Images,
+              allowsEditing: true,
+              quality: 0.8,
+            });
+
+            if (!result.canceled && result.assets[0]) {
+              const photo = result.assets[0];
+              setPhotoUri(photo.uri);
+              uploadPhoto(photo.uri, photo.type || 'image/jpeg');
+            }
+          },
         },
-        { 
-          text: 'Seleccionar', 
+        {
+          text: 'Seleccionar',
           onPress: async () => {
-            const options = {
-              mediaType: 'photo',
-              quality: 0.8,
-              maxWidth: 1024,
-              maxHeight: 1024,
-            };
-
-            try {
-              const result = await launchImageLibrary(options);
-              
-              if (result.didCancel) {
-                console.log('Usuario canceló la selección');
-                return;
-              }
-
-              if (result.errorCode) {
-                Alert.alert('Error', 'No se pudo acceder a la galería');
-                return;
-              }
-
-              if (result.assets && result.assets[0]) {
-                const photo = result.assets[0];
-                setPhotoUri(photo.uri);
-                await uploadPhoto(photo.uri, photo.type);
-              }
-            } catch (error) {
-              console.error('Error al seleccionar foto:', error);
-              Alert.alert('Error', 'No se pudo seleccionar la foto');
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== 'granted') {
+              Alert.alert('Permiso requerido', 'Necesitamos acceso a tus fotos');
+              return;
             }
-          }
+
+            const result = await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: ImagePicker.MediaTypeOptions.Images,
+              allowsEditing: true,
+              quality: 0.8,
+            });
+
+            if (!result.canceled && result.assets[0]) {
+              const photo = result.assets[0];
+              setPhotoUri(photo.uri);
+              uploadPhoto(photo.uri, photo.type || 'image/jpeg');
+            }
+          },
         },
       ]
     );
   };
 
-  const handleVideoEvidence = () => {
+    const handleVideoEvidence = () => {
     Alert.alert(
       'Evidencia en Video',
       '¿Deseas grabar un video o seleccionar uno existente?',
       [
         { text: 'Cancelar', style: 'cancel' },
-        { 
-          text: 'Grabar', 
+        {
+          text: 'Grabar',
           onPress: async () => {
-            const options = {
-              mediaType: 'video',
-              videoQuality: 'medium',
+            const { status } = await ImagePicker.requestCameraPermissionsAsync();
+            if (status !== 'granted') {
+              Alert.alert('Permiso requerido', 'Necesitamos acceso a la cámara');
+              return;
+            }
+
+            const result = await ImagePicker.launchCameraAsync({
+              mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+              videoQuality: ImagePicker.UIImagePickerControllerQualityType.Medium,
               durationLimit: 60,
-            };
+            });
 
-            try {
-              const result = await launchCamera(options);
-              
-              if (result.didCancel) {
-                console.log('Usuario canceló el video');
-                return;
-              }
-
-              if (result.errorCode) {
-                Alert.alert('Error', 'No se pudo acceder a la cámara');
-                return;
-              }
-
-              if (result.assets && result.assets[0]) {
-                const video = result.assets[0];
-                setVideoUri(video.uri);
-                await uploadVideo(video.uri, video.type);
-              }
-            } catch (error) {
-              console.error('Error al grabar video:', error);
-              Alert.alert('Error', 'No se pudo grabar el video');
+            if (!result.canceled && result.assets[0]) {
+              const video = result.assets[0];
+              setVideoUri(video.uri);
+              uploadVideo(video.uri, video.type || 'video/mp4');
             }
-          }
+          },
         },
-        { 
-          text: 'Seleccionar', 
+        {
+          text: 'Seleccionar',
           onPress: async () => {
-            const options = {
-              mediaType: 'video',
-              videoQuality: 'medium',
-            };
-
-            try {
-              const result = await launchImageLibrary(options);
-              
-              if (result.didCancel) {
-                console.log('Usuario canceló la selección');
-                return;
-              }
-
-              if (result.errorCode) {
-                Alert.alert('Error', 'No se pudo acceder a la galería');
-                return;
-              }
-
-              if (result.assets && result.assets[0]) {
-                const video = result.assets[0];
-                setVideoUri(video.uri);
-                await uploadVideo(video.uri, video.type);
-              }
-            } catch (error) {
-              console.error('Error al seleccionar video:', error);
-              Alert.alert('Error', 'No se pudo seleccionar el video');
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== 'granted') {
+              Alert.alert('Permiso requerido', 'Necesitamos acceso a tus videos');
+              return;
             }
-          }
+
+            const result = await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+            });
+
+            if (!result.canceled && result.assets[0]) {
+              const video = result.assets[0];
+              setVideoUri(video.uri);
+              uploadVideo(video.uri, video.type || 'video/mp4');
+            }
+          },
         },
       ]
     );
