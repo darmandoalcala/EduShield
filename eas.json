@@ -6,13 +6,31 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "AWS_ACCESS_KEY_ID": "${secret.AWS_ACCESS_KEY_ID}",
+        "AWS_SECRET_ACCESS_KEY": "${secret.AWS_SECRET_ACCESS_KEY}",
+        "AWS_REGION": "${secret.AWS_REGION}",
+        "S3_BUCKET_NAME": "${secret.S3_BUCKET_NAME}"
+      }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "AWS_ACCESS_KEY_ID": "${secret.AWS_ACCESS_KEY_ID}",
+        "AWS_SECRET_ACCESS_KEY": "${secret.AWS_SECRET_ACCESS_KEY}",
+        "AWS_REGION": "${secret.AWS_REGION}",
+        "S3_BUCKET_NAME": "${secret.S3_BUCKET_NAME}"
+      }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "AWS_ACCESS_KEY_ID": "${secret.AWS_ACCESS_KEY_ID}",
+        "AWS_SECRET_ACCESS_KEY": "${secret.AWS_SECRET_ACCESS_KEY}",
+        "AWS_REGION": "${secret.AWS_REGION}",
+        "S3_BUCKET_NAME": "${secret.S3_BUCKET_NAME}"
+      }
     }
   },
   "submit": {
