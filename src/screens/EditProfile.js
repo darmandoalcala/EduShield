@@ -16,6 +16,7 @@ import * as ImagePicker from 'expo-image-picker';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import HeaderBar from '../components/HeaderBar';
 import { ApiService } from '../config/api';
+import { uploadImageToS3 } from '../utils/s3Uploader';
 
 export default function EditProfile() {
   const navigation = useNavigation();
@@ -162,6 +163,23 @@ export default function EditProfile() {
       return;
     }
 
+    setIsSaving(true);
+    let fotoUrlParaGuardar = profileImage; 
+
+    try {
+      // 1. VERIFICA SI SE SUBIÓ UNA FOTO NUEVA
+      if (profileImage && (profileImage.startsWith('file://') || profileImage.startsWith('data:'))) {
+        
+        console.log('Subiendo nueva foto de perfil a S3...');
+        
+        // 2. SUBE LA FOTO A S3 
+        const s3Url = await uploadImageToS3(profileImage, 'profiles');
+        fotoUrlParaGuardar = s3Url; // Esta es la URL que se guarda en BDatos
+      
+      } else {
+        console.log('No se seleccionó una foto nueva, guardando datos de texto.');
+      }
+
     const nombreCompleto = fullName.trim().split(' ');
     const nombre = nombreCompleto[0];
     const apellido = nombreCompleto.slice(1).join(' ') || nombreCompleto[0];
@@ -171,10 +189,9 @@ export default function EditProfile() {
       apellido: apellido,
       telefono: telefono.trim(),
       sexo: gender,
+      foto_perfil: fotoUrlParaGuardar,
     };
 
-    setIsSaving(true);
-    try {
       const response = await ApiService.updateUserProfile(userId, updatedData);
       if (response.success) {
         Alert.alert(
@@ -182,6 +199,9 @@ export default function EditProfile() {
           'Perfil actualizado correctamente',
           [{ text: 'OK', onPress: () => navigation.goBack() }]
         );
+      } else {
+        // Maneja el caso de que la API falle
+        throw new Error(response.message || 'Error de la API');
       }
     } catch (error) {
       console.error('❌ Error actualizando perfil:', error);

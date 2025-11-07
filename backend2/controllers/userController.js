@@ -42,13 +42,14 @@ class UserController {
   static async updateProfile(req, res) {
     try {
       const { userId } = req.params;
-      const { nombre, apellido, telefono, sexo } = req.body;
+      const { nombre, apellido, telefono, sexo, foto_perfil } = req.body;
 
       await Database.updateUser(userId, {
         nombre,
         apellido,
         telefono,
-        sexo
+        sexo,
+        foto_perfil
       });
 
       res.json({
@@ -60,6 +61,7 @@ class UserController {
           apellido,
           telefono,
           sexo,
+          foto_perfil,
           nombre_completo: `${nombre} ${apellido}`
         }
       });

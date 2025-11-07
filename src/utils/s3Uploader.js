@@ -7,15 +7,15 @@ import { Alert } from "react-native";
 // 1. Lee las variables de entorno que pusiste en eas.json
 // OJO: La ruta es un poco larga para acceder a 'env'
 const S3_CONFIG = {
-  region: Constants.expoConfig?.extra?.eas?.env?.AWS_REGION,
+  region: "us-east-2",
   credentials: {
-    accessKeyId: Constants.expoConfig?.extra?.eas?.env?.AWS_ACCESS_KEY_ID,
-    secretAccessKey: Constants.expoConfig?.extra?.eas?.env?.AWS_SECRET_ACCESS_KEY,
+    accessKeyId: "AKIA5KC7RPKPI3VAT2NU",
+    secretAccessKey: "AKIA5KC7RPKPI3VAT2NU",
   },
 };
 
 // 2. Obtén el nombre del bucket
-const BUCKET_NAME = Constants.expoConfig?.extra?.eas?.env?.S3_BUCKET_NAME;
+const BUCKET_NAME = "edushield-s3-image-storage";
 
 // 3. Valida que las variables existan (¡importante para depurar!)
 if (!S3_CONFIG.region || !S3_CONFIG.credentials.accessKeyId || !S3_CONFIG.credentials.secretAccessKey || !BUCKET_NAME) {
@@ -38,22 +38,28 @@ const s3Client = new S3Client(S3_CONFIG);
  */
 export const uploadImageToS3 = async (imageUri, folder = 'photos') => {
   try {
-    // 5. Convierte la imagen (URI local) en un "Blob" (datos binarios)
-    // fetch funciona con URIs locales 'file://' en React Native
-    const response = await fetch(imageUri);
-    const blob = await response.blob();
-
-    // 6. Genera un nombre de archivo único
-    const fileExtension = imageUri.split('.').pop();
+    // 5. Genera un nombre de archivo único y adivina el ContentType
+    const fileExtension = imageUri.split('.').pop().toLowerCase();
     const fileName = `${folder}/${Date.now()}.${fileExtension}`;
+    
+    let contentType = 'image/jpeg'; // Default
+    if (fileExtension === 'png') {
+      contentType = 'image/png';
+    } else if (fileExtension === 'gif') {
+      contentType = 'image/gif';
+    }
+    
+    // 6. Convierte la imagen (URI local) en un "ArrayBuffer" (datos binarios)
+    const response = await fetch(imageUri);
+    const arrayBuffer = await response.arrayBuffer(); // <-- ¡CAMBIO 1!
 
     // 7. Prepara el comando de subida
     const uploadCommand = new PutObjectCommand({
       Bucket: BUCKET_NAME,
-      Key: fileName,      // El nombre del archivo en S3 (ej. "profiles/123456789.jpg")
-      Body: blob,         // Los datos de la imagen
-      ContentType: blob.type, // ej. 'image/jpeg'
-      ACL: 'public-read', // ¡Importante! Hace el archivo visible públicamente
+      Key: fileName,      
+      Body: arrayBuffer,    // <-- ¡CAMBIO 2! (Ahora es ArrayBuffer)
+      ContentType: contentType, // <-- ¡CAMBIO 3! (Tipo adivinado)
+      ACL: 'public-read', 
     });
 
     // 8. Envía el comando al bucket de S3
@@ -66,9 +72,17 @@ export const uploadImageToS3 = async (imageUri, folder = 'photos') => {
     return imageUrl;
 
   } catch (error) {
-    console.error("Error al subir la imagen a S3:", error);
-    Alert.alert("Error de subida", "No se pudo subir la imagen. Revisa la consola.");
-    // Relanzamos el error para que la pantalla que lo llamó sepa que falló
+    // --- ¡ESTE ES EL CAMBIO IMPORTANTE! ---
+    // Esto nos dará el error específico de S3 (ej. AccessDenied, NoSuchBucket)
+    console.error("--- ERROR DETALLADO DE S3 ---");
+    console.error("Nombre del Error:", error.name); 
+    console.error("Mensaje del Error:", error.message); 
+    console.error("Stack Completo:", error);
+    console.error("--- FIN DEL ERROR ---");
+    // ----------------------------------------
+    
+    // Mostramos el nombre del error en la alerta para depurar más rápido
+    Alert.alert("Error de subida", `Error: ${error.name}. Revisa la consola.`);
     throw new Error("No se pudo subir la imagen.");
   }
 };
