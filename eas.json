@@ -11,7 +11,8 @@
         "AWS_ACCESS_KEY_ID": "${secret.AWS_ACCESS_KEY_ID}",
         "AWS_SECRET_ACCESS_KEY": "${secret.AWS_SECRET_ACCESS_KEY}",
         "AWS_REGION": "${secret.AWS_REGION}",
-        "S3_BUCKET_NAME": "${secret.S3_BUCKET_NAME}"
+        "S3_BUCKET_NAME": "${secret.S3_BUCKET_NAME}",
+        "GOOGLE_MAPS_API_KEY": "${secret.GOOGLE_MAPS_API_KEY}"
       }
     },
     "preview": {
@@ -20,7 +21,8 @@
         "AWS_ACCESS_KEY_ID": "${secret.AWS_ACCESS_KEY_ID}",
         "AWS_SECRET_ACCESS_KEY": "${secret.AWS_SECRET_ACCESS_KEY}",
         "AWS_REGION": "${secret.AWS_REGION}",
-        "S3_BUCKET_NAME": "${secret.S3_BUCKET_NAME}"
+        "S3_BUCKET_NAME": "${secret.S3_BUCKET_NAME}",
+        "GOOGLE_MAPS_API_KEY": "${secret.GOOGLE_MAPS_API_KEY}"
       }
     },
     "production": {
@@ -29,7 +31,8 @@
         "AWS_ACCESS_KEY_ID": "${secret.AWS_ACCESS_KEY_ID}",
         "AWS_SECRET_ACCESS_KEY": "${secret.AWS_SECRET_ACCESS_KEY}",
         "AWS_REGION": "${secret.AWS_REGION}",
-        "S3_BUCKET_NAME": "${secret.S3_BUCKET_NAME}"
+        "S3_BUCKET_NAME": "${secret.S3_BUCKET_NAME}",
+        "GOOGLE_MAPS_API_KEY": "${secret.GOOGLE_MAPS_API_KEY}"
       }
     }
   },

@@ -7,15 +7,15 @@ import { Alert } from "react-native";
 // 1. Lee las variables de entorno que pusiste en eas.json
 // OJO: La ruta es un poco larga para acceder a 'env'
 const S3_CONFIG = {
-  region: "us-east-2",
+  region: Constants.expoConfig?.extra?.eas?.env?.AWS_REGION,
   credentials: {
-    accessKeyId: "AKIA5KC7RPKPI3VAT2NU",
-    secretAccessKey: "AKIA5KC7RPKPI3VAT2NU",
+    accessKeyId: Constants.expoConfig?.extra?.eas?.env?.AWS_ACCESS_KEY_ID,
+    secretAccessKey: Constants.expoConfig?.extra?.eas?.env?.AWS_SECRET_ACCESS_KEY,
   },
 };
 
 // 2. Obtén el nombre del bucket
-const BUCKET_NAME = "edushield-s3-image-storage";
+const BUCKET_NAME = Constants.expoConfig?.extra?.eas?.env?.S3_BUCKET_NAME;
 
 // 3. Valida que las variables existan (¡importante para depurar!)
 if (!S3_CONFIG.region || !S3_CONFIG.credentials.accessKeyId || !S3_CONFIG.credentials.secretAccessKey || !BUCKET_NAME) {
@@ -57,9 +57,9 @@ export const uploadImageToS3 = async (imageUri, folder = 'photos') => {
     const uploadCommand = new PutObjectCommand({
       Bucket: BUCKET_NAME,
       Key: fileName,      
-      Body: arrayBuffer,    // <-- ¡CAMBIO 2! (Ahora es ArrayBuffer)
-      ContentType: contentType, // <-- ¡CAMBIO 3! (Tipo adivinado)
-      ACL: 'public-read', 
+      Body: arrayBuffer,   
+      ContentType: contentType, 
+      //ACL: 'public-read', //NO DESCOMENTAR; TRUENA EL PROGRAMA xddd
     });
 
     // 8. Envía el comando al bucket de S3

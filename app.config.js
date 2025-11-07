@@ -1,4 +1,4 @@
-{
+export default {
   "expo": {
     "name": "edushield",
     "slug": "edushield",
@@ -50,8 +50,15 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "f242d91a-53ea-462d-85fc-d27c7d957669"
+        "projectId": "f242d91a-53ea-462d-85fc-d27c7d957669",
+        "env": {
+          "AWS_ACCESS_KEY_ID": process.env.AWS_ACCESS_KEY_ID,
+          "AWS_SECRET_ACCESS_KEY": process.env.AWS_SECRET_ACCESS_KEY,
+          "AWS_REGION": process.env.AWS_REGION,
+          "S3_BUCKET_NAME": process.env.S3_BUCKET_NAME
+        }
       }
+      
     }
   }
-}
+};
