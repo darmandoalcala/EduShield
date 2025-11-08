@@ -17,6 +17,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import HeaderBar from '../components/HeaderBar';
 import { ApiService } from '../config/api';
 import { uploadImageToS3 } from '../utils/s3Uploader';
+import { useUser } from '../context/UserContext';
 
 export default function EditProfile() {
   const navigation = useNavigation();
@@ -36,6 +37,7 @@ export default function EditProfile() {
   const [profileImage, setProfileImage] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
 
+
   // 🔹 Opciones de Campus (solo CUCEI seleccionable)
   const campusOptions = ['CUCEI', 'CUCEA', 'CUCS'];
   const genderOptions = ['MASCULINO', 'FEMENINO', 'OTRO', 'PREFIERO_NO_DECIR'];
@@ -54,6 +56,8 @@ export default function EditProfile() {
     try {
       setIsLoading(true);
       const response = await ApiService.getUserProfile(userId);
+
+      console.log("RESPUESTA DE GETPROFILE:", JSON.stringify(response, null, 2));
 
       if (response.success && response.data) {
         const user = response.data;
@@ -150,6 +154,8 @@ export default function EditProfile() {
   };
 
   const handleSave = async () => {
+
+    const { setUser } = useUser();
     if (!fullName.trim()) {
       Alert.alert('Error', 'El nombre completo es obligatorio');
       return;
@@ -192,11 +198,16 @@ export default function EditProfile() {
       foto_perfil: fotoUrlParaGuardar,
     };
 
+    console.log("--- INTENTANDO GUARDAR PERFIL ---");
+      console.log("URL de foto a guardar:", fotoUrlParaGuardar);
+      console.log("Datos enviados a la API:", JSON.stringify(updatedData, null, 2));
+
       const response = await ApiService.updateUserProfile(userId, updatedData);
       if (response.success) {
         Alert.alert(
           'Éxito',
           'Perfil actualizado correctamente',
+          setUser(prevUser => ({ ...prevUser, ...updatedData }))
           [{ text: 'OK', onPress: () => navigation.goBack() }]
         );
       } else {
