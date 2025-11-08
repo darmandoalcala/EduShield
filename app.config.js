@@ -1,3 +1,9 @@
+console.log("--- [BUILD LOG] Leyendo process.env ---");
+console.log("BUILD: GOOGLE_MAPS_API_KEY:", process.env.GOOGLE_MAPS_API_KEY ? "¡CARGADA!" : "!!! UNDEFINED !!!");
+console.log("BUILD: AWS_REGION:", process.env.AWS_REGION ? "¡CARGADA!" : "!!! UNDEFINED !!!");
+console.log("BUILD: AWS_ACCESS_KEY_ID:", process.env.AWS_ACCESS_KEY_ID ? "¡CARGADA!" : "!!! UNDEFINED !!!");
+console.log("--- [BUILD LOG] Fin ---");
+
 export default ({ config }) => ({
   ...config,
   name: "edushield",
