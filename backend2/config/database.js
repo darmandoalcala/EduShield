@@ -97,24 +97,31 @@ class Database {
     }
   }
 
-  // Método para actualizar usuario
+// Método para actualizar usuario
   static async updateUser(userId, userData) {
     try {
+
       const sql = `
         UPDATE usuario 
-        SET nombre = ?, apellido = ?, telefono = ?, sexo = ?
+        SET 
+          nombre = ?, 
+          apellido = ?, 
+          telefono = ?, 
+          sexo = ?,
+          foto_perfil = ? 
         WHERE codigo_estudiante = ?
-      `; // 👈 CAMBIO: minúsculas
+      `;
       
       const params = [
         userData.nombre,
         userData.apellido,
         userData.telefono,
         userData.sexo,
+        userData.foto_perfil, 
         userId
       ];
       
-      await this.query(sql, params); // 👈 CAMBIO
+      await this.query(sql, params);
       return { success: true };
     } catch (error) {
       console.error('Error actualizando usuario:', error);
@@ -122,5 +129,4 @@ class Database {
     }
   }
 }
-
 module.exports = Database;

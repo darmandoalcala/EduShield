@@ -16,6 +16,8 @@ import * as ImagePicker from 'expo-image-picker';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import HeaderBar from '../components/HeaderBar';
 import { ApiService } from '../config/api';
+import { uploadImageToS3 } from '../utils/s3Uploader';
+import { useUser } from '../context/UserContext';
 
 export default function EditProfile() {
   const navigation = useNavigation();
@@ -35,7 +37,6 @@ export default function EditProfile() {
   const [profileImage, setProfileImage] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
 
-  // 🔹 Opciones de Campus (solo CUCEI seleccionable)
   const campusOptions = ['CUCEI', 'CUCEA', 'CUCS'];
   const genderOptions = ['MASCULINO', 'FEMENINO', 'OTRO', 'PREFIERO_NO_DECIR'];
 
@@ -53,6 +54,8 @@ export default function EditProfile() {
     try {
       setIsLoading(true);
       const response = await ApiService.getUserProfile(userId);
+
+      console.log("RESPUESTA DE GETPROFILE:", JSON.stringify(response, null, 2));
 
       if (response.success && response.data) {
         const user = response.data;
@@ -88,7 +91,6 @@ export default function EditProfile() {
 
   const pickImage = async (fromCamera = false) => {
     try {
-      // 📸 Solicitar permisos según la fuente
       if (fromCamera) {
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
         if (status !== 'granted') {
@@ -132,15 +134,10 @@ export default function EditProfile() {
             quality: 0.8,
           });
 
-      // 🚫 Cancelado
       if (result.canceled) return;
 
-      // ✅ Imagen seleccionada
       const uri = result.assets[0].uri;
       setProfileImage(uri);
-
-      // Si luego quieres subirla:
-      // await ApiService.uploadProfileImage(userId, uri);
 
     } catch (error) {
       console.error('Error al seleccionar imagen:', error);
@@ -149,44 +146,89 @@ export default function EditProfile() {
   };
 
   const handleSave = async () => {
+    // --- DEBUG 1 ---
+    console.log("--- handleSave INICIADO ---");
+    console.log("Validando Nombre:", fullName);
+    
     if (!fullName.trim()) {
+      console.log("--- FALLÓ: El nombre está vacío ---");
       Alert.alert('Error', 'El nombre completo es obligatorio');
       return;
     }
-    if (!telefono.trim() || telefono.length !== 10) {
+
+    // --- DEBUG 2 ---
+    console.log("Validando Teléfono:", telefono);
+    if (!telefono || !telefono.trim() || telefono.length !== 10) {
+      console.log("--- FALLÓ: El teléfono no tiene 10 dígitos ---");
       Alert.alert('Error', 'El teléfono debe tener 10 dígitos');
       return;
     }
+
+    // --- DEBUG 3 ---
+    console.log("Validando Género:", gender);
     if (!gender) {
+      console.log("--- FALLÓ: El género está vacío ---");
       Alert.alert('Error', 'Debes seleccionar un género');
       return;
     }
 
-    const nombreCompleto = fullName.trim().split(' ');
-    const nombre = nombreCompleto[0];
-    const apellido = nombreCompleto.slice(1).join(' ') || nombreCompleto[0];
-
-    const updatedData = {
-      nombre: nombre,
-      apellido: apellido,
-      telefono: telefono.trim(),
-      sexo: gender,
-    };
-
+    // --- DEBUG 4 ---
+    console.log("--- VALIDACIONES PASADAS. Intentando guardar... ---");
     setIsSaving(true);
+    let fotoUrlParaGuardar = profileImage; 
+
     try {
+      // 1. VERIFICA SI SE SUBIÓ UNA FOTO NUEVA
+      console.log("Revisando URI de la foto:", profileImage);
+      
+      if (profileImage && (profileImage.startsWith('file://') || profileImage.startsWith('data:'))) {
+        
+        console.log('Subiendo nueva foto de perfil a S3...');
+        
+        // 2. SUBE LA FOTO A S3 
+        const s3Url = await uploadImageToS3(profileImage, 'profiles');
+        fotoUrlParaGuardar = s3Url; // Esta es la URL que se guarda en BDatos
+      
+      } else {
+        console.log('No se seleccionó una foto nueva, guardando datos de texto.');
+      }
+
+      const nombreCompleto = fullName.trim().split(' ');
+      const nombre = nombreCompleto[0];
+      const apellido = nombreCompleto.slice(1).join(' ') || nombreCompleto[0];
+
+      const updatedData = {
+        nombre: nombre,
+        apellido: apellido,
+        telefono: telefono.trim(),
+        sexo: gender,
+        foto_perfil: fotoUrlParaGuardar,
+      };
+
+      // --- DEBUG 5 ---
+      console.log("--- INTENTANDO GUARDAR PERFIL (Llamada a API) ---");
+      console.log("Datos enviados:", JSON.stringify(updatedData, null, 2));
+
       const response = await ApiService.updateUserProfile(userId, updatedData);
+      
       if (response.success) {
+        console.log("--- ÉXITO AL GUARDAR ---");
         Alert.alert(
           'Éxito',
           'Perfil actualizado correctamente',
           [{ text: 'OK', onPress: () => navigation.goBack() }]
         );
+      } else {
+        // Maneja el caso de que la API falle
+        console.log("--- FALLÓ: La API devolvió un error ---");
+        throw new Error(response.message || 'Error de la API');
       }
     } catch (error) {
+      console.log("--- FALLÓ: Error en el bloque try/catch ---");
       console.error('❌ Error actualizando perfil:', error);
       Alert.alert('Error', 'No se pudo actualizar el perfil. Intenta nuevamente.');
     } finally {
+      console.log("--- FIN DE handleSave ---");
       setIsSaving(false);
     }
   };
