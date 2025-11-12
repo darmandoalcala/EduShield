@@ -683,6 +683,86 @@ async createReport(reportData) {
       console.error('❌ Error en deletePersonalContact:', error);
       throw error;
     }
-  }
+  },
+
+// Funciones de upload de archivos
+  
+  async uploadEvidence(fileUri, fileType) {
+    try {
+      console.log('Subiendo evidencia:', fileUri);
+
+      const formData = new FormData();
+
+      // Extraer extensión
+      const uriParts = fileUri.split('.');
+      const fileExtension = uriParts[uriParts.length - 1] || 'jpg';
+
+      formData.append('file', {
+        uri: fileUri,
+        type: fileType || 'image/jpeg',
+        name: `evidence-${Date.now()}.${fileExtension}`,
+      });
+
+      const response = await fetch(`${API_BASE_URL}/api/upload`, {
+        method: 'POST',
+        body: formData,
+        // SIN HEADERS → deja que FormData lo maneje
+      });
+
+      const textResponse = await response.text();
+      console.log('Respuesta upload:', textResponse);
+
+      let data;
+      try {
+        data = textResponse ? JSON.parse(textResponse) : {};
+      } catch (parseError) {
+        console.error('Error parseando JSON:', parseError);
+        throw new Error('Respuesta inválida del servidor');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al subir archivo');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error en uploadEvidence:', error);
+      throw error;
+    }
+  },
+
+  async deleteEvidence(fileUrl) {
+    try {
+      console.log('Eliminando archivo:', fileUrl);
+      
+      const response = await fetch(`${API_BASE_URL}/api/upload`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({ fileUrl }),
+      });
+
+      const textResponse = await response.text();
+      console.log('Respuesta eliminacion:', textResponse);
+
+      let data;
+      try {
+        data = textResponse ? JSON.parse(textResponse) : {};
+      } catch (parseError) {
+        throw new Error('Error al procesar respuesta');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al eliminar archivo');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error en deleteEvidence:', error);
+      throw error;
+    }
+  },
 
 };

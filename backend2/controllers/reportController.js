@@ -1,3 +1,4 @@
+// backend2/controllers/reportController.js
 const Database = require('../config/database');
 
 class ReportController {
@@ -24,6 +25,11 @@ class ReportController {
           success: false,
           message: 'Faltan campos obligatorios'
         });
+      }
+
+      // Veriificar que llega la foto de evidencia si es requerida
+      if(foto_evidencia){
+        console.log('📷 Evidencia recibida:', foto_evidencia);
       }
 
       // Insertar el reporte
