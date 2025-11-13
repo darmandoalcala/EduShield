@@ -15,6 +15,7 @@ class ReportController {
         categoria_id,
         nivel_riesgo,
         foto_evidencia,
+        video_evidencia, // 👈 AGREGADO
         codigo_estudiante,
         centro_id
       } = req.body;
@@ -36,8 +37,8 @@ class ReportController {
       const sql = `
         INSERT INTO reportes (
           titulo, descripcion, coordenada_lat, coordenada_lng,
-          categoria_id, nivel_riesgo, foto_evidencia, codigo_estudiante, centro_id
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          categoria_id, nivel_riesgo, foto_evidencia, video_evidencia, codigo_estudiante, centro_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
       const params = [
@@ -48,6 +49,7 @@ class ReportController {
         categoria_id,
         nivel_riesgo,
         foto_evidencia || null,
+        video_evidencia || null, // 👈 AGREGADO
         codigo_estudiante,
         centro_id
       ];
@@ -310,6 +312,40 @@ class ReportController {
       res.status(500).json({
         success: false,
         message: 'Error al obtener las estadísticas',
+        error: error.message
+      });
+    }
+  }
+
+  // Eliminar todos los reportes de un usuario
+  static async deleteAllReportsByUser(req, res) {
+    try {
+      const { codigo_estudiante } = req.params;
+
+      console.log('🗑️ Eliminando TODOS los reportes del usuario:', codigo_estudiante);
+
+      if (!codigo_estudiante) {
+        return res.status(400).json({
+          success: false,
+          message: 'No se proporcionó el código del estudiante'
+        });
+      }
+
+      const sql = `DELETE FROM reportes WHERE codigo_estudiante = ?`;
+      const result = await Database.query(sql, [codigo_estudiante]);
+
+      console.log(`✅ ${result.affectedRows || 0} reportes eliminados`);
+
+      res.status(200).json({
+        success: true,
+        message: 'Todos los reportes del usuario fueron eliminados correctamente'
+      });
+
+    } catch (error) {
+      console.error('❌ Error eliminando todos los reportes del usuario:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error al eliminar los reportes del usuario',
         error: error.message
       });
     }

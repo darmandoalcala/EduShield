@@ -73,6 +73,42 @@ class UserController {
       });
     }
   }
+
+  // Eliminar cuenta de usuario
+  static async deleteAccount(req, res) {
+    try {
+      const { userId } = req.params;
+      const { reason } = req.body;
+
+      const user = await Database.findUserById(userId);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'Usuario no encontrado',
+        });
+      }
+
+      // 🧹 Elimina primero los reportes del usuario
+      await Database.query('DELETE FROM reportes WHERE codigo_estudiante = ?', [userId]);
+
+      // 🗑️ Luego elimina al usuario
+      await Database.query('DELETE FROM usuario WHERE codigo_estudiante = ?', [userId]);
+
+      console.log(`🗑️ Cuenta eliminada: ${userId}`);
+      if (reason) console.log(`Motivo de eliminación: ${reason}`);
+
+      return res.json({
+        success: true,
+        message: 'Cuenta y reportes eliminados exitosamente',
+      });
+    } catch (error) {
+      console.error('Error eliminando cuenta:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor',
+      });
+    }
+  }
 }
 
 module.exports = UserController;

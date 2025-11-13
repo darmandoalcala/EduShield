@@ -1,67 +1,83 @@
-import React from 'react';
-import { View, ScrollView, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, ScrollView, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import HeaderBar from '../components/HeaderBar';
-import { reportesMock } from '../data/mockReportes';
+import ApiService from '../config/api';
 
 export default function SeleccionarReporteScreen() {
   const navigation = useNavigation();
+  const [reportes, setReportes] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchReportes = async () => {
+      try {
+        const response = await ApiService.getAllReports();
+        console.log('📦 Respuesta del backend:', response);
+
+        // 🔹 Extraemos el arreglo de reportes
+        const data = Array.isArray(response?.data) ? response.data : [];
+        setReportes(data);
+      } catch (error) {
+        console.error('❌ Error obteniendo reportes:', error);
+        setReportes([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReportes();
+  }, []);
 
   return (
-
     <View style={styles.container}>
       <HeaderBar navigation={navigation} showBackButton={true} />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        
-        {/* HEADER */}
         <View style={styles.headerSection}>
           <Text style={styles.title}>Reportes</Text>
           <Text style={styles.subtitle}>
             Aquí podrás estar informado sobre lo que pasa en tu centro universitario
           </Text>
         </View>
-        
-        {/* LISTA */}
+
         <View style={styles.reportesList}>
-          <Text style={styles.listTitle}>
-            Selecciona el reporte que quieras ver
-          </Text>
+          <Text style={styles.listTitle}>Selecciona el reporte que quieras ver</Text>
 
-          {reportesMock.map(reporte => (
-            // Item tarjeta de reporte
-            <TouchableOpacity
-              key={reporte.id}
-              style={styles.reporteCard} 
-              onPress={() => navigation.navigate('DetalleReporte', { id: reporte.id })}
-              activeOpacity={0.7}
-            >
-              {/* ICONO */}
-              <View style={styles.reporteIconContainer}>
-                <Icon name="chat-alert-outline" size={24} color="red" />
-              </View>
-              
-              {/* CONTENIDO */}
-              <View style={styles.reporteContent}>
-                <Text style={styles.reporteDescription}>
-                  {reporte.descripcion.length > 30 // Damos un poco más de espacio
-                    ? `${reporte.descripcion.slice(0, 30)}...`
-                    : reporte.descripcion}
-                </Text>
-                {/* SUBTEXT */}
-                <Text style={styles.reporteSubtext}>Reporte de la comunidad</Text>
-              </View>
+          {loading ? (
+            <ActivityIndicator size="large" color="#ff3333" style={{ marginTop: 20 }} />
+          ) : reportes.length === 0 ? (
+            <Text style={styles.reporteSubtext}>No hay reportes disponibles.</Text>
+          ) : (
+            reportes.map((reporte, index) => (
+              <TouchableOpacity
+                key={reporte.ID || index}
+                style={styles.reporteCard}
+                onPress={() => navigation.navigate('DetalleReporte', { id: reporte.ID })}
+                activeOpacity={0.7}
+              >
+                <View style={styles.reporteIconContainer}>
+                  <Icon name="chat-alert-outline" size={24} color="red" />
+                </View>
 
-              {/* Flecha */}
-              <View style={styles.reporteArrow}>
-                <Icon name="chevron-right" size={24} color="#666" />
-              </View>
-            </TouchableOpacity>
-          ))}
+                <View style={styles.reporteContent}>
+                  <Text style={styles.reporteDescription}>
+                    {reporte.DESCRIPCION?.length > 30
+                      ? `${reporte.DESCRIPCION.slice(0, 30)}...`
+                      : reporte.DESCRIPCION}
+                  </Text>
+                  <Text style={styles.reporteSubtext}>Reporte de la comunidad</Text>
+                </View>
+
+                <View style={styles.reporteArrow}>
+                  <Icon name="chevron-right" size={24} color="#666" />
+                </View>
+              </TouchableOpacity>
+            ))
+          )}
         </View>
 
-        {/* FOOTER bonito xd */}
         <View style={styles.footer}>
           <Text style={styles.footerNote}>
             Nota: Cualquier reporte será anónimo ante este público.
@@ -69,12 +85,10 @@ export default function SeleccionarReporteScreen() {
           <Text style={styles.footerText}>EDUSHIELD 2025</Text>
           <Text style={styles.footerSubtext}>Todos los derechos reservados</Text>
         </View>
-
       </ScrollView>
     </View>
   );
 }
-
 
 // --- HOJA DE ESTILOS ---
 // Esta es una copia de los estilos de MisReporteScreen,
