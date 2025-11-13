@@ -102,30 +102,74 @@ export default function DetalleReporteScreen({ route }) {
   const formatDate = (dateString) => {
     if (!dateString) return 'Fecha no disponible';
     
-    const date = new Date(dateString.replace(' ', 'T'));
-    
-    if (isNaN(date.getTime())) {
-      return 'Fecha inválida';
+    try {
+      // Intenta varios formatos de fecha
+      let date;
+      
+      // Si viene en formato "YYYY-MM-DD HH:MM:SS"
+      if (dateString.includes(' ')) {
+        date = new Date(dateString.replace(' ', 'T') + 'Z'); // Agrega Z para UTC
+      } 
+      // Si viene en formato ISO
+      else if (dateString.includes('T')) {
+        date = new Date(dateString);
+      }
+      // Formato alternativo
+      else {
+        date = new Date(dateString);
+      }
+      
+      // Verifica si la fecha es válida
+      if (isNaN(date.getTime())) {
+        console.warn('⚠️ Fecha inválida:', dateString);
+        return 'Fecha inválida';
+      }
+      
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      
+      return `${day}/${month}/${year}`;
+    } catch (error) {
+      console.error('❌ Error parseando fecha:', error);
+      return 'Error en fecha';
     }
-    
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
   };
 
   const formatTime = (dateString) => {
     if (!dateString) return 'Hora no disponible';
     
-    const date = new Date(dateString.replace(' ', 'T'));
-    
-    if (isNaN(date.getTime())) {
-      return 'Hora inválida';
+    try {
+      // Intenta varios formatos de fecha
+      let date;
+      
+      // Si viene en formato "YYYY-MM-DD HH:MM:SS"
+      if (dateString.includes(' ')) {
+        date = new Date(dateString.replace(' ', 'T') + 'Z'); // Agrega Z para UTC
+      } 
+      // Si viene en formato ISO
+      else if (dateString.includes('T')) {
+        date = new Date(dateString);
+      }
+      // Formato alternativo
+      else {
+        date = new Date(dateString);
+      }
+      
+      // Verifica si la fecha es válida
+      if (isNaN(date.getTime())) {
+        console.warn('⚠️ Hora inválida:', dateString);
+        return 'Hora inválida';
+      }
+      
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      
+      return `${hours}:${minutes}`;
+    } catch (error) {
+      console.error('❌ Error parseando hora:', error);
+      return 'Error en hora';
     }
-    
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${hours}:${minutes}`;
   };
 
   if (loading) {

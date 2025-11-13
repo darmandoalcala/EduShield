@@ -1,4 +1,3 @@
-// backend2/server.js
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
@@ -6,36 +5,24 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// ============================================
-// MIDDLEWARE
-// ============================================
+// Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true })); // ← Necesario para FormData
+app.use(express.urlencoded({ extended: true }));
 
-// ============================================
-// IMPORTACION DE RUTAS
-// ============================================
+// Rutas
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
-const uploadRoutes = require('./routes/uploadRoutes'); // 👈 súbela antes
 const reportRoutes = require('./routes/reportRoutes');
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes)
+app.use('/api', reportRoutes);
 const contactsRoutes = require('./routes/contacts');
-
-// ============================================
-// CONFIGURACION DE RUTAS
-// ============================================
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/upload', uploadRoutes); // 👈 aquí arriba del reportRoutes
 app.use('/api/contacts', contactsRoutes);
-app.use('/api', reportRoutes); // 👈 esta SIEMPRE va al final
 
-console.log('Todas las rutas registradas correctamente');
-
-// ============================================
-// RUTAS DE INFORMACION Y SALUD
-// ============================================
+// Ruta de prueba
 app.get('/', (req, res) => {
   res.json({ 
     message: 'EduShield Backend API funcionando',
@@ -43,23 +30,20 @@ app.get('/', (req, res) => {
     endpoints: [
       '/api/auth/register', 
       '/api/auth/login',
-      '/api/reports',
-      '/api/upload'
+      '/api/reports' // Agregado al listado
     ]
   });
 });
 
+// Ruta de salud del servidor
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// ============================================
-// INICIAR SERVIDOR
-// ============================================
+// Iniciar servidor
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Servidor corriendo en puerto ${PORT}`);
-  console.log(`Listo para recibir requests de la app movil`);
-  console.log(`AWS S3 configurado para bucket: ${process.env.AWS_BUCKET_NAME}`);
+  console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
+  console.log(`📱 Listo para recibir requests de la app móvil`);
 });
 
 module.exports = app;

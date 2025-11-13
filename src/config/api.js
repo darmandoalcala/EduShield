@@ -4,7 +4,7 @@ const isDevelopment = __DEV__;
 
 const API_URLS = {
   // CODESPACE ⚠️CAMBIEN SEGUN SU CODESPACE (revisar en puertos, el 3001 y cambiar a público)⚠️
-    development: "https://opulent-potato-5gg45wprgw7w3pxgx-3001.app.github.dev", //NO LLEVA BARRA FINAL
+    development: "https://urban-fiesta-5j7g57wjpqxf76gg-3001.app.github.dev", //NO LLEVA BARRA FINAL
     //development: "http://edushield.duckdns.org:3001", //NO LLEVA BARRA FINAL
 
   // PRODUCCIÓN
