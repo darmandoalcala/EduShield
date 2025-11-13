@@ -4,7 +4,7 @@ const isDevelopment = __DEV__;
 
 const API_URLS = {
   // CODESPACE ⚠️CAMBIEN SEGUN SU CODESPACE (revisar en puertos, el 3001 y cambiar a público)⚠️
-    development: "https://humble-sniffle-x559xjqp579gh67xq-3001.app.github.dev", //NO LLEVA BARRA FINAL
+    development: "https://solid-space-memory-x7g5xgj7gj93vjx5-3001.app.github.dev", //NO LLEVA BARRA FINAL
     //development: "http://edushield.duckdns.org:3001", //NO LLEVA BARRA FINAL
 
   // PRODUCCIÓN
@@ -245,6 +245,47 @@ export const ApiService = {
       throw error;
     }
   },
+
+    // ==========================================
+    // ELIMINAR CUENTA DE USUARIO
+    // ==========================================
+    async deleteAccount(userId, reason) {
+      try {
+        console.log('🗑️ Eliminando cuenta del usuario:', userId, reason);
+
+        const response = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: JSON.stringify({ reason }),
+        });
+
+        const textResponse = await response.text();
+        console.log('📥 Respuesta eliminación cuenta:', textResponse);
+
+        let data;
+        try {
+          data = textResponse ? JSON.parse(textResponse) : {};
+        } catch (parseError) {
+          console.error('❌ Error parseando JSON:', parseError);
+          throw new Error('Error al procesar la respuesta del servidor');
+        }
+
+        if (!response.ok) {
+          throw new Error(data.message || 'Error al eliminar la cuenta');
+        }
+
+        return {
+          success: true,
+          message: data.message || 'Cuenta eliminada correctamente',
+        };
+      } catch (error) {
+        console.error('❌ Error en deleteAccount:', error);
+        throw error;
+      }
+    },
 
   // ==========================================
   // MÉTODOS DE REPORTES
@@ -549,6 +590,46 @@ async createReport(reportData) {
     }
   },
 
+  async deleteAllUserReports(codigoEstudiante) {
+    try {
+      console.log('🗑️ Eliminando todos los reportes del usuario:', codigoEstudiante);
+      
+      const response = await fetch(`${API_BASE_URL}/api/reports/user/${codigoEstudiante}/all`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      const textResponse = await response.text();
+      console.log('📥 Respuesta raw eliminación múltiple:', textResponse);
+
+      let data;
+      try {
+        data = textResponse ? JSON.parse(textResponse) : {};
+      } catch (parseError) {
+        console.error('❌ Error parseando respuesta:', parseError);
+        throw new Error('Error al procesar la respuesta del servidor');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || `Error del servidor: ${response.status}`);
+      }
+
+      console.log('✅ Reportes eliminados exitosamente');
+
+      return {
+        success: true,
+        message: data.message || 'Reportes eliminados correctamente',
+        data: data.data || null,
+      };
+    } catch (error) {
+      console.error('❌ Error en deleteAllUserReports:', error);
+      throw error;
+    }
+  },
+
   // ==========================================
   // FUNCIONES DE CONTACTOS PERSONALES
   // ==========================================
@@ -686,3 +767,5 @@ async createReport(reportData) {
   }
 
 };
+
+export default ApiService;

@@ -128,5 +128,19 @@ class Database {
       throw error;
     }
   }
+
+  // Método para eliminar usuario
+  static async deleteUser(userId) {
+    try {
+      const sql = `DELETE FROM usuario WHERE codigo_estudiante = ?`;
+      console.log('🗑️ Ejecutando eliminación de usuario:', userId);
+      await this.query(sql, [userId]);
+      console.log('✅ Usuario eliminado correctamente:', userId);
+      return { success: true };
+    } catch (error) {
+      console.error('Error eliminando usuario:', error);
+      throw error;
+    }
+  }
 }
 module.exports = Database;

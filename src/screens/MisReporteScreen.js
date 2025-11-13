@@ -171,7 +171,7 @@ export default function MisReporteScreen() {
             </Text>
             <TouchableOpacity 
               style={styles.createButton}
-              onPress={() => navigation.navigate('Report')}
+              onPress={() => navigation.navigate('Inicio', { screen: 'Report' })}
             >
               <Icon name="plus" size={20} color="white" style={{ marginRight: 8 }} />
               <Text style={styles.createButtonText}>Crear reporte</Text>

@@ -1,4 +1,3 @@
-// src/screens/EliminarCuenta.js
 import React, { useMemo, useState } from 'react';
 import {
   View,
@@ -11,13 +10,18 @@ import {
   ScrollView,
   Linking,
   StatusBar,
+  ActivityIndicator,
 } from 'react-native';
 import HeaderBar from '../components/HeaderBar';
 import { useNavigation } from '@react-navigation/native';
+import { ApiService } from '../config/api';
+import { useUser } from '../context/UserContext';
 
 export default function EliminarCuenta() {
   const [reason, setReason] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
+  const { user, logoutUser } = useUser();
 
   const canDelete = useMemo(() => reason.trim().length >= 10, [reason]);
 
@@ -37,11 +41,11 @@ export default function EliminarCuenta() {
   const confirmDelete = () => {
     Alert.alert(
       'Confirmar eliminación',
-      'Esta acción es permanente. ¿Deseas continuar?',
+      '⚠️ Esta acción es PERMANENTE y eliminará:\n\n• Tu cuenta y perfil\n• Todos tus reportes\n• Tu información personal\n\n¿Estás seguro de continuar?',
       [
         { text: 'Cancelar', style: 'cancel' },
         {
-          text: 'Eliminar',
+          text: 'Eliminar definitivamente',
           style: 'destructive',
           onPress: doDelete,
         },
@@ -49,11 +53,53 @@ export default function EliminarCuenta() {
     );
   };
 
-  const doDelete = () => {
-    // Logica a back para eliminar cuenta
-    //await api.deleteAccount({ reason });
-    Alert.alert('Cuenta eliminada', `Gracias por tu retroalimentación:\n\n${reason}`);
-    // navigation.replace('Login') PARA REEMPLAZAR PANTALLA A LOGIN 
+  const doDelete = async () => {
+    try {
+      setLoading(true);
+
+      // Verificar que hay usuario logueado
+      if (!user || !user.codigo_estudiante) {
+        Alert.alert('Error', 'No se encontró información de usuario');
+        return;
+      }
+
+      console.log('🗑️ Eliminando cuenta:', user.codigo_estudiante);
+      console.log('📝 Razón:', reason);
+
+      // Llamar al API para eliminar la cuenta
+      await ApiService.deleteAccount(user.codigo_estudiante, reason);
+
+      console.log('✅ Cuenta eliminada exitosamente');
+
+      // Cerrar sesión y redirigir
+      await logoutUser();
+
+      Alert.alert(
+        'Cuenta eliminada',
+        'Tu cuenta ha sido eliminada exitosamente. Lamentamos verte partir.\n\nGracias por tu retroalimentación.',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Login' }],
+              });
+            },
+          },
+        ],
+        { cancelable: false }
+      );
+
+    } catch (error) {
+      console.error('❌ Error eliminando cuenta:', error);
+      Alert.alert(
+        'Error',
+        error.message || 'No se pudo eliminar la cuenta. Por favor, intenta nuevamente o contáctanos.'
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDelete = () => {
@@ -67,8 +113,7 @@ export default function EliminarCuenta() {
   return (
     <View style={styles.mainContainer}>
       <StatusBar barStyle="light-content" />
-      {/* Header fijo */}
-      <HeaderBar navigation={navigation} showBackButton={true} /* title="ELIMINAR CUENTA" */ />
+      <HeaderBar navigation={navigation} showBackButton={true} />
 
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <Text style={styles.title}>Cuéntanos tu experiencia 🙂</Text>
@@ -81,16 +126,21 @@ export default function EliminarCuenta() {
           numberOfLines={6}
           value={reason}
           onChangeText={setReason}
+          editable={!loading}
         />
 
         <TouchableOpacity
           style={[styles.deleteButton, !canDelete && styles.deleteButtonDisabled]}
           onPress={handleDelete}
-          disabled={!canDelete}
+          disabled={!canDelete || loading}
           accessibilityRole="button"
           accessibilityLabel="Eliminar cuenta"
         >
-          <Text style={styles.deleteButtonText}>Eliminar cuenta</Text>
+          {loading ? (
+            <ActivityIndicator size="small" color="#FFF" />
+          ) : (
+            <Text style={styles.deleteButtonText}>Eliminar cuenta</Text>
+          )}
         </TouchableOpacity>
 
         <Text style={styles.infoText}>

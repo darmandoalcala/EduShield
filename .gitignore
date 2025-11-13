@@ -30,11 +30,8 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
-.env*.local
-
 # typescript
 *.tsbuildinfo
 
 /android
-/ios
+/ios.env

@@ -7,18 +7,25 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Keyboard,
-  StyleSheet
+  StyleSheet,
+  ActivityIndicator
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import HeaderBar from "../components/HeaderBar";
 import { classifyByBackend } from "../chatbot/api";
 
 export default function ChatbotScreen() {
   const navigation = useNavigation();
   const [messages, setMessages] = useState([
-    { id: "sys-1", role: "bot", text: "Hola, soy el asistente de EduShield. Cuéntame tu situación." }
+    { 
+      id: "sys-1", 
+      role: "bot", 
+      text: "👋 Hola, soy el asistente de EduShield.\n\nEstoy aquí para ayudarte. Cuéntame tu situación." 
+    }
   ]);
   const [input, setInput] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
   const flatListRef = useRef(null);
 
   const onSend = async () => {
@@ -28,38 +35,41 @@ export default function ChatbotScreen() {
     const userMsg = { id: `u-${Date.now()}`, role: "user", text: trimmed };
     setMessages(prev => [userMsg, ...prev]);
     setInput("");
+    setIsTyping(true);
 
-try {
-    const data = await classifyByBackend(trimmed); // llama al backend
+    try {
+      const data = await classifyByBackend(trimmed);
 
-    // Mostrar mensaje del bot
-    const botMsg = { 
-      id: `b-${Date.now()}`, 
-      role: "bot", 
-      text: data.text || data.reply || "🤖 ..." // soporta ambas claves
-    };
-    setMessages(prev => [botMsg, ...prev]);
+      setIsTyping(false);
 
-    // 👇 NUEVO: si el backend manda acción → navegar
-    if (data.action === "Report") {
-      navigation.navigate("MainApp", { 
-        screen: "Inicio", 
-        params: { screen: "Report" }
-      });
-    } else if (data.action === "Contacts") {
-      navigation.navigate("MainApp", { 
-        screen: "Contactos",   // 👈 el tab
-        params: { screen: "Contacts" }  // 👈 la screen dentro del stack
-      });
-}
-  } catch (err) {
-    const errorMsg = { 
-      id: `b-${Date.now()}`, 
-      role: "bot", 
-      text: "⚠️ No pude conectar con el servidor. Intenta de nuevo." 
-    };
-    setMessages(prev => [errorMsg, ...prev]);
-  }
+      const botMsg = { 
+        id: `b-${Date.now()}`, 
+        role: "bot", 
+        text: data.text || data.reply || "🤖 ..." 
+      };
+      setMessages(prev => [botMsg, ...prev]);
+
+      if (data.action === "Report") {
+        navigation.navigate("MainApp", { 
+          screen: "Inicio", 
+          params: { screen: "Report" }
+        });
+      } else if (data.action === "Contacts") {
+        navigation.navigate("MainApp", { 
+          screen: "Contactos",
+          params: { screen: "Contacts" }
+        });
+      }
+    } catch (err) {
+      setIsTyping(false);
+      const errorMsg = { 
+        id: `b-${Date.now()}`, 
+        role: "bot", 
+        text: "⚠️ No pude conectar con el servidor. Por favor, intenta de nuevo." 
+      };
+      setMessages(prev => [errorMsg, ...prev]);
+    }
+
     setTimeout(() => {
       flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
     }, 100);
@@ -67,14 +77,53 @@ try {
   };
 
   const renderItem = ({ item }) => (
-    <View style={[styles.bubble, item.role === "user" ? styles.user : styles.bot]}>
-      <Text style={[styles.text, { color: "#fff" }]}>{item.text}</Text>
+    <View style={[
+      styles.messageContainer,
+      item.role === "user" ? styles.userContainer : styles.botContainer
+    ]}>
+      {item.role === "bot" && (
+        <View style={styles.botAvatar}>
+          <Icon name="robot" size={20} color="white" />
+        </View>
+      )}
+      <View style={[
+        styles.bubble,
+        item.role === "user" ? styles.userBubble : styles.botBubble
+      ]}>
+        <Text style={styles.messageText}>{item.text}</Text>
+        <Text style={styles.timestamp}>
+          {new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
+        </Text>
+      </View>
+      {item.role === "user" && (
+        <View style={styles.userAvatar}>
+          <Icon name="account" size={20} color="white" />
+        </View>
+      )}
     </View>
   );
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior="padding" keyboardVerticalOffset={0}>
+    <KeyboardAvoidingView 
+      style={styles.container} 
+      behavior="padding" 
+      keyboardVerticalOffset={0}
+    >
       <HeaderBar navigation={navigation} showBackButton={true} />
+      
+      {/* Chat Header */}
+      <View style={styles.chatHeader}>
+        <View style={styles.headerAvatarContainer}>
+          <Icon name="robot" size={24} color="red" />
+        </View>
+        <View style={styles.headerInfo}>
+          <Text style={styles.headerTitle}>Asistente EduShield</Text>
+          <Text style={styles.headerStatus}>
+            {isTyping ? "Escribiendo..." : "En línea"}
+          </Text>
+        </View>
+      </View>
+
       <FlatList
         ref={flatListRef}
         style={styles.list}
@@ -82,66 +131,247 @@ try {
         data={messages}
         keyExtractor={m => m.id}
         renderItem={renderItem}
-        contentContainerStyle={{ paddingBottom: 10 }}
+        contentContainerStyle={styles.listContent}
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       />
+
+      {/* Typing Indicator */}
+      {isTyping && (
+        <View style={styles.typingContainer}>
+          <View style={styles.botAvatar}>
+            <Icon name="robot" size={20} color="white" />
+          </View>
+          <View style={styles.typingBubble}>
+            <View style={styles.typingDots}>
+              <View style={[styles.dot, styles.dot1]} />
+              <View style={[styles.dot, styles.dot2]} />
+              <View style={[styles.dot, styles.dot3]} />
+            </View>
+          </View>
+        </View>
+      )}
+
+      {/* Input Bar */}
       <View style={styles.inputBar}>
-        <TextInput
-          style={styles.input}
-          placeholder="Escribe tu reporte..."
-          value={input}
-          onChangeText={setInput}
-          multiline
-        />
-        <TouchableOpacity style={styles.sendBtn} onPress={onSend}>
-          <Text style={styles.btnText}>Enviar</Text>
-        </TouchableOpacity>
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Escribe tu mensaje..."
+            placeholderTextColor="#666"
+            value={input}
+            onChangeText={setInput}
+            multiline
+            maxLength={500}
+          />
+          <TouchableOpacity 
+            style={[styles.sendBtn, !input.trim() && styles.sendBtnDisabled]} 
+            onPress={onSend}
+            disabled={!input.trim() || isTyping}
+          >
+            <Icon 
+              name={input.trim() ? "send" : "send-outline"} 
+              size={24} 
+              color="white" 
+            />
+          </TouchableOpacity>
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
 }
 
-
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "black" },
-  list: { flex: 1, paddingHorizontal: 12, backgroundColor: "black" },
-  bubble: {
-    marginVertical: 6,
-    padding: 12,
-    borderRadius: 12,
-    maxWidth: "85%",
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2
+  container: { 
+    flex: 1, 
+    backgroundColor: "#000" 
   },
-  user: { alignSelf: "flex-end", backgroundColor: "#9e2b2bff" },
-  bot: { alignSelf: "flex-start", backgroundColor: "#696969ff" },
-  text: { color: "#fff", fontSize: 15 },
+  
+  // Chat Header
+  chatHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1a1a1a',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#222',
+  },
+  headerAvatarContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255, 0, 0, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  headerInfo: {
+    flex: 1,
+  },
+  headerTitle: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  headerStatus: {
+    color: '#888',
+    fontSize: 12,
+  },
+
+  // Messages List
+  list: { 
+    flex: 1, 
+    backgroundColor: "#000" 
+  },
+  listContent: { 
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+  },
+
+  // Message Container
+  messageContainer: {
+    flexDirection: 'row',
+    marginBottom: 16,
+    alignItems: 'flex-end',
+  },
+  userContainer: {
+    justifyContent: 'flex-end',
+  },
+  botContainer: {
+    justifyContent: 'flex-start',
+  },
+
+  // Avatars
+  botAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#1a1a1a',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  userAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 0, 0, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 0, 0, 0.3)',
+  },
+
+  // Bubbles
+  bubble: {
+    maxWidth: "75%",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+  },
+  userBubble: { 
+    backgroundColor: "red",
+    borderBottomRightRadius: 4,
+  },
+  botBubble: { 
+    backgroundColor: "#1a1a1a",
+    borderBottomLeftRadius: 4,
+    borderWidth: 1,
+    borderColor: '#222',
+  },
+  messageText: { 
+    color: "#fff", 
+    fontSize: 15,
+    lineHeight: 20,
+  },
+  timestamp: {
+    color: 'rgba(255, 255, 255, 0.5)',
+    fontSize: 10,
+    marginTop: 4,
+    alignSelf: 'flex-end',
+  },
+
+  // Typing Indicator
+  typingContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+  },
+  typingBubble: {
+    backgroundColor: '#1a1a1a',
+    borderRadius: 20,
+    borderBottomLeftRadius: 4,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: '#222',
+  },
+  typingDots: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#666',
+  },
+
+  // Input Bar
   inputBar: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: "#000",
+    borderTopWidth: 1,
+    borderTopColor: "#222",
+  },
+  inputContainer: {
     flexDirection: "row",
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    backgroundColor: "black",
     alignItems: "center",
-    borderTopWidth: 0,
-    borderTopColor: "black"
+    backgroundColor: '#1a1a1a',
+    borderRadius: 25,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: '#222',
   },
   input: {
     flex: 1,
     minHeight: 40,
     maxHeight: 120,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    backgroundColor: "#747474ff",
     color: "#fff",
+    fontSize: 15,
+    paddingTop: 10,
+    paddingBottom: 10,
   },
   sendBtn: {
-    marginLeft: 8,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: "red",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: 8,
+    shadowColor: "red",
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
   },
-  btnText: { color: "#fff", fontWeight: "600" }
+  sendBtnDisabled: {
+    backgroundColor: "#333",
+    shadowOpacity: 0,
+  },
 });

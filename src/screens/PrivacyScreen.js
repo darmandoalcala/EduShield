@@ -13,9 +13,12 @@ import { Camera } from 'expo-camera';
 import * as MediaLibrary from 'expo-media-library';
 import HeaderBar from '../components/HeaderBar';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import ApiService from '../config/api';
+import { useUser } from '../context/UserContext';
 
 export default function PrivacySettings() {
   const navigation = useNavigation();
+  const { user } = useUser(); // 👈 Obtener usuario del contexto
 
   const [cameraAccess, setCameraAccess] = useState(false);
   const [galleryAccess, setGalleryAccess] = useState(false);
@@ -23,7 +26,6 @@ export default function PrivacySettings() {
   useEffect(() => {
     const checkPermissions = async () => {
       try {
-        // ✅ Llamadas correctas
         const { status: cameraStatus } = await Camera.getCameraPermissionsAsync();
         setCameraAccess(cameraStatus === 'granted');
 
@@ -42,7 +44,7 @@ export default function PrivacySettings() {
         setCameraAccess(false);
         Alert.alert(
           'Acceso Desactivado',
-          'Has desactivado el uso de la cámara en la app...',
+          'Has desactivado el uso de la cámara en la app.',
           [{ text: 'OK' }]
         );
         return;
@@ -68,11 +70,10 @@ export default function PrivacySettings() {
         ]);
       }
     } catch (error) {
-      console.error('--- ¡ERROR AL SOLICITAR PERMISOS! ---');
-      console.error(error);
+      console.error('❌ Error al solicitar permisos:', error);
       Alert.alert(
-        'Error de Módulo Nativo',
-        `Falló la solicitud de permisos. Revisa la consola.\nError: ${error.message}`
+        'Error',
+        `No se pudieron solicitar los permisos.\n\n${error.message}`
       );
     }
   };
@@ -82,7 +83,7 @@ export default function PrivacySettings() {
       setGalleryAccess(false);
       Alert.alert(
         'Acceso Desactivado',
-        'Has desactivado el uso de la galería en la app...',
+        'Has desactivado el uso de la galería en la app.',
         [{ text: 'OK' }]
       );
       return;
@@ -96,7 +97,7 @@ export default function PrivacySettings() {
       setGalleryAccess(false);
       Alert.alert(
         'Permiso Requerido',
-        'Para activar la galería, necesitas otorgar permisos...',
+        'Para activar la galería, necesitas otorgar permisos desde la configuración.',
         [
           { text: 'Cancelar', style: 'cancel' },
           { text: 'Abrir Configuración', onPress: () => Linking.openSettings() },
@@ -105,13 +106,46 @@ export default function PrivacySettings() {
     }
   };
 
-  const handleClearHistory = () => {
+  const handleClearHistory = async () => {
     Alert.alert(
       'Confirmar Eliminación',
-      '¿Estás seguro de que quieres eliminar todo tu historial de incidentes?',
+      '⚠️ ¿Estás seguro de que quieres eliminar todo tu historial de incidentes?\n\nEsta acción no se puede deshacer.',
       [
         { text: 'Cancelar', style: 'cancel' },
-        { text: 'Eliminar', style: 'destructive', onPress: () => console.log('Historial eliminado') },
+        {
+          text: 'Eliminar Todo',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              // Usar el usuario del contexto
+              const codigoEstudiante = user?.codigo_estudiante;
+              
+              if (!codigoEstudiante) {
+                Alert.alert('Error', 'No se encontró información de usuario. Por favor, inicia sesión nuevamente.');
+                return;
+              }
+
+              console.log('🗑️ Eliminando todos los reportes de:', codigoEstudiante);
+
+              const result = await ApiService.deleteAllUserReports(codigoEstudiante);
+              
+              if (result.success) {
+                Alert.alert(
+                  '✅ Éxito', 
+                  'Todos tus reportes han sido eliminados correctamente.',
+                  [
+                    { text: 'OK', onPress: () => navigation.goBack() }
+                  ]
+                );
+              } else {
+                Alert.alert('Error', result.message || 'No se pudieron eliminar los reportes.');
+              }
+            } catch (error) {
+              console.error('❌ Error eliminando reportes:', error);
+              Alert.alert('Error', error.message || 'Ocurrió un error al eliminar tus reportes.');
+            }
+          },
+        },
       ]
     );
   };
@@ -137,7 +171,7 @@ export default function PrivacySettings() {
           style={[styles.toggleButton, value && styles.toggleSelected]}
           onPress={() => onToggle(true)}
         >
-          <Text style={[styles.toggleText, value && styles.toggleTextSelected]}>SI</Text>
+          <Text style={[styles.toggleText, value && styles.toggleTextSelected]}>SÍ</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.toggleButton, !value && styles.toggleSelected]}
@@ -154,12 +188,9 @@ export default function PrivacySettings() {
       <HeaderBar navigation={navigation} showBackButton={true} />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        
         <View style={styles.headerSection}>
-          <Text style={styles.title}>Privacidad</Text>
-          <Text style={styles.subtitle}>
-            Controla los permisos de la app y tus datos
-          </Text>
+          <Text style={styles.title}>Privacidad y Seguridad</Text>
+          <Text style={styles.subtitle}>Controla los permisos de la app y gestiona tus datos</Text>
         </View>
 
         <Text style={styles.listTitle}>Permisos de la App</Text>
@@ -184,6 +215,7 @@ export default function PrivacySettings() {
         <Text style={styles.listTitle}>Gestión de Datos</Text>
         <View style={styles.settingsCard}>
           <View style={styles.actionRow}>
+            <Icon name="delete-forever" size={24} color="red" style={styles.settingIcon} />
             <View style={styles.settingTextContainer}>
               <Text style={styles.settingLabel}>Historial de Incidentes</Text>
               <Text style={styles.settingDescription}>
@@ -191,7 +223,6 @@ export default function PrivacySettings() {
               </Text>
             </View>
             <TouchableOpacity style={styles.deleteButton} onPress={handleClearHistory}>
-              <Icon name="delete-forever" size={18} color="white" />
               <Text style={styles.deleteButtonText}>Eliminar</Text>
             </TouchableOpacity>
           </View>

@@ -8,4 +8,7 @@ router.get('/:userId', UserController.getProfile);
 // PUT /api/users/:userId - Actualizar perfil
 router.put('/:userId', UserController.updateProfile);
 
+// DELETE /api/users/:userId - Eliminar cuenta
+router.delete('/:userId', UserController.deleteAccount);
+
 module.exports = router;
