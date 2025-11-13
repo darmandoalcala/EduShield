@@ -1,3 +1,4 @@
+// src/screens/ReportScreen.js
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -11,6 +12,7 @@ import {
   ActivityIndicator,
   Linking,
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as ImagePicker from 'expo-image-picker';
@@ -18,7 +20,6 @@ import { Video } from 'expo-av';
 import HeaderBar from '../components/HeaderBar';
 import { ApiService } from '../config/api';
 import { useUser } from '../context/UserContext';
-import { uploadImageToS3, uploadVideoToS3 } from '../utils/s3Uploader';
 
 const centers = ['CUCEI', 'CUAAD', 'CUCEV', 'CUCS'];
 
@@ -30,20 +31,17 @@ const ReportScreen = ({ navigation }) => {
   const [descripcion, setDescripcion] = useState('');
   const [loading, setLoading] = useState(false);
   const [fecha, setFecha] = useState(new Date());
-  
-  // Estados para las fotos
-  const [photoEvidence, setPhotoEvidence] = useState(null);
-  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
-
-  // Estados para los videos
-  const [videoEvidence, setVideoEvidence] = useState(null); 
-  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const [photoUri, setPhotoUri] = useState(null);
+  const [videoUri, setVideoUri] = useState(null);
+  const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState(null);
+  const [uploadedVideoUrl, setUploadedVideoUrl] = useState(null);
+  const [uploadingFile, setUploadingFile] = useState(false);
 
   useEffect(() => {
     if (user) {
-      console.log('👤 Usuario del contexto:', user);
+      console.log('Usuario del contexto:', user);
     } else {
-      console.warn('⚠️ No hay usuario en el contexto');
+      console.warn('No hay usuario en el contexto');
     }
   }, [user]);
 
@@ -55,208 +53,152 @@ const ReportScreen = ({ navigation }) => {
     console.log('Editar descripción');
   };
 
-  // Función para manejar la selección de foto
-  const handlePhotoEvidence = async () => {
-    try {
-      Alert.alert(
-        'Evidencia en Foto',
-        '¿Deseas tomar una foto o seleccionar una existente?',
-        [
-          { text: 'Cancelar', style: 'cancel' },
-          { 
-            text: 'Tomar foto', 
-            onPress: () => pickImage(true) 
-          },
-          { 
-            text: 'Seleccionar', 
-            onPress: () => pickImage(false) 
-          },
-        ]
-      );
-    } catch (error) {
-      console.error('Error al seleccionar foto:', error);
-      Alert.alert('Error', 'No se pudo seleccionar la foto');
-    }
-  };
-
-  // 🆕 Función para manejar la selección de video
-  const handleVideoEvidence = async () => {
-    try {
-      Alert.alert(
-        'Evidencia en Video',
-        '¿Deseas grabar un video o seleccionar uno existente?',
-        [
-          { text: 'Cancelar', style: 'cancel' },
-          { 
-            text: 'Grabar video', 
-            onPress: () => pickVideo(true) 
-          },
-          { 
-            text: 'Seleccionar', 
-            onPress: () => pickVideo(false) 
-          },
-        ]
-      );
-    } catch (error) {
-      console.error('Error al seleccionar video:', error);
-      Alert.alert('Error', 'No se pudo seleccionar el video');
-    }
-  };
-
-  // Función para abrir cámara o galería (fotos)
-  const pickImage = async (fromCamera = false) => {
-    try {
-      // Solicitar permisos
-      if (fromCamera) {
-        const { status } = await ImagePicker.requestCameraPermissionsAsync();
-        if (status !== 'granted') {
-          Alert.alert(
-            'Permiso denegado',
-            'Se necesita acceso a la cámara para tomar una foto.',
-            [
-              { text: 'Cancelar', style: 'cancel' },
-              { text: 'Abrir configuración', onPress: () => Linking.openSettings() },
-            ]
-          );
-          return;
-        }
-      } else {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== 'granted') {
-          Alert.alert(
-            'Permiso denegado',
-            'Se necesita acceso a la galería para elegir una foto.',
-            [
-              { text: 'Cancelar', style: 'cancel' },
-              { text: 'Abrir configuración', onPress: () => Linking.openSettings() },
-            ]
-          );
-          return;
-        }
-      }
-
-      // Abrir cámara o galería
-      const result = fromCamera
-        ? await ImagePicker.launchCameraAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [16, 9],
-            quality: 0.8,
-          })
-        : await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [16, 9],
-            quality: 0.8,
-          });
-
-      if (result.canceled) return;
-
-      const uri = result.assets[0].uri;
-      console.log('📸 Foto seleccionada:', uri);
-      setPhotoEvidence(uri);
-
-    } catch (error) {
-      console.error('Error al seleccionar imagen:', error);
-      Alert.alert('Error', 'No se pudo abrir la cámara o galería');
-    }
-  };
-
-  // 🆕 Función para abrir cámara o galería (videos)
-  const pickVideo = async (fromCamera = false) => {
-    try {
-      // Solicitar permisos
-      if (fromCamera) {
-        const { status } = await ImagePicker.requestCameraPermissionsAsync();
-        if (status !== 'granted') {
-          Alert.alert(
-            'Permiso denegado',
-            'Se necesita acceso a la cámara para grabar un video.',
-            [
-              { text: 'Cancelar', style: 'cancel' },
-              { text: 'Abrir configuración', onPress: () => Linking.openSettings() },
-            ]
-          );
-          return;
-        }
-      } else {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== 'granted') {
-          Alert.alert(
-            'Permiso denegado',
-            'Se necesita acceso a la galería para elegir un video.',
-            [
-              { text: 'Cancelar', style: 'cancel' },
-              { text: 'Abrir configuración', onPress: () => Linking.openSettings() },
-            ]
-          );
-          return;
-        }
-      }
-
-      // Abrir cámara o galería para video
-      const result = fromCamera
-        ? await ImagePicker.launchCameraAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Videos,
-            allowsEditing: true,
-            quality: 0.7, // Calidad más baja para videos (reducir tamaño)
-            videoMaxDuration: 30, // Máximo 30 segundos
-          })
-        : await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Videos,
-            allowsEditing: true,
-            quality: 0.7,
-            videoMaxDuration: 30,
-          });
-
-      if (result.canceled) return;
-
-      const uri = result.assets[0].uri;
-      console.log('🎥 Video seleccionado:', uri);
-      setVideoEvidence(uri);
-
-    } catch (error) {
-      console.error('Error al seleccionar video:', error);
-      Alert.alert('Error', 'No se pudo abrir la cámara o galería para video');
-    }
-  };
-
-  // Función para eliminar la foto seleccionada
-  const handleRemovePhoto = () => {
+  const handlePhotoEvidence = () => {
     Alert.alert(
-      'Eliminar foto',
-      '¿Estás seguro de que deseas eliminar esta foto?',
+      'Evidencia en Foto',
+      '¿Deseas tomar una foto o seleccionar una existente?',
       [
         { text: 'Cancelar', style: 'cancel' },
         {
-          text: 'Eliminar',
-          style: 'destructive',
-          onPress: () => {
-            setPhotoEvidence(null);
-            console.log('🗑️ Foto eliminada');
+          text: 'Tomar foto',
+          onPress: async () => {
+            const { status } = await ImagePicker.requestCameraPermissionsAsync();
+            if (status !== 'granted') {
+              Alert.alert('Permiso requerido', 'Necesitamos acceso a la cámara');
+              return;
+            }
+
+            const result = await ImagePicker.launchCameraAsync({
+              mediaTypes: ImagePicker.MediaTypeOptions.Images,
+              allowsEditing: true,
+              quality: 0.8,
+            });
+
+            if (!result.canceled && result.assets[0]) {
+              const photo = result.assets[0];
+              setPhotoUri(photo.uri);
+              uploadPhoto(photo.uri, photo.type || 'image/jpeg');
+            }
+          },
+        },
+        {
+          text: 'Seleccionar',
+          onPress: async () => {
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== 'granted') {
+              Alert.alert('Permiso requerido', 'Necesitamos acceso a tus fotos');
+              return;
+            }
+
+            const result = await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: ImagePicker.MediaTypeOptions.Images,
+              allowsEditing: true,
+              quality: 0.8,
+            });
+
+            if (!result.canceled && result.assets[0]) {
+              const photo = result.assets[0];
+              setPhotoUri(photo.uri);
+              uploadPhoto(photo.uri, photo.type || 'image/jpeg');
+            }
           },
         },
       ]
     );
   };
 
-  // 🆕 Función para eliminar el video seleccionado
-  const handleRemoveVideo = () => {
+    const handleVideoEvidence = () => {
     Alert.alert(
-      'Eliminar video',
-      '¿Estás seguro de que deseas eliminar este video?',
+      'Evidencia en Video',
+      '¿Deseas grabar un video o seleccionar uno existente?',
       [
         { text: 'Cancelar', style: 'cancel' },
         {
-          text: 'Eliminar',
-          style: 'destructive',
-          onPress: () => {
-            setVideoEvidence(null);
-            console.log('🗑️ Video eliminado');
+          text: 'Grabar',
+          onPress: async () => {
+            const { status } = await ImagePicker.requestCameraPermissionsAsync();
+            if (status !== 'granted') {
+              Alert.alert('Permiso requerido', 'Necesitamos acceso a la cámara');
+              return;
+            }
+
+            const result = await ImagePicker.launchCameraAsync({
+              mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+              videoQuality: ImagePicker.UIImagePickerControllerQualityType.Medium,
+              durationLimit: 60,
+            });
+
+            if (!result.canceled && result.assets[0]) {
+              const video = result.assets[0];
+              setVideoUri(video.uri);
+              uploadVideo(video.uri, video.type || 'video/mp4');
+            }
+          },
+        },
+        {
+          text: 'Seleccionar',
+          onPress: async () => {
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== 'granted') {
+              Alert.alert('Permiso requerido', 'Necesitamos acceso a tus videos');
+              return;
+            }
+
+            const result = await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+            });
+
+            if (!result.canceled && result.assets[0]) {
+              const video = result.assets[0];
+              setVideoUri(video.uri);
+              uploadVideo(video.uri, video.type || 'video/mp4');
+            }
           },
         },
       ]
     );
+  };
+
+  const uploadPhoto = async (uri, type) => {
+    try {
+      setUploadingFile(true);
+      console.log('Subiendo foto a S3...');
+
+      const result = await ApiService.uploadEvidence(uri, type || 'image/jpeg');
+
+      if (result.success) {
+        setUploadedPhotoUrl(result.fileUrl);
+        Alert.alert('Éxito', 'Foto subida correctamente');
+        console.log('URL de la foto:', result.fileUrl);
+      }
+    } catch (error) {
+      console.error('Error subiendo foto:', error);
+      Alert.alert('Error', 'No se pudo subir la foto. Intenta de nuevo.');
+      setPhotoUri(null);
+    } finally {
+      setUploadingFile(false);
+    }
+  };
+
+  const uploadVideo = async (uri, type) => {
+    try {
+      setUploadingFile(true);
+      console.log('Subiendo video a S3...');
+
+      const result = await ApiService.uploadEvidence(uri, type || 'video/mp4');
+
+      if (result.success) {
+        setUploadedVideoUrl(result.fileUrl);
+        Alert.alert('Éxito', 'Video subido correctamente');
+        console.log('URL del video:', result.fileUrl);
+      }
+    } catch (error) {
+      console.error('Error subiendo video:', error);
+      Alert.alert('Error', 'No se pudo subir el video. Intenta de nuevo.');
+      setVideoUri(null);
+    } finally {
+      setUploadingFile(false);
+    }
   };
 
   const validateReport = () => {
@@ -354,7 +296,6 @@ const ReportScreen = ({ navigation }) => {
                 'CUCS': 4,
               };
 
-              // 🆕 3. CREAR REPORTE CON LA URL DE FOTO Y VIDEO
               const reportData = {
                 titulo: `Reporte de incidente - ${selectedCenter}`,
                 descripcion: descripcion.trim(),
@@ -362,16 +303,15 @@ const ReportScreen = ({ navigation }) => {
                 coordenada_lng: null,
                 categoria_id: 1,
                 nivel_riesgo: 'medio',
-                foto_evidencia: fotoEvidenciaUrl, // 👈 URL de S3 o null
-                video_evidencia: videoEvidenciaUrl, // 👈 URL de S3 o null
+                foto_evidencia: uploadedPhotoUrl || uploadedVideoUrl || null,
                 codigo_estudiante: user.codigo_estudiante,
                 centro_id: centerMap[selectedCenter] || 1,
               };
 
-              console.log('📤 Enviando reporte:', reportData);
+              console.log('Enviando reporte:', reportData);
 
               const response = await ApiService.createReport(reportData);
-              console.log('✅ Respuesta del servidor:', response);
+              console.log('Respuesta del servidor:', response);
 
               Alert.alert(
                 '¡Éxito!',
@@ -385,12 +325,16 @@ const ReportScreen = ({ navigation }) => {
                       setPhotoEvidence(null);
                       setVideoEvidence(null);
                       setFecha(new Date());
+                      setPhotoUri(null);
+                      setVideoUri(null);
+                      setUploadedPhotoUrl(null);
+                      setUploadedVideoUrl(null);
                     },
                   },
                 ]
               );
             } catch (error) {
-              console.error('❌ Error enviando reporte:', error);
+              console.error('Error enviando reporte:', error);
               Alert.alert(
                 'Error',
                 error.message || 'No se pudo enviar el reporte. Por favor, intenta de nuevo.'
@@ -418,7 +362,6 @@ const ReportScreen = ({ navigation }) => {
       <HeaderBar navigation={navigation} showBackButton={true} />
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* 1) Centro Universitario */}
         <Text style={styles.instructionAText}>Centro Universitario asignado:</Text>
         <View style={styles.sectionBox}>
           <View style={styles.row}>
@@ -437,7 +380,6 @@ const ReportScreen = ({ navigation }) => {
           </View>
         </View>
 
-        {/* 2) Fecha y hora del incidente */}
         <Text style={styles.instructionAText}>Fecha y hora exacta del incidente.</Text>
         <View style={styles.sectionBox}>
           <View style={styles.row}>
@@ -446,37 +388,19 @@ const ReportScreen = ({ navigation }) => {
           </View>
         </View>
 
-         {/* 3) Descripción de los hechos - MEJORADO */}
         <Text style={styles.instructionAText}>Da un breve resumen de los hechos.</Text>
-        <View style={styles.descriptionContainer}>
-          <Icon 
-            name="alert-circle-outline" 
-            size={20} 
-            color="#FFF" 
-            style={styles.descriptionIcon} 
-          />
-          <TextInput
-            style={styles.descriptionInput}
-            placeholder="Describe detalladamente lo ocurrido..."
-            placeholderTextColor="#666"
-            multiline
-            numberOfLines={6}
-            value={descripcion}
-            onChangeText={setDescripcion}
-            editable={!loading}
-            textAlignVertical="top"
-          />
-        </View>
-
-        {/* 4) Preview de la foto si existe */}
-        {photoEvidence && (
-          <View style={styles.photoPreviewContainer}>
-            <Text style={styles.instructionAText}>Foto de evidencia:</Text>
-            <View style={styles.photoPreviewBox}>
-              <Image 
-                source={{ uri: photoEvidence }} 
-                style={styles.photoPreview}
-                resizeMode="cover"
+        <View style={styles.sectionBoxes}>
+          <View style={styles.rowWithSpace}>
+            <Icon name="alert-circle-outline" size={20} color="#FFF" marginTop={-25} style={styles.iconLeft} />
+            <View style={{ flex: 1, justifyContent: 'center' }}>
+              <TextInput
+                style={styles.textInputFlex}
+                placeholder="Escribe aquí..."
+                placeholderTextColor="#888"
+                multiline
+                value={descripcion}
+                onChangeText={setDescripcion}
+                editable={!loading && !uploadingFile}
               />
               <TouchableOpacity 
                 style={styles.removePhotoButton}
@@ -488,29 +412,6 @@ const ReportScreen = ({ navigation }) => {
           </View>
         )}
 
-        {/* 🆕 5) Preview del video si existe */}
-        {videoEvidence && (
-          <View style={styles.photoPreviewContainer}>
-            <Text style={styles.instructionAText}>Video de evidencia:</Text>
-            <View style={styles.photoPreviewBox}>
-              <Video
-                source={{ uri: videoEvidence }}
-                style={styles.photoPreview}
-                useNativeControls
-                resizeMode="contain"
-                isLooping
-              />
-              <TouchableOpacity 
-                style={styles.removePhotoButton}
-                onPress={handleRemoveVideo}
-              >
-                <Icon name="close-circle" size={30} color="#FF4444" />
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-
-        {/* 6) Botones de evidencia */}
         <View style={styles.sectionBox}>
           <View style={[styles.row, { justifyContent: 'space-between' }]}>
             <TouchableOpacity
@@ -519,18 +420,12 @@ const ReportScreen = ({ navigation }) => {
                 videoEvidence && styles.evidenceButtonActive
               ]}
               onPress={handleVideoEvidence}
-              disabled={loading || isUploadingVideo}
+              disabled={loading || uploadingFile}
             >
-              {isUploadingVideo ? (
-                <ActivityIndicator size="small" color="#FFF" />
-              ) : (
-                <>
-                  <Text style={styles.evidenceText}>
-                    {videoEvidence ? 'Cambiar video' : 'Evidencia en video'}
-                  </Text>
-                  <Text style={styles.iconRight}>🎥</Text>
-                </>
-              )}
+              <Text style={styles.evidenceText}>
+                {videoUri ? 'Video seleccionado ✓' : 'Evidencia en video'}
+              </Text>
+              <Text style={styles.iconRight}>🎥</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -539,34 +434,34 @@ const ReportScreen = ({ navigation }) => {
                 photoEvidence && styles.evidenceButtonActive
               ]}
               onPress={handlePhotoEvidence}
-              disabled={loading || isUploadingPhoto}
+              disabled={loading || uploadingFile}
             >
-              {isUploadingPhoto ? (
-                <ActivityIndicator size="small" color="#FFF" />
-              ) : (
-                <>
-                  <Text style={styles.evidenceText}>
-                    {photoEvidence ? 'Cambiar foto' : 'Evidencia en foto'}
-                  </Text>
-                  <Text style={styles.iconRight}>📸</Text>
-                </>
-              )}
+              <Text style={styles.evidenceText}>
+                {photoUri ? 'Foto seleccionada ✓' : 'Evidencia en foto'}
+              </Text>
+              <Text style={styles.iconRight}>📸</Text>
             </TouchableOpacity>
           </View>
         </View>
+
+        {uploadingFile && (
+          <View style={{ alignItems: 'center', marginVertical: 10 }}>
+            <ActivityIndicator size="large" color="#007AFF" />
+            <Text style={{ color: '#FFF', marginTop: 10 }}>Subiendo archivo...</Text>
+          </View>
+        )}
 
         <Text style={styles.instructionAText}>
           Cualquier evidencia queda respaldada por la ley de protección de datos.
         </Text>
 
-        {/* 7) Botón final */}
         <TouchableOpacity
           style={[
             styles.sendButtonPlaceholder,
-            loading && { opacity: 0.5 }
+            (loading || uploadingFile) && { opacity: 0.5 }
           ]}
           onPress={handleSendReport}
-          disabled={loading || isUploadingPhoto || isUploadingVideo}
+          disabled={loading || uploadingFile}
         >
           {loading ? (
             <ActivityIndicator size="small" color="#FFF" />
@@ -582,6 +477,7 @@ const ReportScreen = ({ navigation }) => {
   );
 };
 
+// ... (Aquí empiezan los estilos)
 const styles = StyleSheet.create({
   container: {
     flex: 1,
