@@ -36,3 +36,6 @@ yarn-error.*
 /android
 /ios.env
 /iosbackend2/.env
+
+# Ignorar el archivo de variables de entorno locales
+.env
